@@ -254,19 +254,36 @@ view      -- View a pull request
 
 プルリクエストに対する操作は比較的たくさんあるようです。
 今はシンプルにプルリクエストを作成したいので `create` を指定します。
-`create` のヘルプを読むと、`--title` と `--body` でタイトルと本文を、`--reviewer` でレビュアーを指定できるようなので、これらも指定してみます:
+`create` のヘルプを読むと、`--title` と `--body` でタイトルと本文を、`--base` でマージ先のブランチを、そして `--reviewer` でレビュアーを指定できるようなので、これらも指定してみます:
 
 ```sh
 $ git add articles
 $ git commit -m "Add my first article on Zenn"
 $ git push -u origin first-article
-$
+$ gh pr create --base master --title "Add my first article on Zenn close #1" --body "This pull request was created by gh"
+                                                                                                                                                                                                                                              
+Creating pull request for first-article into master in morinokami/zenn-docs                                                                                                                                                                   
+                                                                                                                                                                                                                                              
+https://github.com/morinokami/zenn-docs/pull/2
 ```
 
 作成されたプルリクエストは、イシューと同様に、`status` や `view` により確認することができます:
 
 ```sh
-$
+$ gh pr status                                                                                                                                                                                                  
+                                                                                                                                                                                                                                              
+Relevant pull requests in morinokami/zenn-docs                                                                                                                                                                                                
+                                                                                                                                                                                                                                              
+Current branch                                                                                                                                                                                                                                
+  #2  Add my first article on Zenn close #1 [first-article]                                                                                                                                                                                   
+                                                                                                                                                                                                                                              
+Created by you                                                                                                                                                                                                                                
+  #2  Add my first article on Zenn close #1 [first-article]                                                                                                                                                                                   
+                                                                                                                                                                                                                                              
+Requesting a code review from you
+  You have no pull requests to review
+
+$ 
 ```
 
 # レビュー
@@ -275,22 +292,35 @@ $
 まずは diff の確認をしてみます:
 
 ```sh
-$
+$ gh pr diff                                                                                                                                                                                                    
+diff --git a/articles/hello-github-cli.md b/articles/hello-github-cli.md
+new file mode 100644
+index 0000000..aa14ce9
+--- /dev/null
++++ b/articles/hello-github-cli.md
+@@ -0,0 +1,300 @@
++---
++title: "GitHub CLI 1.0 がリリースされたので使ってみた" # 記事のタイトル
++emoji: "😸" # アイキャッチとして使われる絵文字（1文字だけ）
++type: "tech" # tech: 技術記事 / idea: アイデア記事
++topics: ["gh", "GitHub CLI"] # タグ。["markdown", "rust", "aws"]のように指定する
++published: true # 公開設定（falseにすると下書き）
++---
++
+
+...
 ```
 
 続いてマージします:
 
 ```sh
-$
+$ gh pr merge -m 2
+✔ Merged pull request #2 (Add my first article on Zenn close #1)
+✔ Deleted branch first-article and switched to branch master
 ```
 
-最後にプルリクエストのステータスを確認してみます:
-
-```sh
-$
-```
-
-見事、GitHub 上でプルリクエストがおこなわれ、Zenn において記事が公開されました!
+これにより自動的にマージ元のブランチは削除されるようです。
+そして見事、GitHub 上でプルリクエストがおこなわれ、Zenn において記事が公開されました!
 
 # 終わりに
 
