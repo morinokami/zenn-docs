@@ -6,8 +6,7 @@ topics: ["gh", "GitHub CLI"] # タグ。["markdown", "rust", "aws"]のように�
 published: true # 公開設定（falseにすると下書き）
 ---
 
-[GitHub CLI 1.0 がリリース](https://github.blog/2020-09-17-github-cli-1-0-is-now-available/)されました。
-Zenn へと投稿するのは初めてなので、Zenn と連携するリポジトリを `gh` コマンドを通じて操作することで、`gh` コマンドの使用感の確認と Zenn への投稿を同時におこなってみます。
+[GitHub CLI 1.0 がリリース](https://github.blog/2020-09-17-github-cli-1-0-is-now-available/)されました。Zenn へと投稿するのは初めてなので、Zenn と連携するリポジトリを `gh` コマンドを通じて操作することで、`gh` コマンドの使用感の確認と Zenn への投稿を同時におこなってみます。
 
 Zenn での記事の作成方法については以下の記事を参考にしました:
 
@@ -27,8 +26,7 @@ $ brew install gh
 $ sudo port install gh
 ```
 
-Linux 環境へインストールする場合は[こちら](https://github.com/cli/cli/blob/trunk/docs/install_linux.md)を参考にしてください。
-たとえば Ubuntu 20.04 にインストールするには以下のコマンドを実行します:
+Linux 環境へインストールする場合は[こちら](https://github.com/cli/cli/blob/trunk/docs/install_linux.md)を参考にしてください。たとえば Ubuntu 20.04 にインストールするには以下のコマンドを実行します:
 
 ```sh
 $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
@@ -38,8 +36,7 @@ $ sudo apt install gh
 
 # コマンドの補完
 
-`gh` コマンドの補完を有効にするために、シェルの設定ファイルへと追記します。
-たとえば、使用しているシェルが bash であれば、`.bash_profile` に以下の行を追記します:
+`gh` コマンドの補完を有効にするために、シェルの設定ファイルへと追記します。たとえば、使用しているシェルが bash であれば、`.bash_profile` に以下の行を追記します:
 
 ```
 eval "$(gh completion -s bash)"
@@ -64,15 +61,13 @@ repo        -- Create, clone, fork, and view repositories
 
 # 認証
 
-`gh` コマンドから GitHub 上のリソースを操作できるようにするために、認証用のコマンドを実行する必要があります。
-以下のコマンドにより認証プロセスが開始されます:
+`gh` コマンドから GitHub 上のリソースを操作できるようにするために、認証用のコマンドを実行する必要があります。以下のコマンドにより認証プロセスが開始されます:
 
 ```sh
 $ gh auth login
 ```
 
-インタラクティブセッションが開始されるので、指示に従って認証を完了させてください。
-問題が発生しなければ、`gh auth status` コマンドにより認証状態を確認することができるはずです:
+インタラクティブセッションが開始されるので、指示に従って認証を完了させてください。問題が発生しなければ、`gh auth status` コマンドにより認証状態を確認することができるはずです:
 
 ```sh
 $ gh auth status 
@@ -81,15 +76,11 @@ github.com
   ✓ Git operations for github.com configured to use ssh protocol.
 ```
 
-ここまでで `gh` コマンドを使用するための準備は整いました。
-ここからは Zenn と連携するリポジトリを作成・操作してみます。
+ここまでで `gh` コマンドを使用するための準備は整いました。ここからは Zenn と連携するリポジトリを作成・操作してみます。
 
 # リポジトリの作成
 
-まずはリポジトリを作成します。
-`gh` は Docker の CLI などと同様に、サブコマンドで操作対象のリソースを指定し、それに続いて操作内容を記述するようなスタイルです。
-リポジトリに対する操作は `repo` サブコマンドを通じておこないます。
-`repo` に対する可能な操作は以下のようになります:
+まずはリポジトリを作成します。`gh` は Docker の CLI などと同様に、サブコマンドで操作対象のリソースを指定し、それに続いて操作内容を記述するようなスタイルです。リポジトリに対する操作は `repo` サブコマンドを通じておこないます。`repo` に対する可能な操作は以下のようになります:
 
 ```sh
 $ gh repo
@@ -99,12 +90,7 @@ fork    -- Create a fork of a repository
 view    -- View a repository
 ```
 
-非常に明快です。
-今はリポジトリを作成したいため、`create` を使用します。
-`create` の使い方を調べるために `gh repo create --help` を実行すると後半に `EXAMPLES` という項目が見つかります。
-ここから、`gh repo create my-repo` というコマンドを実行すれば、自分のアカウントに紐づく `my-repo` というコマンドが作成されることがわかります。
-また、`--public` フラグによりリポジトリをパブリックに設定できることもわかります。
-早速実行してみましょう:
+非常に明快です。今はリポジトリを作成したいため、`create` を使用します。`create` の使い方を調べるために `gh repo create --help` を実行すると後半に `EXAMPLES` という項目が見つかります。ここから、`gh repo create my-repo` というコマンドを実行すれば、自分のアカウントに紐づく `my-repo` というコマンドが作成されることがわかります。また、`--public` フラグによりリポジトリをパブリックに設定できることもわかります。早速実行してみましょう:
 
 ```sh
 $ gh repo create --public zenn-docs                                                                                                                                                                                                       
@@ -115,8 +101,7 @@ Initialized empty Git repository in /home/shf0811/dev/zenn-docs/.git/
 ✓ Initialized repository in './zenn-docs/'
 ```
 
-コマンドの出力から、GitHub 上にリポジトリが作成され、またそれに紐づくディレクトリがカレントディレクトリに作成されたことがわかります。
-ただ、質問の内容と実行内容が微妙に食い違っているように思えますし、また出力内容が冗長であるようにも感じますね。
+コマンドの出力から、GitHub 上にリポジトリが作成され、またそれに紐づくディレクトリがカレントディレクトリに作成されたことがわかります。ただ、質問の内容と実行内容が微妙に食い違っているように思えますし、また出力内容が冗長であるようにも感じますね。
 
 リポジトリが作成されたことは以下のコマンドからも確認可能です:
 
@@ -147,9 +132,7 @@ git push -u origin master
 
 # イシューの作成
 
-続いてイシューを作成してみます。
-イシュー関連の操作に対応するのは `gh issue` です。
-これについても可能な操作を確認してみます:
+続いてイシューを作成してみます。イシュー関連の操作に対応するのは `gh issue` です。これについても可能な操作を確認してみます:
 
 ```sh
 $ gh issue
@@ -161,9 +144,7 @@ status  -- Show status of relevant issues
 view    -- View an issue
 ```
 
-これまた明快です。
-`create` を使用してイシューを作成することができるようなので、ヘルプで使用方法を調べてみると、一番最初の使用例として `gh issue create --title "I found a bug" --body "Nothing works"` というものがあります。
-他にもラベルやアサイン先を指定することもできるようですが、今回はシンプルに行きます:
+これまた明快です。`create` を使用してイシューを作成することができるようなので、ヘルプで使用方法を調べてみると、一番最初の使用例として `gh issue create --title "I found a bug" --body "Nothing works"` というものがあります。他にもラベルやアサイン先を指定することもできるようですが、今回はシンプルに行きます:
 
 ```sh
 $ gh issue create --title "Add an article" --body "This issue was created by gh."       
@@ -173,8 +154,7 @@ Creating issue in morinokami/zenn-docs
 https://github.com/morinokami/zenn-docs/issues/1
 ```
 
-作成されたイシューを確認してみます。
-リポジトリに関連するイシューをざっくり確認したい場合は `status` を使うようです:
+作成されたイシューを確認してみます。リポジトリに関連するイシューをざっくり確認したい場合は `status` を使うようです:
 
 ```sh
 $ gh issue status
@@ -193,8 +173,7 @@ Issues opened by you
 
 ラベルやアサイン先によってイシューを絞り込みたいような場合には、`list` コマンドを使用します。
 
-個別のイシューについて詳細を確認したいような場合には、`view` コマンドを使用します。
-たとえば先ほど作られたばかりのイシューを確認するためには、イシュー番号が 1 であることから、次のようにコマンドを実行します:
+個別のイシューについて詳細を確認したいような場合には、`view` コマンドを使用します。たとえば先ほど作られたばかりのイシューを確認するためには、イシュー番号が 1 であることから、次のようにコマンドを実行します:
 
 ```sh
 $ gh issue view 1
@@ -210,8 +189,7 @@ Open • morinokami opened less than a minute ago • 0 comments
 View this issue on GitHub: https://github.com/morinokami/zenn-docs/issues/1
 ```
 
-問題なくイシューが作成されていることが確認できました。
-続いてプルリクエストを作成してみます。
+問題なくイシューが作成されていることが確認できました。続いてプルリクエストを作成してみます。
 
 # プルリクエストの作成
 
@@ -232,9 +210,7 @@ command not found: zenn
 zsh: exit 1     npx zenn new:article
 ```
 
-さて、記事が作成できたらコミットをおこない、プルリクエストをおこないます。
-プルリクエストに対応するサブコマンドは `pr` です。
-例のごとく可能な操作について列挙してみます:
+さて、記事が作成できたらコミットをおこない、プルリクエストをおこないます。プルリクエストに対応するサブコマンドは `pr` です。例のごとく可能な操作について列挙してみます:
 
 ```sh
 $ gh pr
@@ -252,9 +228,7 @@ status    -- Show status of relevant pull requests
 view      -- View a pull request
 ```
 
-プルリクエストに対する操作は比較的たくさんあるようです。
-今はシンプルにプルリクエストを作成したいので `create` を指定します。
-`create` のヘルプを読むと、`--title` と `--body` でタイトルと本文を、`--base` でマージ先のブランチを、そして `--reviewer` でレビュアーを指定できるようなので、これらも指定してみます:
+プルリクエストに対する操作は比較的たくさんあるようです。今はシンプルにプルリクエストを作成したいので `create` を指定します。`create` のヘルプを読むと、`--title` と `--body` でタイトルと本文を、`--base` でマージ先のブランチを指定できるようなので、これらも指定してみます:
 
 ```sh
 $ git add articles
@@ -271,25 +245,34 @@ https://github.com/morinokami/zenn-docs/pull/2
 
 ```sh
 $ gh pr status                                                                                                                                                                                                  
-                                                                                                                                                                                                                                              
-Relevant pull requests in morinokami/zenn-docs                                                                                                                                                                                                
-                                                                                                                                                                                                                                              
-Current branch                                                                                                                                                                                                                                
-  #2  Add my first article on Zenn close #1 [first-article]                                                                                                                                                                                   
-                                                                                                                                                                                                                                              
-Created by you                                                                                                                                                                                                                                
-  #2  Add my first article on Zenn close #1 [first-article]                                                                                                                                                                                   
-                                                                                                                                                                                                                                              
+
+Relevant pull requests in morinokami/zenn-docs
+
+Current branch
+  #2  Add my first article on Zenn close #1 [first-article]
+
+Created by you
+  #2  Add my first article on Zenn close #1 [first-article]
+
 Requesting a code review from you
   You have no pull requests to review
 
-$ 
+$ gh pr view 2                                                                                                                                                                                                  
+Add my first article on Zenn close #1
+Open • morinokami wants to merge 1 commit into master from first-article
+
+
+
+  This pull request was created by gh
+
+
+
+View this pull request on GitHub: https://github.com/morinokami/zenn-docs/pull/2
 ```
 
 # レビュー
 
-最後に、自分自信で先ほどのプルリクエストをレビューしマージしてみます。
-まずは diff の確認をしてみます:
+最後に、自分自信で先ほどのプルリクエストをレビューしマージしてみます。まずは diff の確認をしてみます:
 
 ```sh
 $ gh pr diff                                                                                                                                                                                                    
@@ -319,12 +302,9 @@ $ gh pr merge -m 2
 ✔ Deleted branch first-article and switched to branch master
 ```
 
-これにより自動的にマージ元のブランチは削除されるようです。
-そして見事、GitHub 上でプルリクエストがおこなわれ、Zenn において記事が公開されました!
+これにより自動的にマージ元のブランチは削除されるようです。そして見事、GitHub 上でプルリクエストがおこなわれ、Zenn において[記事が公開されました](https://zenn.dev/morinokami/articles/hello-github-cli)!
 
 # 終わりに
 
-この記事では GitHub CLI の使用感を確かめるために、いくつかのサブコマンドを実際に使用した様子をレポートしました。
-自分は [`hub` コマンド](https://github.com/github/hub)はこれまで使っておらず、ブラウザ上で GitHub を操作していたため、ターミナルからの操作がいかに楽か実感することができました。
-サブコマンドに対する操作も一貫性があり明確で、かつヘルプなども充実しているため、これからは GitHub CLI をどんどん使っていきたいと思います。
+この記事では GitHub CLI の使用感を確かめるために、いくつかのサブコマンドを実際に使用した様子をレポートしました。自分は [`hub` コマンド](https://github.com/github/hub)はこれまで使っておらず、ブラウザ上で GitHub を操作していたため、ターミナルからの操作がいかに楽か実感することができました。サブコマンドに対する操作も一貫性があり明確で、かつヘルプなども充実しているため、これからは GitHub CLI をどんどん使っていきたいと思います。
 
