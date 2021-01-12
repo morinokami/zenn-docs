@@ -12,7 +12,7 @@ published: false # 公開設定（falseにすると下書き）
 
 対象読者としては、簡単な CRUD アプリケーションなどを NestJS によって作成したことがあり、各概念や構成要素について何となくは把握したものの、どうもスッキリとは理解できていない気がする、というような方を想定しています。
 
-この記事が自分のような NestJS 入門者のお役に立てれば幸いです。
+この記事が自分のような NestJS 入門者のお役に立てれば幸いです。なお、以下で示した各概念をすべて実装している[サンプル](https://github.com/morinokami/nestjs-app)を用意しましたので、この文章やドキュメントを読みながら、手元で色々と実験してみることをオススメします。
 
 # 基礎的な概念の図解
 
@@ -233,7 +233,7 @@ Middleware は
   - リクエスト・レスポンスのサイクルを終わらせる
   - 他の Middleware を呼ぶ
 - 関数、または `@Injectable()` デコレータを適用したクラスとして実装する
-- ドキュメントには例として `Logger` が紹介されている
+- ドキュメントには例としてロガーが紹介されている
 
 Middleware を作成する際は、
 
@@ -294,7 +294,7 @@ export class AppModule implements NestModule {
 
 ```ts
 const app = await NestFactory.create(AppModule);
-app.use(logger);
+app.use(LoggerMiddleware);
 await app.listen(3000);
 ```
 
@@ -306,7 +306,44 @@ Exception filter は、
 - 形式的には、`@Catch()` デコレータを適用し、`ExceptionFilter` インターフェース を実装したクラスのこと
 - ドキュメントには例として例外をキャッチしレスポンスにタイムスタンプなどの情報を追加する Filter が紹介されている
 
-<構造>
+Exception filter を作成する際は、
+
+```sh
+$ nest g filter common/filters/<name>
+```
+
+とします。このコマンドにより、`src/common/filters/<name>.filter.ts` などのファイルが作成されます。
+
+Exception filter の基本的な構造は次のようになります:
+
+```ts
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+} from "@nestjs/common";
+import { Request, Response } from "express";
+
+@Catch(HttpException) // @Catch() デコレータの適用、HttpException をハンドルすることを宣言
+export class HttpExceptionFilter<T extends HttpException>
+  implements ExceptionFilter {
+  // ExceptionFilter インターフェースの実装
+  catch(exception: T, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
+    const status = exception.getStatus();
+
+    // レスポンスを加工
+    response.status(status).json({
+      statusCode: status,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+    });
+  }
+}
+```
 
 Exception filters は、メソッドのレベル、コントローラのレベル、グローバルなレベルで使用することができます。メソッド、つまり Route ハンドラのレベルにおいて使用するためには、次のように `@UseFilters()` デコレータを使用します:
 
@@ -321,7 +358,7 @@ async create(@Body() createCatDto: CreateCatDto) {
 コントローラレベルで使用する場合も同様です:
 
 ```ts
-@UseFilters(new HttpExceptionFilter())
+@UseFilters(HttpExceptionFilter)
 export class CatsController {}
 ```
 
@@ -329,9 +366,11 @@ export class CatsController {}
 
 ```ts
 const app = await NestFactory.create(AppModule);
-app.useGlobalFilters(new HttpExceptionFilter());
+app.useGlobalFilters(HttpExceptionFilter);
 await app.listen(3000);
 ```
+
+なお、Filter のインスタンスを `@UseFilters` へと与えることも可能ですが (`@UseFilters(new HttpExceptionFilter())` のように)、メモリ使用の効率性の観点から、公式ドキュメントではインスタンスよりもクラスを使用することが推奨されています。
 
 ## Pipes
 
