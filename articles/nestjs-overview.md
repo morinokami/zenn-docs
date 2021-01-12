@@ -52,7 +52,7 @@ image
 について、図ではざっくりとした流れを描きましたが、これらをアプリケーションへと登録する際に、実際には次の四つのレベルがあるということを認識しましょう:
 
 - Global (グローバルなレベル)
-- Controller (コントローラーのレベル)
+- Controller (コントローラのレベル)
 - Method (メソッドのレベル)
 - Param (パラメータのレベル、これは後述するように Pipe のみ設定可能)
 
@@ -305,6 +305,33 @@ Exception filter は、
 - `HttpException` をハンドルする組み込みの Global exception filter の制御フローと、それがクライアントへと送り返すレスポンスをコントロールする
 - 形式的には、`@Catch()` デコレータを適用し、`ExceptionFilter` インターフェース を実装したクラスのこと
 - ドキュメントには例として例外をキャッチしレスポンスにタイムスタンプなどの情報を追加する Filter が紹介されている
+
+<構造>
+
+Exception filters は、メソッドのレベル、コントローラのレベル、グローバルなレベルで使用することができます。メソッド、つまり Route ハンドラのレベルにおいて使用するためには、次のように `@UseFilters()` デコレータを使用します:
+
+```ts
+@Post()
+@UseFilters(HttpExceptionFilter) // Exception filter を登録
+async create(@Body() createCatDto: CreateCatDto) {
+  // ...
+}
+```
+
+コントローラレベルで使用する場合も同様です:
+
+```ts
+@UseFilters(new HttpExceptionFilter())
+export class CatsController {}
+```
+
+一方、グローバルに Exception filter を登録するためには、`useGlobalFilters()` メソッドを使用します:
+
+```ts
+const app = await NestFactory.create(AppModule);
+app.useGlobalFilters(new HttpExceptionFilter());
+await app.listen(3000);
+```
 
 ## Pipes
 
