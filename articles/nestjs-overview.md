@@ -385,7 +385,66 @@ Pipe は、
   - `ParseArrayPipe`
   - `ParseUUIDPipe`
   - `DefaultValuePipe`
-- ドキュメントには例として、リクエストに含まれるデータの形式をバリデーションする Pipe が紹介されている
+- ドキュメントには例として、[Joi](https://github.com/hapijs/joi) によるスキーマを使用するバリデーションや、[class-validator](https://github.com/typestack/class-validator) によるデコレータを使用するバリデーションが紹介されている
+
+Pipe を作成する際は、
+
+```sh
+nest g pipe common/pipes/<name>
+```
+
+とします。このコマンドにより、`src/common/pipes/<name>.pipe.ts` などのファイルが作成されます。
+
+Pipe の基本的な構造は次のようになります:
+
+```ts
+import {
+  PipeTransform,
+  Injectable,
+  ArgumentMetadata,
+  BadRequestException,
+} from "@nestjs/common";
+
+@Injectable() // @Injectable() デコレータの適用
+export class ParseIntPipe implements PipeTransform<string, number> {
+  // PipeTransform インターフェースの実装
+  transform(value: string, metadata: ArgumentMetadata): number {
+    const val = parseInt(value, 10); // データの変換
+    if (isNaN(val)) {
+      throw new BadRequestException("Validation failed");
+    }
+    return val;
+  }
+}
+```
+
+なお、これは与えられたデータを変換するタイプの Pipe ですが、変換が不可能である場合には例外を送出します。これはバリデーションをおこなうタイプの Pipe でも同様で、バリデーションの過程で問題があればその際も例外を送出するようにします。
+
+Pipe は、メソッドのレベル、コントローラのレベル、グローバルなレベルに加えて、パラメータのレベルで使用することができます。まず、パラメータのレベルで使用するためには、次のように @Param() などの [Param decorator](https://docs.nestjs.com/custom-decorators#param-decorators) の内部で Pipe を指定します:
+
+```ts
+@Get(':id')
+async findOne(@Param('id', ParseIntPipe) id) { // パラメータ id に対する Pipe を登録
+  return this.catsService.findOne(id);
+}
+```
+
+メソッドやコントローラのレベルで使用するためは、次のように `@UsePipes()` デコレータを使用します:
+
+```ts
+@Post()
+@UsePipes(ValidationPipe) // Pipe を登録
+async create(@Body() createCatDto: CreateCatDto) {
+  // ...
+}
+```
+
+グローバルに Pipe を登録するためには、`useGlobalPipes()` メソッドを使用します:
+
+```ts
+const app = await NestFactory.create(AppModule);
+app.useGlobalPipes(ValidationPipe);
+```
 
 ## Guards
 
@@ -528,6 +587,6 @@ app.useGlobalInterceptors(LoggingInterceptor);
 
 # まとめ
 
-入門時に様々な概念が登場し、各概念の役割や使い方に関して多少混乱したため、それらについて図解しまとめました。まずは、Module や Controller、Provider など、レスポンスを返すための基本的な仕組みやコードをまとめるための構造について理解することが大事です。そして、クライアントとサーバとの間でのリクエスト・レスポンスサイクルを制御する仕組みである残りの仕組みについて、その役割、適用される順序・スコープ、コード内での組み込み方などを頭に入れていくと良いと思います。
+入門時に様々な概念が登場し、各概念の役割や使い方に関して多少混乱したため、それらについて図解しまとめました。まずは、Module や Controller、Provider など、レスポンスを返すための基本的な仕組みやコードをまとめるための構造について理解することが大切です。そして、クライアントとサーバとの間でのリクエスト・レスポンスサイクルを制御する仕組みである残りの仕組みについて、その役割、適用される順序・スコープ、コード内での組み込み方などを頭に入れていくと良いと思います。
 
 なお、個人的に最も複雑であると感じたのは、Middleware と Interceptor です。これらは適用範囲が広いため役割がはっきりとしなかったり、また Express や RxJS など、別のレイヤーの概念が顔を出してくるためです。これらを使用する際は、設計時にしっかりと役割などについて取り決めたほうが良さそうだと感じました (これらに関しては、Express そのものだったり、Interceptor という同名かつ同じようなことができる概念があるらしい Spring などを触ったことがある人は、それほど迷わないのだろうか)。
