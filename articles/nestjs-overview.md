@@ -12,7 +12,7 @@ published: false # 公開設定（falseにすると下書き）
 
 対象読者としては、簡単な CRUD アプリケーションなどを NestJS によって作成したことがあり、各概念や構成要素について何となくは把握したものの、どうもスッキリとは理解できていない気がする、というような方を想定しています。
 
-この記事が自分のような NestJS 入門者のお役に立てれば幸いです。なお、以下で示した各概念をすべて実装している[サンプル](https://github.com/morinokami/nestjs-app)を用意しましたので、この文章やドキュメントを読みながら、手元で色々と実験してみることをオススメします。
+この記事が自分のような NestJS 入門者のお役に立てれば幸いです。なお、以下で示した各概念をすべて実装している[サンプル](https://github.com/morinokami/nestjs-app)を用意しましたので、この文章やドキュメントを読みながら、`yarn start:dev` を実行し、手元で色々と実験してみることをオススメします。
 
 # 基礎的な概念の図解
 
@@ -295,7 +295,6 @@ export class AppModule implements NestModule {
 ```ts
 const app = await NestFactory.create(AppModule);
 app.use(LoggerMiddleware);
-await app.listen(3000);
 ```
 
 ## Exception filters
@@ -367,7 +366,6 @@ export class CatsController {}
 ```ts
 const app = await NestFactory.create(AppModule);
 app.useGlobalFilters(HttpExceptionFilter);
-await app.listen(3000);
 ```
 
 なお、Filter のインスタンスを `@UseFilters` へと与えることも可能ですが (`@UseFilters(new HttpExceptionFilter())` のように)、メモリ使用の効率性の観点から、公式ドキュメントではインスタンスよりもクラスを使用することが推奨されています。
@@ -380,7 +378,14 @@ Pipe は、
 - 大きく二つのユースケースがある:
   - 変換: インプットされたデータを変換する (たとえば文字列から整数へ)
   - バリデーション: インプットされたデータに問題がなければ次の処理へと引き継ぎ、問題があれば例外を送出する
-- ドキュメントには例として...
+- 六つの組み込みの Pipe が存在する:
+  - `ValidationPipe`
+  - `ParseIntPipe`
+  - `ParseBoolPipe`
+  - `ParseArrayPipe`
+  - `ParseUUIDPipe`
+  - `DefaultValuePipe`
+- ドキュメントには例として、リクエストに含まれるデータの形式をバリデーションする Pipe が紹介されている
 
 ## Guards
 
@@ -388,7 +393,65 @@ Guard は、
 
 - 形式的には、`@Injectable()` デコレータを適用し、`CanActivate` インターフェースを実装したクラスのこと
 - (権限やロール、ACL 等の) 特定の条件に応じて、リクエストがハンドラによって処理されるべきかどうかを決定する
-- ドキュメントには例として...
+- ドキュメントには例として、認可や、ユーザーのロールに応じたアクセス権限の付与に関する Guard が紹介されている
+
+Guard を作成する際は、
+
+```sh
+$ nest g guard common/guards/<name>
+```
+
+とします。このコマンドにより、`src/common/guards/<name>.guard.ts` などのファイルが作成されます。
+
+Guard の基本的な構造は次のようになります:
+
+```ts
+import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
+import { Request } from "express";
+import { Observable } from "rxjs";
+
+const API_KEY = "secret";
+
+// ヘッダーの Authorization の値を検証する単純な関数
+function validateRequest(request: Request): boolean {
+  return request.header("Authorization") === API_KEY;
+}
+
+@Injectable() // @Injectable() デコレータの適用
+export class AuthGuard implements CanActivate {
+  // CanActivate インターフェースの実装
+  canActivate(
+    context: ExecutionContext
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const request = context.switchToHttp().getRequest<Request>();
+    return validateRequest(request); // リクエストに対する何らかの検証 (true であれば次の処理へと進む)
+  }
+}
+```
+
+Guard は、メソッドのレベル、コントローラのレベル、グローバルなレベルで使用することができます。メソッドのレベルで使用するためには、次のように `@UseGuards()` デコレータを使用します:
+
+```ts
+@Post()
+@UseGuards(AuthGuard) // Guard を登録
+async create(@Body() createCatDto: CreateCatDto) {
+  // ...
+}
+```
+
+コントローラレベルで使用する場合も同様です:
+
+```ts
+@UseGuards(AuthGuard)
+export class CatsController {}
+```
+
+一方、グローバルに Guard を登録するためには、`useGlobalGuards()` メソッドを使用します:
+
+```ts
+const app = await NestFactory.create(AppModule);
+app.useGlobalGuards(AuthGuard);
+```
 
 ## Interceptors
 
@@ -401,4 +464,66 @@ Interceptor は、
   - 関数から送出された例外を変換する
   - 関数の振る舞いを拡張する
   - (たとえばキャッシュを目的として) 特定の条件に応じて関数をオーバーライドする
-- ドキュメントには例として...
+- ドキュメントには例として、リクエストからレスポンスまでに掛かった時間を確認したり、ハンドラから返されたレスポンスや例外を書き換える Interceptor が紹介されている
+
+Interceptor を作成する際は、
+
+```sh
+$ nest g interceptor common/interceptors/<name>
+```
+
+とします。このコマンドにより、`src/common/interceptors/<name>.interceptor.ts` などのファイルが作成されます。
+
+Interceptor の基本的な構造は次のようになります:
+
+```ts
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from "@nestjs/common";
+import { Observable } from "rxjs";
+import { tap } from "rxjs/operators";
+
+@Injectable() // @Injectable() デコレータの適用
+export class LoggingInterceptor implements NestInterceptor {
+  // NestInterceptor  インターフェースの実装
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    console.log("Before...");
+
+    const now = Date.now();
+    return next.handle().pipe(
+      tap(
+        () => console.log(`After... ${Date.now() - now}ms`) // レスポンスが返るまでの経過時間を表示
+      )
+    );
+  }
+}
+```
+
+Interceptor は、メソッドのレベル、コントローラのレベル、グローバルなレベルで使用することができます。メソッドのレベルで使用するためには、次のように `@UseInterceptors()` デコレータを使用します:
+
+```ts
+@Post()
+@UseInterceptors(LoggingInterceptor) // Interceptor を登録
+async create(@Body() createCatDto: CreateCatDto) {
+  // ...
+}
+```
+
+コントローラレベルで使用する場合も同様です:
+
+```ts
+@UseInterceptors(LoggingInterceptor)
+export class CatsController {}
+```
+
+一方、グローバルに Guard を登録するためには、`useGlobalGuards()` メソッドを使用します:
+
+```ts
+const app = await NestFactory.create(AppModule);
+app.useGlobalInterceptors(LoggingInterceptor);
+```
+
+# まとめ
