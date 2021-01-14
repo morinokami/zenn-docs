@@ -12,7 +12,7 @@ published: false # 公開設定（falseにすると下書き）
 
 対象読者としては、簡単な CRUD アプリケーションなどを NestJS によって作成したことがあり、基礎的な概念や構成要素について何となくは把握したものの、どうもスッキリとは理解できていない気がする、というような方を想定しています。
 
-この記事が自分のような NestJS 入門者のお役に立てれば幸いです。なお、以下で示した各概念をすべて実装している[サンプル](https://github.com/morinokami/nestjs-app)を用意しましたので、この文章やドキュメントを読みながら、`yarn start:dev` を実行し、手元で色々と実験してみるなど、手を動かしつつ理解することをオススメします。
+この記事が自分のような NestJS 入門者のお役に立てれば幸いです。なお、以下で示した各概念をすべて実装している[サンプル](https://github.com/morinokami/nestjs-app)を用意しましたので、この文章やドキュメントを読みながら、`yarn start:dev` を実行し、手元で色々と実験してみるなど、 何らかのかたちで手を動かしつつ理解することをオススメします。
 
 # 基礎的な概念の図解
 
@@ -31,7 +31,7 @@ published: false # 公開設定（falseにすると下書き）
 
 image
 
-グレーの点線は、クライアントから発せられた HTTP Request と、NestJS アプリケーションから発せられた HTTP Response と Exception の流れを表わしています (厳密には、Exception が発生したとしても HTTP Response としてクライアントに送信されるわけですが、ここではわかりやすさのため Exception の流れを独立して描いています)。また、赤紫色の筒のようなものは、Guard や Exception filter などの対応する概念が Request や Response へと何らかのかたちで作用することを表わしています。また、`App Module` は NestJS アプリケーションの Root module を表わし、それにぶら下がるように他の Module が登録されており、また各 Module には Controller や Providers の一種である Service などが登録されています  (ここでは見やすさのために Controller と Service を一つずつ描きましたが、実際には、ある Module が別の Module の Service に依存するなど、より複雑な構成となるはずです)。
+グレーの点線は、クライアントから発せられた HTTP Request と、NestJS アプリケーションから発せられた HTTP Response と Exception の流れを表わしています (厳密には、Exception が発生したとしても HTTP Response としてクライアントに送信されるわけですが、ここではわかりやすさのため Exception の流れを独立して描いています)。また、赤紫色の筒のようなものは、Guard や Exception filter など概念が Request や Response へと何らかのかたちで作用することを表わしています。また、`App Module` は NestJS アプリケーションの Root module を表わし、それにぶら下がるように他の Module が登録されており、また各 Module には Controller や Providers の一種である Service などが登録されています (ここでは見やすさのために Controller と Service を一つずつ描きましたが、実際には、ある Module が別の Module の Service に依存するなど、より複雑な構成となるはずです)。
 
 ここでのポイントとしては、まず、Request へと作用する概念として
 
@@ -58,7 +58,9 @@ image
 
 つまり、どのレベルで各機能を使いたいかに応じて、コード内での使用方法も変化するということです。
 
-以下では、各概念の役割やコード例を
+クライアントと Module の間で展開されるリクエスト・レスポンスのサイクルにおいて、Middleware や Pipe などの概念がどのような順序で作用するかを頭に入れ、各々に適用時のスコープ、レベルがあるということを理解することが、大枠を理解する上で重要です。
+
+続いて以下では、各概念の役割や典型的なコードレベルでの形式、また Controller、Provider、Module 以外については各スコープでの登録方法について要約的に記述していきます。
 
 # 各概念の役割と、実装方法に関するまとめ
 
@@ -67,7 +69,7 @@ image
 Controller は
 
 - 形式的には、`@Controller()` デコレータを適用したクラスのこと
-- リクエストを受け取りレスポンスを返すことが役割
+- 指定したパスでリクエストを受け取りレスポンスを返すことが役割
 - Provider が提供するサービスを利用する
 - 特定の Module に属する
 
@@ -94,7 +96,7 @@ export class CatsController {
   @Post() // HTTP メソッドの指定
   async create(@Body() createCatDto: CreateCatDto) {
     // リクエストの Body を取得
-    this.catsService.create(createCatDto); // Service に受け取った値を渡す
+    this.catsService.create(createCatDto); // 受け取った値を Service に渡す
   }
 
   @Get()
@@ -241,7 +243,7 @@ Middleware を作成する際は、
 $ nest g middleware common/middleware/<name>
 ```
 
-とします。このコマンドにより、`src/common/middleware/<name>.middleware.ts` などのファイルが作成されます。
+とします。このコマンドにより、`src/common/middleware/<name>.middleware.ts` などのファイルが作成されます (なお、Middleware 以降の概念については `common` というディレクトリにコードを追加する前提で記述していますが、このあたりはプロジェクトごとに適宜変更してください)。
 
 Middleware をクラスとして定義した場合の基本的な構造は次のようになります:
 
@@ -282,6 +284,7 @@ import { CatsModule } from "./cats/cats.module";
   imports: [CatsModule],
 })
 export class AppModule implements NestModule {
+  // NestModule インターフェースの実装
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(LoggerMiddleware) // Middleware の適用
@@ -302,6 +305,7 @@ app.use(LoggerMiddleware);
 Exception filter は、
 
 - `HttpException` をハンドルする組み込みの Global exception filter の制御フローと、それがクライアントへと送り返すレスポンスをコントロールする
+  - デフォルトでは、この Global exception filter が例外を検出し HTTP レスポンスへと変換する
 - 形式的には、`@Catch()` デコレータを適用し、`ExceptionFilter` インターフェース を実装したクラスのこと
 - ドキュメントには例として例外をキャッチしレスポンスにタイムスタンプなどの情報を追加する Filter が紹介されている
 
@@ -385,7 +389,7 @@ Pipe は、
   - `ParseArrayPipe`
   - `ParseUUIDPipe`
   - `DefaultValuePipe`
-- ドキュメントには例として、[Joi](https://github.com/hapijs/joi) によるスキーマを使用するバリデーションや、[class-validator](https://github.com/typestack/class-validator) によるデコレータを使用するバリデーションが紹介されている
+- ドキュメントには例として、[Joi](https://github.com/hapijs/joi) によるスキーマを使用するバリデーションや、[class-validator](https://github.com/typestack/class-validator) によるデコレータを使用するバリデーションなどが紹介されている
 
 Pipe を作成する際は、
 
@@ -420,7 +424,7 @@ export class ParseIntPipe implements PipeTransform<string, number> {
 
 なお、これは与えられたデータを変換するタイプの Pipe ですが、変換が不可能である場合には例外を送出します。これはバリデーションをおこなうタイプの Pipe でも同様で、バリデーションの過程で問題があればその際も例外を送出するようにします。
 
-Pipe は、メソッドのレベル、コントローラのレベル、グローバルなレベルに加えて、パラメータのレベルで使用することができます。まず、パラメータのレベルで使用するためには、次のように @Param() などの [Param decorator](https://docs.nestjs.com/custom-decorators#param-decorators) の内部で Pipe を指定します:
+Pipe は例外的に、メソッドのレベル、コントローラのレベル、グローバルなレベルに加えて、パラメータのレベルでも使用することができます。まず、パラメータのレベルで使用するためには、次のように @Param() などの [Param decorator](https://docs.nestjs.com/custom-decorators#param-decorators) の内部で Pipe を指定します:
 
 ```ts
 @Get(':id')
@@ -587,6 +591,6 @@ app.useGlobalInterceptors(LoggingInterceptor);
 
 # まとめ
 
-入門時に様々な概念が登場し、各概念の役割や使い方に関して多少混乱したため、それらについて図解しまとめました。まずは、Module や Controller、Provider など、レスポンスを返すための基本的な仕組みやコードをまとめるための構造について理解することが大切です。そして、クライアントとサーバとの間でのリクエスト・レスポンスサイクルを制御する仕組みである残りの仕組みについて、その役割、適用される順序・スコープ、コード内での組み込み方などを頭に入れていくと良いと思います。
+入門時に様々な概念が登場し、各概念の役割や使い方に関して多少混乱したため、それらについて図解しまとめました。まずは、Module や Controller、Provider など、レスポンスを返すための基本的な仕組みやコードをまとめるための構造について理解することが大切です。そして、クライアントとサーバとの間でのリクエスト・レスポンスサイクルを制御するための仕組みである残りの概念について、その役割、適用される順序・スコープ、コード内での組み込み方などを頭に入れていくと頭が整理されるはずです。
 
-なお、個人的に最も複雑であると感じたのは、Middleware と Interceptor です。これらは適用範囲が広いため役割がはっきりとしなかったり、また Express や RxJS など、別のレイヤーの概念が顔を出してくるためです。これらを使用する際は、設計時にしっかりと役割などについて取り決めたほうが良さそうだと感じました (これらに関しては、Express そのものだったり、Interceptor という同名かつ同じようなことができる概念があるらしい Spring などを触ったことがある人は、それほど迷わないのだろうか)。
+なお、個人的に最も複雑であると感じたのは、Middleware と Interceptor です。これらは適用範囲が広いため役割がはっきりとしなかったり、また Express や RxJS など、別のレイヤーの概念が顔を出してくるためです。これらを使用する際は、設計時にしっかりと役割などについて取り決めたほうが良さそうだと感じました (これらに関しては、Express そのものだったり、Interceptor という同名かつ同じようなことができる概念があるらしい Spring Framework などを触ったことがある人は、それほど迷わないのだろうか)。
