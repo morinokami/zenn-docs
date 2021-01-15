@@ -31,7 +31,7 @@ published: true # 公開設定（falseにすると下書き）
 
 ![](https://storage.googleapis.com/zenn-user-upload/zs4f5nwd0mf2m95sdpcye34x1gc8)
 
-グレーの点線は、クライアントから発せられた HTTP Request と、NestJS アプリケーションから発せられた HTTP Response と Exception の流れを表わしています (厳密には、Exception が発生したとしても HTTP Response としてクライアントに送信されるわけですが、ここではわかりやすさのため Exception の流れを独立して描いています)。また、赤紫色の筒のようなものは、Guard や Exception filter など概念が Request や Response へと何らかのかたちで作用することを表わしています。また、`App Module` は NestJS アプリケーションの Root module を表わし、それにぶら下がるように他の Module が登録されており、また各 Module には Controller や Providers の一種である Service などが登録されています (ここでは見やすさのために Controller と Service を一つずつ描きましたが、実際には、ある Module が別の Module の Service に依存するなど、より複雑な構成となるはずです)。
+グレーの点線は、クライアントから発せられた HTTP Request と、NestJS アプリケーションから発せられた HTTP Response と Exception の流れを表わしています (厳密には、Exception が発生したとしても HTTP Response としてクライアントに送信されるわけですが、ここではわかりやすさのため Exception の流れを独立して描いています)。また、赤紫色の筒のようなものは、Guard や Exception filter などの概念が Request や Response へと何らかのかたちで作用することを表わしています。また、`App Module` は NestJS アプリケーションの Root module を表わし、それにぶら下がるように他の Module が登録されており、また各 Module には Controller や Providers の一種である Service などが登録されています (ここでは見やすさのために Controller と Service を一つずつ描きましたが、実際には、ある Module が別の Module の Service に依存するなど、より複雑な構成となるはずです)。
 
 ここでのポイントとしては、まず、Request へと作用する概念として
 
@@ -40,7 +40,7 @@ published: true # 公開設定（falseにすると下書き）
 3. Intercepter
 4. Pipe
 
-という概念があり、これらがこの順番で作用するということです。同様に、Response に対しては Interceptor が、また Exception が発生した際には Interceptor や Exception filter が作用します。こうした全体の俯瞰図をまずざっくりと頭に入れましょう。
+という概念があり、これらがこの順番で作用するということです。同様に、Response に対しては Interceptor が、また Exception が発生した際には Interceptor や Exception filter が作用します。こうした全体の俯瞰図をまず頭に入れましょう。
 
 また、Middleware を除く
 
@@ -58,7 +58,7 @@ published: true # 公開設定（falseにすると下書き）
 
 つまり、どのレベルで各機能を使いたいかに応じて、コード内での使用方法も変化するということです。
 
-クライアントと Module の間で展開されるリクエスト・レスポンスのサイクルにおいて、Middleware や Pipe などの概念がどのような順序で作用するかを頭に入れ、各々に適用時のスコープ、レベルがあるということを理解することが、大枠を理解する上で重要です。
+クライアントと Module から成るアプリケーションの間で展開されるリクエスト・レスポンスのサイクルにおいて、Middleware や Pipe などの概念がどのような順序で作用するかを頭に入れ、各々に適用時のスコープ、レベルがあるということを理解することが、大枠を把握する上で重要です。
 
 続いて以下では、各概念の役割や典型的なコードレベルでの形式、また Controller、Provider、Module 以外については各スコープでの登録方法について要約的に記述していきます。
 
@@ -94,8 +94,7 @@ export class CatsController {
   constructor(private catsService: CatsService) {} // 利用する Service が inject される
 
   @Post() // HTTP メソッドの指定
-  async create(@Body() createCatDto: CreateCatDto) {
-    // リクエストの Body を取得
+  async create(@Body() createCatDto: CreateCatDto) {　// リクエストの Body を取得
     this.catsService.create(createCatDto); // 受け取った値を Service に渡す
   }
 
@@ -283,8 +282,7 @@ import { CatsModule } from "./cats/cats.module";
 @Module({
   imports: [CatsModule],
 })
-export class AppModule implements NestModule {
-  // NestModule インターフェースの実装
+export class AppModule implements NestModule { // NestModule インターフェースの実装
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(LoggerMiddleware) // Middleware の適用
@@ -330,8 +328,7 @@ import { Request, Response } from "express";
 
 @Catch(HttpException) // @Catch() デコレータの適用、HttpException をハンドルすることを宣言
 export class HttpExceptionFilter<T extends HttpException>
-  implements ExceptionFilter {
-  // ExceptionFilter インターフェースの実装
+  implements ExceptionFilter { // ExceptionFilter インターフェースの実装
   catch(exception: T, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -410,8 +407,7 @@ import {
 } from "@nestjs/common";
 
 @Injectable() // @Injectable() デコレータの適用
-export class ParseIntPipe implements PipeTransform<string, number> {
-  // PipeTransform インターフェースの実装
+export class ParseIntPipe implements PipeTransform<string, number> { // PipeTransform インターフェースの実装
   transform(value: string, metadata: ArgumentMetadata): number {
     const val = parseInt(value, 10); // データの変換
     if (isNaN(val)) {
@@ -481,8 +477,7 @@ function validateRequest(request: Request): boolean {
 }
 
 @Injectable() // @Injectable() デコレータの適用
-export class AuthGuard implements CanActivate {
-  // CanActivate インターフェースの実装
+export class AuthGuard implements CanActivate { // CanActivate インターフェースの実装
   canActivate(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -550,8 +545,7 @@ import { Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 
 @Injectable() // @Injectable() デコレータの適用
-export class LoggingInterceptor implements NestInterceptor {
-  // NestInterceptor  インターフェースの実装
+export class LoggingInterceptor implements NestInterceptor { // NestInterceptor  インターフェースの実装
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     console.log("Before...");
 
