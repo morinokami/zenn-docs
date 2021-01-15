@@ -29,7 +29,7 @@ published: false # 公開設定（falseにすると下書き）
 
 最初の三つの概念、すなわち、Controllers、Providers、Modules は、クライアントからのリクエストに対するルーティングやビジネスロジック、それらをまとめる機能を提供します。また、残りの五つの概念は、リクエストとレスポンスの経路上で様々な役割を果たします。このことを図解すると以下のようになります:
 
-image
+![](https://storage.googleapis.com/zenn-user-upload/zs4f5nwd0mf2m95sdpcye34x1gc8)
 
 グレーの点線は、クライアントから発せられた HTTP Request と、NestJS アプリケーションから発せられた HTTP Response と Exception の流れを表わしています (厳密には、Exception が発生したとしても HTTP Response としてクライアントに送信されるわけですが、ここではわかりやすさのため Exception の流れを独立して描いています)。また、赤紫色の筒のようなものは、Guard や Exception filter など概念が Request や Response へと何らかのかたちで作用することを表わしています。また、`App Module` は NestJS アプリケーションの Root module を表わし、それにぶら下がるように他の Module が登録されており、また各 Module には Controller や Providers の一種である Service などが登録されています (ここでは見やすさのために Controller と Service を一つずつ描きましたが、実際には、ある Module が別の Module の Service に依存するなど、より複雑な構成となるはずです)。
 
