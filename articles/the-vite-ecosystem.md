@@ -29,3 +29,7 @@ TODO: Preface
 ## babel
 
 Vite はほとんどのセットアップで [babel](https://babeljs.io/) を必要とせず、その重い AST パイプラインを不要としています。しかし、React のエコシステムは、HMR や コンパイルを必要とする CSS-in-JS ライブラリのような他のソリューションのために babel に大きく依存しています。現在は、[@vitejs/plugin-react](https://github.com/vitejs/vite/tree/main/packages/plugin-react) と、レガシーブラウザのサポートのために [@vitejs/plugin-legacy](https://github.com/vitejs/vite/tree/main/packages/plugin-legacy) において使用されています。[Parcel](https://parceljs.org/) チームと [Next.js](https://nextjs.org/) チームは、最も使われているプラグインを Rust のツールチェーンである [SWC](https://swc.rs/) に移植する作業をおこなっています。これらの取り組みが成熟すれば、Vite は babel から SWC に移行するかもしれません (初期段階の試み: [SWC ベースの @vitejs/plugin-legacy](https://github.com/vitejs/vite/pull/4105)、[unplugin-swc](https://github.com/egoist/unplugin-swc)、[vite-plugin-swc-react](https://github.com/iheyunfei/vite-on-swc))。
+
+## PostCSS
+
+Vite は [PostCSS](https://postcss.org/) の使用を推奨しており、デフォルトでサポートしています。[他の CSS プリプロセッサ](https://vitejs.dev/guide/features.html#css-pre-processors)も、プロジェクトの依存関係に手動で追加することでサポートされます。しかし、PostCSS は Vite のビジョンとより一致しており、[postcss-nesting](https://github.com/csstools/postcss-nesting) のような [CSSWG ドラフト](https://drafts.csswg.org/)の使用を今日から可能とし、また将来にわたって CSS 標準への準拠を維持してくれます。
