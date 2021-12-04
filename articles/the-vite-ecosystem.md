@@ -46,3 +46,14 @@ Vite は [PostCSS](https://postcss.org/) の使用を推奨しており、デフ
 ## WMR
 
 [WMR](https://github.com/preactjs/wmr) は Vite と似たスコープと哲学を持ち、[Preact](https://preactjs.com/) チームによって開発されています。[@_developit](https://twitter.com/_developit) は、WMR でユニバーサルな Rollup プラグインAPIを開発しました。これは、Rollup の豊かなエコシステムを利用して、開発中とビルド時に Rollup プラグインを使用できるようにする仕組みです。Vite 2 のプラグイン API は WMR のアプローチに基づいており、Vite 独自のフックが追加されています。Vite と WMR は協調し、URL サフィックス修飾子やその他の機能を統一しました。
+
+## Web Dev Server
+
+TODO: Web Dev Server takes a more lower-level approach, requiring a manual Rollup setup for the production build. The modern web project encompasses several explorations and includes tools that could be used in a Vite setup, like the Web Test Runner that some community members are using with vite-web-test-runner-plugin.
+
+
+# UI フレームワーク
+
+## Vue
+
+Vue の創始者かつプロジェクトリーダーである [Evan You](https://twitter.com/youyuxi)、そして他に 2 人の Vue コアチームメンバー ([@antfu](https://twitter.com/antfu7) と [@sodatea](https://twitter.com/haoqunjiang)) が Vite コアチームにいることから、Vue チームが新しいプロジェクトに Vite が動くスキャフォールディングツールである [create-vue](https://github.com/vuejs/create-vue) の使用を推奨しているのは驚くことではありません。Vue 3 のサポートは [@vitejs/plugin-vue](https://github.com/vitejs/vite/tree/main/packages/plugin-vue) で、Vue 2のサポートは [vite-plugin-vue2](https://github.com/underfin/vite-plugin-vue2) で実現しています。Vite は Vue のエコシステムで大々的に導入される予定で、ほとんどのプロジェクトが Vite のサポートを計画またはすでに実装しており、いくつかのケースではデフォルトで Vite を有効にしています ([Nuxt](https://v3.nuxtjs.org/)、[Vuetify](https://next.vuetifyjs.com/en/getting-started/installation/#vite)、[Quasar](https://quasar.dev/start/vite-plugin))。また、Vite の速度と機能を活かすために生まれた新しい Vue のプロジェクトもあります ([VitePress](https://patak.dev/vite/ecosystem.html#vitepress)、[iles](https://patak.dev/vite/ecosystem.html#iles)、[Slidev](https://patak.dev/vite/ecosystem.html#slidev))。
