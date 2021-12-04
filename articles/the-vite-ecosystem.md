@@ -12,7 +12,7 @@ TODO: Preface
 
 ## vite
 
-[Vite 2 のリリース](https://patak.dev/web/vite-2.html)における 2 回目の大規模スプリントの後、[Evan You](https://twitter.com/youyuxi) は [Vite チームを立ち上げ](https://github.com/vitejs/vite/discussions/2601)、プロジェクトのメンテナンスを開始しました。現在、Evan が率いる緊密なチームがプロジェクトを推進しており、エコシステム内の他のチームと密接に協力して、彼らのフレームワークや%統合%で Vite がスムーズに動作するようにしています。[リポジトリのコントリビュータは 400 人を超えており](https://github.com/vitejs/vite/graphs/contributors)、[Discord でも活発なコミュニティが形成されています](https://chat.vitejs.com/)。プロジェクトは急速に成長しています。GitHub では [75000 以上の他のプロジェクト](https://github.com/vitejs/vite/network/dependents?package_id=UGFja2FnZS0xMTA1NzgzMTkx)で使用されており、[vite パッケージ](https://www.npmjs.com/package/vite)の npm 月間ダウンロード数は 130 万回を超えています。
+[Vite 2 のリリース](https://patak.dev/web/vite-2.html)における 2 回目の大規模スプリントの後、[Evan You](https://twitter.com/youyuxi) は [Vite チームを立ち上げ](https://github.com/vitejs/vite/discussions/2601)、プロジェクトのメンテナンスを開始しました。現在、Evan が率いる緊密なチームがプロジェクトを推進しており、エコシステム内の他のチームと密接に協力して、彼らのフレームワークや%統合%で Vite がスムーズに動作するようにしています。[リポジトリのコントリビュータは 400 人を超えており](https://github.com/vitejs/vite/graphs/contributors)、[Discord でも活発なコミュニティが形成されています](https://chat.vitejs.com/)。プロジェクトは急速に成長しています。GitHub では [75000 以上の他のプロジェクト](https://github.com/vitejs/vite/network/dependents?package_id=UGFja2FnZS0xMTA1NzgzMTkx)で使用されており、[`vite` パッケージ](https://www.npmjs.com/package/vite)の npm 月間ダウンロード数は 130 万回を超えています。
 
 ## rollup
 
@@ -21,3 +21,7 @@ TODO: Preface
 ## esbuild
 
 [esbuild](https://esbuild.github.io/) は Go で書かれたバンドラーで、ビルドツールのパフォーマンスの限界を拡張し続けています。Vite は esbuild により個々のファイルをトランスパイルしたり (typecript の型の削除、JSX のコンパイル)、(JS と CSS ファイルともに) デフォルトのミニファイアーとして使用したりしています。また、開発中に依存関係を事前にバンドルする際のバンドラーとしても使用されています。[@evanwallace](https://twitter.com/evanwallace) は素晴らしい仕事をしてくれています。esbuild は日々改善されており、タスクに応じて tsc、babel、Rollup の高速な代替手段として Vite に利用されています。
+
+## TypeScript
+
+[TypeScript](https://typescriptlang.org/) が JS の世界に旋風を巻き起こしています。Vite は [.ts ファイルのインポートをデフォルトでサポートしています](https://vitejs.dev/guide/features.html#typescript)。内部的には、esbuild を使用して型を除去し、ブラウザ用にソースをトランスパイルする際のクリティカルパスにおけるコストのかかる型チェックを回避しています。これは、可能な限り最高の HMR 体験を得るために重要です。[VS Code](https://code.visualstudio.com/docs/languages/typescript) のような最新の IDE を使用している場合、コードを書いているときにインテリセンスによってほとんどの情報を得ることができます。また、ビルド時に `tsc` を実行したり、[rollup-plugin-typescript2](https://github.com/ezolenko/rollup-plugin-typescript2) のようなプラグインを使用することもできます。[@fi3ework](https://twitter.com/fi3ework) の [vite-plugin-checker](https://github.com/fi3ework/vite-plugin-checker#readme) は、ワーカースレッドで TypeScript を実行することができる興味深いオプションです。
