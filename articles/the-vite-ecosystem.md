@@ -42,3 +42,7 @@ Vite は [PostCSS](https://postcss.org/) の使用を推奨しており、デフ
 [Snowpack](https://www.snowpack.dev/) は、JavaScriptのネイティブのモジュールシステムを利用して不要な作業を回避し、プロジェクトがどれだけ大きくなっても高速に動作します。開発ツールにおける ESM ファーストというアプローチの利点を確立するのに貢献しました。Snowpack と Vite は、HMR API を標準化するための議論や、CJS と ESM が混在する世界でパッケージをロードするための技術など、互いに影響を与え合いました。Snowpack のコアチームのメンバー ([@FredKSchott](https://twitter.com/FredKSchott)、[@drwpow](https://twitter.com/drwpow)、[@matthewcp](https://twitter.com/matthewcp)、[@n_moore](https://twitter.com/n_moore)) は、現在 Vite を利用した Islands\* ベースの SSG フレームワークである [astro](https://astro.build/) に取り組んでいます。両方のコミュニティが協力しあいながら、Snowpack に取り組む中で学んだことを Vite コアの改善に活かしています。
 
 \* 訳注) Astro の主要コンセプトである [Island Architecture](https://docs.astro.build/core-concepts/component-hydration/index.html#concept-island-architecture) のこと。
+
+## WMR
+
+[WMR](https://github.com/preactjs/wmr) は Vite と似たスコープと哲学を持ち、[Preact](https://preactjs.com/) チームによって開発されています。[@_developit](https://twitter.com/_developit) は、WMR でユニバーサルな Rollup プラグインAPIを開発しました。これは、Rollup の豊かなエコシステムを利用して、開発中とビルド時に Rollup プラグインを使用できるようにする仕組みです。Vite 2 のプラグイン API は WMR のアプローチに基づいており、Vite 独自のフックが追加されています。Vite と WMR は協調し、URL サフィックス修飾子やその他の機能を統一しました。
