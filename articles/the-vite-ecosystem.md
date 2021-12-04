@@ -33,3 +33,12 @@ Vite はほとんどのセットアップで [babel](https://babeljs.io/) を必
 ## PostCSS
 
 Vite は [PostCSS](https://postcss.org/) の使用を推奨しており、デフォルトでサポートしています。[他の CSS プリプロセッサ](https://vitejs.dev/guide/features.html#css-pre-processors)も、プロジェクトの依存関係に手動で追加することでサポートされます。しかし、PostCSS は Vite のビジョンとより一致しており、[postcss-nesting](https://github.com/csstools/postcss-nesting) のような [CSSWG ドラフト](https://drafts.csswg.org/)の使用を今日から可能とし、また将来にわたって CSS 標準への準拠を維持してくれます。
+
+
+# その他の試み
+
+## Snowpack
+
+[Snowpack](https://www.snowpack.dev/) は、JavaScriptのネイティブのモジュールシステムを利用して不要な作業を回避し、プロジェクトがどれだけ大きくなっても高速に動作します。開発ツールにおける ESM ファーストというアプローチの利点を確立するのに貢献しました。Snowpack と Vite は、HMR API を標準化するための議論や、CJS と ESM が混在する世界でパッケージをロードするための技術など、互いに影響を与え合いました。Snowpack のコアチームのメンバー ([@FredKSchott](https://twitter.com/FredKSchott)、[@drwpow](https://twitter.com/drwpow)、[@matthewcp](https://twitter.com/matthewcp)、[@n_moore](https://twitter.com/n_moore)) は、現在 Vite を利用した Islands\* ベースの SSG フレームワークである [astro](https://astro.build/) に取り組んでいます。両方のコミュニティが協力しあいながら、Snowpack に取り組む中で学んだことを Vite コアの改善に活かしています。
+
+\* 訳注) Astro の主要コンセプトである [Island Architecture](https://docs.astro.build/core-concepts/component-hydration/index.html#concept-island-architecture) のこと。
