@@ -6,6 +6,8 @@ topics: ["vite"]
 published: false
 ---
 
+TODO: https://patak.dev/vite/ecosystem.html へのリンク差し替え
+
 TODO: Preface
 
 # 巨人の肩に乗って
@@ -104,3 +106,7 @@ Vite では、[@vitejs/plugin-react](https://github.com/vitejs/vite/tree/main/pa
 ## VitePress
 
 VitePress is a fresh take on VuePress, taking the opportunity to see rethink what a Vue-powered static site generator can look like using Vue 3 and Vite. Evan You は、Vite と並行して VitePress を開発しましたが、これは Vite のデザインをテストし、その情報を提供するための素晴らしいユースケースです。VitePress は、ドキュメント作成において多くの採用実績があります。[Vite](https://vitejs.dev/)、[Vue Blog](https://blog.vuejs.org/)、[VueUse](https://vueuse.js.org/)、[Pinia](https://pinia.esm.dev/)、[vite-ruby](https://vite-ruby.netlify.app/)、[vite-plugin-pwa](https://vite-plugin-pwa.netlify.app/)、[Slidev](https://sli.dev/)、[windi](https://windicss.org/)、[laravel-vite](https://laravel-vite.innocenzi.dev/) などがその例です。VuePress も [@vuepress/bundler-vite](https://v2.vuepress.vuejs.org/reference/bundler/vite.html#vite) によって Vite のサポートを実装しました。
+
+## Slinkity
+
+[@bholmesdev](https://twitter.com/bholmesdev) らは、[Eleventy](https://www.11ty.dev/) と Vite を統合する islands SSG フレームワークである [Slinkity](https://slinkity.dev/) に取り組んでいます。[@Snugug](https://twitter.com/Snugug) の [vite-plugin-eleventy における初期の取り組み](https://snugug.com/musings/eleventy-plus-vite/)や、[Astro](https://patak.dev/vite/ecosystem.html#astro) のようなフレームワークに影響を受け、Slinkity は 11ty ユーザーに Vite のエコシステムへの扉を開きました。これにより、Eleventy のプロジェクトは、[Vite の UI フレームワークのサポート](https://youtu.be/DqUGJyuX8m0)、高速な HMR、Vite の豊富なプラグインエコシステムを活用することができます。
