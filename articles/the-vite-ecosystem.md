@@ -61,3 +61,7 @@ Vue の創始者かつプロジェクトリーダーである [Evan You](https:/
 ## React
 
 Vite では、[@vitejs/plugin-react](https://github.com/vitejs/vite/tree/main/packages/plugin-react) により [React](https://reactjs.org/) がサポートされています。Vite の主要メンテナの一人である [@alecdotbiz](https://twitter.com/alecdotbiz) は、開発経験をスムーズにするために尽力しています。React のエコシステムでは、主にプロトタイピングやライブラリの例として多くの利用が見られます。例えば、[React Router のドキュメント](https://reactrouter.com/)では、[StackBlitz](https://stackblitz.com/) の [Web Containers](https://blog.stackblitz.com/posts/introducing-webcontainers/) を使った Vite 環境が紹介されています。Next.js は Webpack と SWC の未来に賭けています。そのため、複雑な SSR の React アプリケーションで Vite が使われることはあまりありません。しかし、Vite をベースとする、Next.js にインスパイアされたフレームワークが、[rakkas](https://rakkasjs.org/) や [vitext](https://github.com/Aslemammad/vitext) のように登場し始めています。
+
+## Preact
+
+[Preact](https://preactjs.com/) チームが [WMR](https://github.com/preactjs/wmr) を開発していることから、推奨するビルドツールとして WMR が提案されているだろうと予想できます。それにもかかわらず、彼らは [@preact/preset-vite](https://github.com/preactjs/preset-vite) で Vite も公式にサポートしています。特に Preact のコアチームのメンバーである [@marvinhagemeist](https://twitter.com/marvinhagemeist) は、Vite コミュニティと密接な関係にあり、セキュリティや両エコシステム間の互換性に関する議論に積極的に参加しています ([機能を揃えること](https://github.com/preactjs/wmr/issues/452#issuecomment-803569329)と、プラグインが Vite と WMR で動作するようにすることの両方)。
