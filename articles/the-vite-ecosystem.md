@@ -133,3 +133,7 @@ VitePress is a fresh take on VuePress, taking the opportunity to see rethink wha
 ## laravel-vite
 
 [@enzoinnocenzi](https://twitter.com/enzoinnocenzi) は、Vite と Laravel のエコシステムを統合するために [laravel-vite](https://laravel-vite.innocenzi.dev/) を作成しました。[vite-ruby](https://vite-ruby.netlify.app/) に続くかたちで、Enzo の活動は Laravel コミュニティでの Vite の採用を促進する重要な要因となっています。
+
+## fastify-vite
+
+[fastify-vite](https://fastify-vite.dev/) は、Nuxt や Next のような本格的な SSR フレームワークのミニマルかつ高速な代替です。[@anothergalvez](https://twitter.com/anothergalvez) は、フレームワークではなく [fastify を第一とするソリューション](https://fastify-vite.dev/meta/philosophy.html#fastify-first)として fastify-vite を作成しました。fastify と Vite のコミュニティの間には多くの相乗効果が生まれています。fastify-vite により、両プロジェクトの採用が促進されています。
