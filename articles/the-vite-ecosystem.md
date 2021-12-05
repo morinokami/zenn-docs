@@ -96,3 +96,7 @@ Vite では、[@vitejs/plugin-react](https://github.com/vitejs/vite/tree/main/pa
 ## Astro
 
 [astro](https://astro.build/) チームは、[Vite を使用するためにエンジンを作り直し](https://astro.build/blog/astro-021-preview/#hello-vite)、エコシステムにおける重要なプレーヤーとなりました。Astro は、これまで他のフレームワークが扱ってこなかったいくつかの分野で Vite の限界を押し広げており、探求しながらコア部分を改良しています。ESM ツールに関する彼らの経験は、今後の  Vite にとって非常に重要なものとなるでしょう。
+
+## iles
+
+[@MaximoMussini](https://twitter.com/MaximoMussini) は、Vite と Vue によりインタラクティブな islands を作ることができるフレームワーク、[iles](https://iles-docs.netlify.app/) を作成しました。Astro や VitePress にインスパイアされた iles は、[Vite が可能にしている新たな試み](https://viewsonvue.com/islands-architecture-in-vue-with-m-ximo-mussini-vue-170)の好例です。Maximo は積極的にコミュニティに参加しており、また [Rails](https://patak.dev/vite/ecosystem.html#vite-ruby) コミュニティにおける Vite の採用についても推進しています。
