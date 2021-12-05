@@ -60,8 +60,12 @@ Vue の創始者かつプロジェクトリーダーである [Evan You](https:/
 
 ## React
 
-Vite では、[@vitejs/plugin-react](https://github.com/vitejs/vite/tree/main/packages/plugin-react) により [React](https://reactjs.org/) がサポートされています。Vite の主要メンテナの一人である [@alecdotbiz](https://twitter.com/alecdotbiz) は、開発経験をスムーズにするために尽力しています。React のエコシステムでは、主にプロトタイピングやライブラリの例として多くの利用が見られます。例えば、[React Router のドキュメント](https://reactrouter.com/)では、[StackBlitz](https://stackblitz.com/) の [Web Containers](https://blog.stackblitz.com/posts/introducing-webcontainers/) を使った Vite 環境が紹介されています。Next.js は Webpack と SWC の未来に賭けています。そのため、複雑な SSR の React アプリケーションで Vite が使われることはあまりありません。しかし、Vite をベースとする、Next.js にインスパイアされたフレームワークが、[rakkas](https://rakkasjs.org/) や [vitext](https://github.com/Aslemammad/vitext) のように登場し始めています。
+Vite では、[@vitejs/plugin-react](https://github.com/vitejs/vite/tree/main/packages/plugin-react) により [React](https://reactjs.org/) がサポートされています。Vite の主要メンテナの一人である [@alecdotbiz](https://twitter.com/alecdotbiz) は、開発体験をスムーズにするために尽力しています。React のエコシステムでは、主にプロトタイピングやライブラリの例として多くの利用が見られます。例えば、[React Router のドキュメント](https://reactrouter.com/)では、[StackBlitz](https://stackblitz.com/) の [Web Containers](https://blog.stackblitz.com/posts/introducing-webcontainers/) を使った Vite 環境が紹介されています。Next.js は Webpack と SWC の未来に賭けています。そのため、複雑な SSR の React アプリケーションで Vite が使われることはあまりありません。しかし、Vite をベースとする、Next.js にインスパイアされたフレームワークが、[rakkas](https://rakkasjs.org/) や [vitext](https://github.com/Aslemammad/vitext) のように登場し始めています。
 
 ## Preact
 
 [Preact](https://preactjs.com/) チームが [WMR](https://github.com/preactjs/wmr) を開発していることから、推奨するビルドツールとして WMR が提案されているだろうと予想できます。それにもかかわらず、彼らは [@preact/preset-vite](https://github.com/preactjs/preset-vite) で Vite も公式にサポートしています。特に Preact のコアチームのメンバーである [@marvinhagemeist](https://twitter.com/marvinhagemeist) は、Vite コミュニティと密接な関係にあり、セキュリティや両エコシステム間の互換性に関する議論に積極的に参加しています ([機能を揃えること](https://github.com/preactjs/wmr/issues/452#issuecomment-803569329)と、プラグインが Vite と WMR で動作するようにすることの両方)。
+
+## Svelte
+
+[Svelte](https://svelte.dev/) チームは、Vite への最も活発な貢献者の一つです。Svelte のサポートは [vite-plugin-svelte](https://github.com/sveltejs/vite-plugin-svelte) により実現しています。[SvelteKit](https://kit.svelte.dev/) は Vite によって動いており、彼らのエコシステムで Vite を使用することが推進されていくでしょう。[@Rich_Harris](https://twitter.com/Rich_Harris) は、SvelteKit のための汎用的な SSR の仕組みを考え出し、Evan You は後にそれを Vite に移植して、重要な機能の 1 つとなりました。SSR プリミティブを共有できることは、現在の Vite ベースの SSG および SSR フレームワークの革新を進めるために非常に重要でした。[@GrygrFlzr](https://twitter.com/GrygrFlzr)、[@benmccann](https://twitter.com/benjaminmccann)、[@dominikg](https://github.com/dominikg)、[@bluwyoo](https://twitter.com/bluwyoo) はこのプロジェクトと密接な関係にあり、SvelteKit は Vite を使用した先進的なフレームワークの 1 つであることから、両チームは緊密に協力しあっています。
