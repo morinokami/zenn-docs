@@ -122,3 +122,10 @@ VitePress is a fresh take on VuePress, taking the opportunity to see rethink wha
 ## vite-ssr
 
 [@frandiox](https://twitter.com/frandiox) は、Node.js における Vite のためのシンプルかつ強力な SSR ソリューションとして、[vite-ssr](https://github.com/frandiox/vite-ssr#readme) を作成しました。これは、Vite のSSR API を高レベルのソリューションとして公開するための別の試みです。彼はまた、[Cloudflare Workers](https://workers.cloudflare.com/) 上で動作する、エッジサイドレンダリングとフルスタックの Vite フレームワークである [vitedge](https://vitedge.js.org/) の作成者でもあります。
+
+
+# 他のエコシステムとの統合
+
+## vite-ruby
+
+[@MaximoMussini](https://twitter.com/MaximoMussini) は、洗練されたバックエンドとの最初の統合の 1 つを [vite-ruby](https://vite-ruby.netlify.app/) によって果たし、Vite が Ruby コミュニティに参入することを可能にしました。プロジェクト発足の経緯については、[ドキュメントのモチベーションに関するセクション](https://vite-ruby.netlify.app/guide/introduction.html#why-vite-ruby-%F0%9F%A4%94)をチェックしてください。[Vite Land の #rails チャンネル](https://patak.dev/vite/discord.gg/pC5sG7Gqh7.html)では多くの活動がおこなわれており、このプロジェクトにより他の人も Vite を自分のプロジェクトに統合するようになりました。
