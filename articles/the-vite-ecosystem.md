@@ -100,3 +100,7 @@ Vite では、[@vitejs/plugin-react](https://github.com/vitejs/vite/tree/main/pa
 ## iles
 
 [@MaximoMussini](https://twitter.com/MaximoMussini) は、Vite と Vue によりインタラクティブな islands を作ることができるフレームワーク、[iles](https://iles-docs.netlify.app/) を作成しました。Astro や VitePress にインスパイアされた iles は、[Vite が可能にしている新たな試み](https://viewsonvue.com/islands-architecture-in-vue-with-m-ximo-mussini-vue-170)の好例です。Maximo は積極的にコミュニティに参加しており、また [Rails](https://patak.dev/vite/ecosystem.html#vite-ruby) コミュニティにおける Vite の採用についても推進しています。
+
+## VitePress
+
+VitePress is a fresh take on VuePress, taking the opportunity to see rethink what a Vue-powered static site generator can look like using Vue 3 and Vite. Evan You は、Vite と並行して VitePress を開発しましたが、これは Vite のデザインをテストし、その情報を提供するための素晴らしいユースケースです。VitePress は、ドキュメント作成において多くの採用実績があります。[Vite](https://vitejs.dev/)、[Vue Blog](https://blog.vuejs.org/)、[VueUse](https://vueuse.js.org/)、[Pinia](https://pinia.esm.dev/)、[vite-ruby](https://vite-ruby.netlify.app/)、[vite-plugin-pwa](https://vite-plugin-pwa.netlify.app/)、[Slidev](https://sli.dev/)、[windi](https://windicss.org/)、[laravel-vite](https://laravel-vite.innocenzi.dev/) などがその例です。VuePress も [@vuepress/bundler-vite](https://v2.vuepress.vuejs.org/reference/bundler/vite.html#vite) によって Vite のサポートを実装しました。
