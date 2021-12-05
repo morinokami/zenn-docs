@@ -129,3 +129,7 @@ VitePress is a fresh take on VuePress, taking the opportunity to see rethink wha
 ## vite-ruby
 
 [@MaximoMussini](https://twitter.com/MaximoMussini) は、洗練されたバックエンドとの最初の統合の 1 つを [vite-ruby](https://vite-ruby.netlify.app/) によって果たし、Vite が Ruby コミュニティに参入することを可能にしました。プロジェクト発足の経緯については、[ドキュメントのモチベーションに関するセクション](https://vite-ruby.netlify.app/guide/introduction.html#why-vite-ruby-%F0%9F%A4%94)をチェックしてください。[Vite Land の #rails チャンネル](https://patak.dev/vite/discord.gg/pC5sG7Gqh7.html)では多くの活動がおこなわれており、このプロジェクトにより他の人も Vite を自分のプロジェクトに統合するようになりました。
+
+## laravel-vite
+
+[@enzoinnocenzi](https://twitter.com/enzoinnocenzi) は、Vite と Laravel のエコシステムを統合するために [laravel-vite](https://laravel-vite.innocenzi.dev/) を作成しました。[vite-ruby](https://vite-ruby.netlify.app/) に続くかたちで、Enzo の活動は Laravel コミュニティでの Vite の採用を促進する重要な要因となっています。
