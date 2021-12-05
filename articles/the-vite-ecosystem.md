@@ -69,3 +69,7 @@ Vite では、[@vitejs/plugin-react](https://github.com/vitejs/vite/tree/main/pa
 ## Svelte
 
 [Svelte](https://svelte.dev/) チームは、Vite への最も活発な貢献者の一つです。Svelte のサポートは [vite-plugin-svelte](https://github.com/sveltejs/vite-plugin-svelte) により実現しています。[SvelteKit](https://kit.svelte.dev/) は Vite によって動いており、彼らのエコシステムで Vite を使用することが推進されていくでしょう。[@Rich_Harris](https://twitter.com/Rich_Harris) は、SvelteKit のための汎用的な SSR の仕組みを考え出し、Evan You は後にそれを Vite に移植して、重要な機能の 1 つとなりました。SSR プリミティブを共有できることは、現在の Vite ベースの SSG および SSR フレームワークの革新を進めるために非常に重要でした。[@GrygrFlzr](https://twitter.com/GrygrFlzr)、[@benmccann](https://twitter.com/benjaminmccann)、[@dominikg](https://github.com/dominikg)、[@bluwyoo](https://twitter.com/bluwyoo) はこのプロジェクトと密接な関係にあり、SvelteKit は Vite を使用した先進的なフレームワークの 1 つであることから、両チームは緊密に協力しあっています。
+
+## marko
+
+[marko](https://markojs.com/) チームは、Vite の公式プラグインとして [@marko/vite](https://github.com/marko-js/vite#readme) をメンテナンスしており、[Vite ベースのスターター](https://twitter.com/markodevteam/status/1386733591296561153)を提供しています。また、[@dylan_piercey](https://twitter.com/dylan_piercey) と [@RyanCarniato](https://twitter.com/RyanCarniato) はこのプロジェクトに深く関わっており、[Zero JS](https://github.com/vitejs/vite/issues/3127) や [SSR ストリーミング](https://github.com/vitejs/vite/issues/3163)のサポートなどの機能を進めています。
