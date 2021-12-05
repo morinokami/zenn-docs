@@ -118,3 +118,7 @@ VitePress is a fresh take on VuePress, taking the opportunity to see rethink wha
 ## vite-plugin-ssr
 
 [vite-plugin-ssr](https://vite-plugin-ssr.com/) は、[@brillout](https://twitter.com/brillout) によって開発されているミニマルな SSR フレームワークです。彼は Vite の SSR まわりで非常に活発に活動しており、他の人を助けたり、Vite コアに修正やアイデアを提供したりしています。vite-plugin-ssr は SSR フレームワークの作者のためのツールキットで、Vite の低レベルな SSR プリミティブをより一貫性のあるかたちで利用できるようにすることを目的としています。[@asleMammadam](https://twitter.com/asleMammadam) が開発した React フレームワークである [vitext](https://github.com/Aslemammad/vitext) のようなフレームワークは、vite-plugin-ssr によって作成されています。また、[@brillout](https://twitter.com/brillout) も、[telefunc](https://telefunc.com/) や Vike など、他の関連プロジェクトに取り組んでいます。
+
+## vite-ssr
+
+[@frandiox](https://twitter.com/frandiox) は、Node.js における Vite のためのシンプルかつ強力な SSR ソリューションとして、[vite-ssr](https://github.com/frandiox/vite-ssr#readme) を作成しました。これは、Vite のSSR API を高レベルのソリューションとして公開するための別の試みです。彼はまた、[Cloudflare Workers](https://workers.cloudflare.com/) 上で動作する、エッジサイドレンダリングとフルスタックの Vite フレームワークである [vitedge](https://vitedge.js.org/) の作成者でもあります。
