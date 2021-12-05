@@ -81,3 +81,9 @@ Vite では、[@vitejs/plugin-react](https://github.com/vitejs/vite/tree/main/pa
 ## lit
 
 [lit](https://lit.dev/) チームはフレームワークの新バージョンをリリースしました。Vite のモノレポにスターターテンプレートがあるので、create-vite で利用することができます。lit プロジェクトで HMR を有効にするプラグインはありませんが、lit チームはそれを作ることに興味をもっていました。
+
+# アプリケーションフレームワーク
+
+## Nuxt
+
+[Nuxt チーム](https://nuxtlabs.com/)は、Vite が Nuxt でスムーズに動作するよう、Vite チームと密接に協力してきました。彼らは、Vite を Nuxt 2 に統合する [nuxt-vite](https://vite.nuxtjs.org/) を作成しました。そして次のバージョンである [Nuxt 3](https://v3.nuxtjs.org/) はデフォルトで Vite を使用します。Nuxt チームは、使用するビルドツールからフレームワークを抽象化するという、ビルドツールに関する興味深いアプローチをとりました。ユーザーは、Vite と [Webpack 5](https://webpack.js.org/) のいずれかを選択することができるのです。Nuxt 3 は、[Vue Storefront](https://www.vuestorefront.io/) のような、Vue エコシステムの他のプロジェクトにおいても Vite の DX を享受することを可能とします。なお、エコシステムの DX に関するイノベーションの大部分を担当している [@antfu](https://twitter.com/antfu7) は、現在 Nuxt チームで活動しています (この記事でも再度触れます)。
