@@ -110,3 +110,7 @@ VitePress is a fresh take on VuePress, taking the opportunity to see rethink wha
 ## Slinkity
 
 [@bholmesdev](https://twitter.com/bholmesdev) らは、[Eleventy](https://www.11ty.dev/) と Vite を統合する islands SSG フレームワークである [Slinkity](https://slinkity.dev/) に取り組んでいます。[@Snugug](https://twitter.com/Snugug) の [vite-plugin-eleventy における初期の取り組み](https://snugug.com/musings/eleventy-plus-vite/)や、[Astro](https://patak.dev/vite/ecosystem.html#astro) のようなフレームワークに影響を受け、Slinkity は 11ty ユーザーに Vite のエコシステムへの扉を開きました。これにより、Eleventy のプロジェクトは、[Vite の UI フレームワークのサポート](https://youtu.be/DqUGJyuX8m0)、高速な HMR、Vite の豊富なプラグインエコシステムを活用することができます。
+
+## rakkas
+
+[rakkas](https://rakkasjs.org/) は Next.js と SvelteKit にインスパイアされた、Vite を使用した React の SSR フレームワークです。作者の [@cyco130](https://twitter.com/cyco130) は、Vite の SSR を改善するために他の人と協力しながら Vite のコミュニティで活躍しています。
