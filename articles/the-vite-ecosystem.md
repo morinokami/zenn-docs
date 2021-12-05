@@ -73,3 +73,7 @@ Vite では、[@vitejs/plugin-react](https://github.com/vitejs/vite/tree/main/pa
 ## marko
 
 [marko](https://markojs.com/) チームは、Vite の公式プラグインとして [@marko/vite](https://github.com/marko-js/vite#readme) をメンテナンスしており、[Vite ベースのスターター](https://twitter.com/markodevteam/status/1386733591296561153)を提供しています。また、[@dylan_piercey](https://twitter.com/dylan_piercey) と [@RyanCarniato](https://twitter.com/RyanCarniato) はこのプロジェクトに深く関わっており、[Zero JS](https://github.com/vitejs/vite/issues/3127) や [SSR ストリーミング](https://github.com/vitejs/vite/issues/3163)のサポートなどの機能を進めています。
+
+## Solid
+
+[Solid](https://www.solidjs.com/) チームも、Vite の公式プラグインである [vite-plugin-solid](https://github.com/solidjs/vite-plugin-solid) をメンテナンスしています。彼らのスターターテンプレートも Vite を使用しており、また Vite を使用したアプリケーションフレームワークである [SolidStart](https://github.com/solidjs/solid-start) にも取り組んでいます。[@RyanCarniato](https://twitter.com/RyanCarniato) は Vite コミュニティで非常に活発に活動しています。たとえば Vite と Solid を使って [Vercel Edge Functions](https://vercel.com/features/edge-functions) のストリーミング機能を活用した[デモ](https://twitter.com/RyanCarniato/status/1453283158149980161?s=20)などをチェックしてみてください。
