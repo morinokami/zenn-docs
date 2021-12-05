@@ -92,3 +92,7 @@ Vite では、[@vitejs/plugin-react](https://github.com/vitejs/vite/tree/main/pa
 ## SvelteKit
 
 [SvelteKit](https://kit.svelte.dev/) は、[Svelte](https://patak.dev/vite/ecosystem.html#svelte) を基礎とするアプリケーションフレームワークで、モダンなWeb開発のための [Transitional Apps](https://www.youtube.com/watch?v=860d8usGC0o) というアイデアを推進しています。Svelte チームと Vite チームは、Vite の SSR プリミティブ、サーバ API、および全般的な品質を向上させるために、協力しあっています。SvelteKit が Vite の限界を拡張してきたことで、Vite 自身も大きく改善されてきました。
+
+## Astro
+
+[astro](https://astro.build/) チームは、[Vite を使用するためにエンジンを作り直し](https://astro.build/blog/astro-021-preview/#hello-vite)、エコシステムにおける重要なプレーヤーとなりました。Astro は、これまで他のフレームワークが扱ってこなかったいくつかの分野で Vite の限界を押し広げており、探求しながらコア部分を改良しています。ESM ツールに関する彼らの経験は、今後の  Vite にとって非常に重要なものとなるでしょう。
