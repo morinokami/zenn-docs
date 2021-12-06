@@ -152,3 +152,25 @@ VitePress is a fresh take on VuePress, taking the opportunity to see rethink wha
 ## UnoCSS
 
 Windi での経験を経て [@antfu](https://twitter.com/antfu7) は、オンデマンドで即座に使える Atomic CSS エンジンのツールキット、[UnoCSS](https://github.com/antfu/unocss) を作りました。UnoCSS は、私たちの前にどれだけ改善の余地があるかを改めて示してくれました。UnoCSS は Windi CSS の 200 倍の速度を出すことができ、最速のエンジンに 2 桁の差をつけています。誕生の経緯については、[Reimagine Atomic CSS](https://antfu.me/posts/reimagine-atomic-css) と [Icons in Pure CSS](https://antfu.me/posts/icons-in-pure-css) を読むことができます。Anthony はこのプロジェクトを Vite のみのソリューションとして開始しましたが、現在では他のバンドラーでも利用可能です。UnoCSS は、WindiCSS の次世代のエンジンを動かす予定です。
+
+
+# プラグイン
+
+## Awesome Vite Plugins
+
+[Vite プラグイン](https://vitejs.dev/guide/api-plugin.html)のリストは [Awesome Vite](https://github.com/vitejs/awesome-vite#plugins) で見つかります。新しいプロジェクト、テンプレート、プラグインが投稿されるため、[リポジトリ](https://github.com/vitejs/awesome-vite)では多くの活動がおこなわれていますが、[@Scrum_](https://twitter.com/Scrum_) がリストを上手くキュレーションしてくれています。膨大な数のプラグインがあり、エコシステムは日々成長しています。どういった機能が利用可能であるかを示すために、いくつかの例を紹介します。完全なリストを見るには、Awesome Vite の [Plugins セクション](https://github.com/vitejs/awesome-vite#plugins)をチェックしてください。
+
+| 名前 | 説明 |
+| ---- | ---- |
+| [vite-plugin-pages](https://github.com/hannoeru/vite-plugin-pages#readme) | ファイルシステムベースのルーティングサポート |
+| [vite-plugin-mpa](https://github.com/IndexXuan/vite-plugin-mpa#readme) | Vite の MPA サポート |
+| [vite-plugin-federation](https://github.com/originjs/vite-plugin-federation#readme) | Webpack のようなモジュールフェデレーションのサポート |
+| [vite-plugin-node](https://github.com/axe-me/vite-plugin-node#readme) | Node の開発用サーバーとしての Vite の使用 |
+| [vite-plugin-comlink](https://github.com/mathe42/vite-plugin-comlink#readme) | [comlink](https://github.com/GoogleChromeLabs/comlink#readme) を使った WebWorkers |
+| [vite-plugin-rsw](https://github.com/lencx/vite-plugin-rsw#readme) | [wasm-pack](https://rustwasm.github.io/wasm-pack/) のサポート |
+| [vite-plugin-elm](https://github.com/hmsk/vite-plugin-elm) | プロジェクト上で Elm のアプリ/ドキュメント/エレメントをコンパイルする |
+| [vite-plugin-qrcode](https://github.com/svitejs/vite-plugin-qrcode#readme) | モバイルでデバッグするために、サーバー起動時に QR コードを表示する |
+| [vite-plugin-full-reload](https://github.com/ElMassimo/vite-plugin-full-reload#readme) | ファイル変更に応じて自動的にページをリロードする |
+| [vite-plugin-compress](https://github.com/alloc/vite-plugin-compress#readme) | バンドルとアセットを圧縮する |
+| [vite-plugin-checker](https://github.com/fi3ework/vite-plugin-checker#readme) | ワーカースレッドでの TypeScript、VLS、vue-tsc、ESLint のチェック |
+| [vite-plugin-inspect](https://github.com/antfu/vite-plugin-inspect#readme) | プラグインの中間状態の検査 |
