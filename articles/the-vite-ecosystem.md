@@ -148,3 +148,7 @@ VitePress is a fresh take on VuePress, taking the opportunity to see rethink wha
 ## Windi CSS
 
 [@satireven](https://twitter.com/satireven) は Tailwind のための高速なオンデマンドエンジンである [WindiCSS](https://windicss.org/) を作り、また [@antfu](https://twitter.com/antfu7) はそれを使って、ローディングと HMR 速度において前例のない DX を提供する [vite-plugin-windicss](https://github.com/windicss/vite-plugin-windicss) を作りました。このプロジェクトを中心として活発なコミュニティが現在は展開されています。WindiCSS は現在、[Nuxt 3](https://v3.nuxtjs.org/) のドキュメントページや、[Slidev](https://sli.dev/) のようなプロジェクトで使用されています。
+
+## UnoCSS
+
+Windi での経験を経て [@antfu](https://twitter.com/antfu7) は、オンデマンドで即座に使える Atomic CSS エンジンのツールキット、[UnoCSS](https://github.com/antfu/unocss) を作りました。UnoCSS は、私たちの前にどれだけ改善の余地があるかを改めて示してくれました。UnoCSS は Windi CSS の 200 倍の速度を出すことができ、最速のエンジンに 2 桁の差をつけています。誕生の経緯については、[Reimagine Atomic CSS](https://antfu.me/posts/reimagine-atomic-css) と [Icons in Pure CSS](https://antfu.me/posts/icons-in-pure-css) を読むことができます。Anthony はこのプロジェクトを Vite のみのソリューションとして開始しましたが、現在では他のバンドラーでも利用可能です。UnoCSS は、WindiCSS の次世代のエンジンを動かす予定です。
