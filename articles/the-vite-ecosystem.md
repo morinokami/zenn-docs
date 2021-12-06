@@ -141,4 +141,10 @@ VitePress is a fresh take on VuePress, taking the opportunity to see rethink wha
 
 # CSS フレームワーク
 
+## Tailwind CSS
+
 [Tailwind Labs](https://tailwindcss.com/) は、Vite の可能性を最初に認識したチームの 1 つで、非常に早い段階で Vite を導入する例を公式に提供し、プロジェクトのスポンサリングを開始しました。Vite エコシステムにおける DX の革新に対応して、Tailwind v2.1+ 用のオンデマンドエンジンである [Just-in-Time モード](https://tailwindcss.com/docs/just-in-time-mode)をリリースし、Vite HMR と組み合わせた際の素晴らしい体験を提供しています。[Hydrogen](https://patak.dev/vite/ecosystem.html#hydrogen) のようなフレームワークが Vite と Tailwind CSS の組み合わせを推奨していることから、Tailwind のユーザーによる Vite の採用という新たな波が訪れるでしょう。
+
+## Windi CSS
+
+[@satireven](https://twitter.com/satireven) は Tailwind のための高速なオンデマンドエンジンである [WindiCSS](https://windicss.org/) を作り、また [@antfu](https://twitter.com/antfu7) はそれを使って、ローディングと HMR 速度において前例のない DX を提供する [vite-plugin-windicss](https://github.com/windicss/vite-plugin-windicss) を作りました。このプロジェクトを中心として活発なコミュニティが現在は展開されています。WindiCSS は現在、[Nuxt 3](https://v3.nuxtjs.org/) のドキュメントページや、[Slidev](https://sli.dev/) のようなプロジェクトで使用されています。
