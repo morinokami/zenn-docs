@@ -137,3 +137,8 @@ VitePress is a fresh take on VuePress, taking the opportunity to see rethink wha
 ## fastify-vite
 
 [fastify-vite](https://fastify-vite.dev/) は、Nuxt や Next のような本格的な SSR フレームワークのミニマルかつ高速な代替です。[@anothergalvez](https://twitter.com/anothergalvez) は、フレームワークではなく [fastify を第一とするソリューション](https://fastify-vite.dev/meta/philosophy.html#fastify-first)として fastify-vite を作成しました。fastify と Vite のコミュニティの間には多くの相乗効果が生まれています。fastify-vite により、両プロジェクトの採用が促進されています。
+
+
+# CSS フレームワーク
+
+[Tailwind Labs](https://tailwindcss.com/) は、Vite の可能性を最初に認識したチームの 1 つで、非常に早い段階で Vite を導入する例を公式に提供し、プロジェクトのスポンサリングを開始しました。Vite エコシステムにおける DX の革新に対応して、Tailwind v2.1+ 用のオンデマンドエンジンである [Just-in-Time モード](https://tailwindcss.com/docs/just-in-time-mode)をリリースし、Vite HMR と組み合わせた際の素晴らしい体験を提供しています。[Hydrogen](https://patak.dev/vite/ecosystem.html#hydrogen) のようなフレームワークが Vite と Tailwind CSS の組み合わせを推奨していることから、Tailwind のユーザーによる Vite の採用という新たな波が訪れるでしょう。
