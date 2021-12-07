@@ -205,3 +205,7 @@ Rollup のエコシステムでは [Rollup org でコアプラグイン](https:/
 ## Replit
 
 [Replit](https://replit.com/) は、ユーザーにより良い体験を提供するために [Vite を活用した](https://blog.replit.com/vite)最初の企業の一つで、[React スターターテンプレート](https://replit.com/@templates/Reactjs)を Vite に切り替えました。[このテンプレートと CRA のバージョンを比較](https://twitter.com/amasad/status/1355379680275128321)した [@amasad](https://twitter.com/amasad) 氏のツイートは、後に多くのブログ記事や講演において、ロード速度の違いを説明するために使用されました。「コンテナが CRA のファイルを読み込むよりも早く Vite が実行されたのです。」
+
+## Glitch
+
+[glitch](https://glitch.com/) は、彼らの[スタータープロジェクト](https://glitch.com/create-project)に Vite を採用しました。[重い処理を Vite に任せる](https://blog.glitch.com/post/a-closer-look-at-the-new-glitch-starter-apps)ことにしたのです。[keithkurson](https://twitter.com/keithkurson) は「Vite を使うことはとても楽しいですし、すべてのスタータープロジェクトが同様のビルドパターンと Rollup プラグインを使えるようにすることは、glitch のプログラマーにとって大きな付加価値となるでしょう」と[述べています](https://twitter.com/keithkurson/status/1382054337795411968)。
