@@ -259,3 +259,7 @@ TODO: @sodatea is building vite-jest, which aims to provide first-class Vite int
 ## TroisJS
 
 [troisjs](https://troisjs.github.io/) は [ThreeJS](https://threejs.org/)、[Vue 3](https://v3.vuejs.org/)、Vite を組み合わせた、[react-three-fiber](https://docs.pmnd.rs/react-three-fiber) のような Vue 用のライブラリです。[デモは素晴らしい出来](https://stackblitz.com/edit/troisjs-cannonjs.html)です。[@Rich_Harris](https://twitter.com/Rich_Harris) は最近、Svelte 用に宣言型 の 3D コンポーネントベースのシーンを提供する [Svelte Cubed](https://svelte-cubed.vercel.app/) を発表しました。Vite の HMR は 3D シーンをデザインするのに完璧にマッチしており、実際、[react-three-fiber](https://github.com/pmndrs/react-three-fiber/tree/master/example) のいくつかのサンプルは現在 Vite を使用しています。
+
+## Slidev
+
+[@antfu](https://twitter.com/antfu7) の別のプロジェクトである [Slidev](https://sli.dev/) は、Vite、Vue 3、[Windi CSS](https://patak.dev/vite/windicss.html) を使った、Markdown ベースのスライドジェネレータです。[機能が満載](https://sli.dev/guide/#features)されており、またその DX は素晴らしいものです。Vite の HMR により、変更が即座にスライドに反映されます。これは、Vite が可能にした新しい傾向のツールにおける最高の例の一つです。
