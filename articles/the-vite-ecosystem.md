@@ -263,3 +263,7 @@ TODO: @sodatea is building vite-jest, which aims to provide first-class Vite int
 ## Slidev
 
 [@antfu](https://twitter.com/antfu7) の別のプロジェクトである [Slidev](https://sli.dev/) は、Vite、Vue 3、[Windi CSS](https://patak.dev/vite/windicss.html) を使った、Markdown ベースのスライドジェネレータです。[機能が満載](https://sli.dev/guide/#features)されており、またその DX は素晴らしいものです。Vite の HMR により、変更が即座にスライドに反映されます。これは、Vite が可能にした新しい傾向のツールにおける最高の例の一つです。
+
+## Viteshot
+
+[@fwouts](https://twitter.com/fwouts) の [Viteshot](https://viteshot.com/) は、[UI コンポーネントのスクリーンショットを数秒で生成](https://www.youtube.com/watch?v=Ag5NBguCucc)することができます。また、[React Preview](https://reactpreview.com/) (Preview JSに改名される予定です) にも取り組んでおり、Visual Studio Code でコンポーネントや Storybook のストーリーを瞬時にプレビューすることができます。
