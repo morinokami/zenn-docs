@@ -209,3 +209,7 @@ Rollup のエコシステムでは [Rollup org でコアプラグイン](https:/
 ## Glitch
 
 [glitch](https://glitch.com/) は、彼らの[スタータープロジェクト](https://glitch.com/create-project)に Vite を採用しました。[重い処理を Vite に任せる](https://blog.glitch.com/post/a-closer-look-at-the-new-glitch-starter-apps)ことにしたのです。[keithkurson](https://twitter.com/keithkurson) は「Vite を使うことはとても楽しいですし、すべてのスタータープロジェクトが同様のビルドパターンと Rollup プラグインを使えるようにすることは、glitch のプログラマーにとって大きな付加価値となるでしょう」と[述べています](https://twitter.com/keithkurson/status/1382054337795411968)。
+
+## StackBlitz
+
+[StackBlitz](https://stackblitz.com/) は、Vite を彼らのブラウザ IDE の第一級市民としました。彼らは Vite を ([esbuild](https://esbuild.github.io/) をサポートする) [WebContainers](https://github.com/stackblitz/webcontainer-core) と互換性をもたせるようにし、また、Vite エコシステムのチームと協力して、最も人気のある Vite フレームワークがスムーズに動作するようにしました。これはたとえば [SvelteKit](https://blog.stackblitz.com/posts/sveltekit-supported-in-webcontainers/)、[Hydrogen](https://blog.stackblitz.com/posts/shopify-hydrogen-in-stackblitz-webcontainers/)、[Astro](https://blog.stackblitz.com/posts/astro-support/) などです。ローカルにとても近い環境であるため、Vite Core はバグレポートでのミニマルな再現に Stackblitz の使用を推奨しています。また、[Vite のスターター](https://blog.stackblitz.com/posts/vite-new-templates/)として [vite.new](https://vite.new/)、[vite.new/{template}](https://vite.new/vue) を追加し、新しいダッシュボードに Vite を含め、[Vite の最大のスポンサー](https://blog.stackblitz.com/posts/why-were-backing-vite/)となっています。
