@@ -240,3 +240,7 @@ TODO: @sodatea is building vite-jest, which aims to provide first-class Vite int
 ## Cypress
 
 [Cypress](https://www.cypress.io/) は Vite を彼らのプロダクトに組み込んでおり、コミュニティでもかなり活発に活動しています。彼らは、新しい [Cypress Component Testing](https://docs.cypress.io/guides/component-testing/introduction) を Vite の開発サーバーとうまくマッチするようにしています。また、アプリケーションの UI を [Vitesse](https://patak.dev/vite/ecosystem.html#vitesse) を使って再構築しています。Cypress と Vite の相性の良さについては、[@_jessicasachs](https://twitter.com/_jessicasachs) の [VueConf US 2021 での講演](https://www.youtube.com/watch?v=7S5cbY8iYLk)をチェックしてみてください。
+
+## Web Test Runner
+
+[vite-web-test-runner-plugin](https://github.com/material-svelte/vite-web-test-runner-plugin#readme) は、Vite を使ったプロジェクトをテストするための [@web/test-runner](https://patak.dev/vite/modern-web.dev/docs/test-runner/overview/) プラグインです。このプラグインは、カレントディレクトリにある Vite プロジェクトに自動的に接続し、プロジェクトの設定を読み込み、設定済みの Vite のビルドパイプラインを使用して各テストファイルをビルドします。
