@@ -236,3 +236,7 @@ Vite コミュニティでは、フレームワークとツールのさまざま
 ## vite-jest
 
 TODO: @sodatea is building vite-jest, which aims to provide first-class Vite integration for Jest. これは、Jest の[阻害要因](https://github.com/sodatea/vite-jest/blob/main/packages/vite-jest/README.md#vite-jest)のために、まだ進行中のプロジェクトです。[First Class Jest Integration というイシュー](https://github.com/vitejs/vite/issues/1955)で進捗状況を確認できますし、[Vite Land](https://chat.vitejs.dev/) の #testing チャンネルに参加することで、この取り組みを支援することもできます。
+
+## Cypress
+
+[Cypress](https://www.cypress.io/) は Vite を彼らのプロダクトに組み込んでおり、コミュニティでもかなり活発に活動しています。彼らは、新しい [Cypress Component Testing](https://docs.cypress.io/guides/component-testing/introduction) を Vite の開発サーバーとうまくマッチするようにしています。また、アプリケーションの UI を [Vitesse](https://patak.dev/vite/ecosystem.html#vitesse) を使って再構築しています。Cypress と Vite の相性の良さについては、[@_jessicasachs](https://twitter.com/_jessicasachs) の [VueConf US 2021 での講演](https://www.youtube.com/watch?v=7S5cbY8iYLk)をチェックしてみてください。
