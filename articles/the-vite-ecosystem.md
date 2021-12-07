@@ -232,3 +232,7 @@ Vite コミュニティでは、フレームワークとツールのさまざま
 ## mocha-vite-puppeteer
 
 [@larsthorup](https://twitter.com/larsthorup) が開発している [mocha-vite-puppeteer](https://github.com/larsthorup/mocha-vite-puppeteer) は、Mocha のフロントエンドテストを Vite と [Puppeteer](https://pptr.dev/) で実行できるようにするものです。[Vite がコードをバンドルするのと同じ速さでテストを実行](https://www.youtube.com/watch?v=uU5yKjojtq4)することができます。
+
+## vite-jest
+
+TODO: @sodatea is building vite-jest, which aims to provide first-class Vite integration for Jest. これは、Jest の[阻害要因](https://github.com/sodatea/vite-jest/blob/main/packages/vite-jest/README.md#vite-jest)のために、まだ進行中のプロジェクトです。[First Class Jest Integration というイシュー](https://github.com/vitejs/vite/issues/1955)で進捗状況を確認できますし、[Vite Land](https://chat.vitejs.dev/) の #testing チャンネルに参加することで、この取り組みを支援することもできます。
