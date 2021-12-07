@@ -255,3 +255,7 @@ TODO: @sodatea is building vite-jest, which aims to provide first-class Vite int
 ## Tauri
 
 [Tauri](https://tauri.studio/) は、Web フロントエンドの技術によりデスクトップアプリケーションを構築するためのフレームワークです。Tauri チームは、主要メンバーである [@Amr__Bashir](https://twitter.com/Amr__Bashir) がメンテナンスしているプラグイン [vite-plugin-tauri](https://github.com/amrbashir/vite-plugin-tauri#readme) を使って、Vite 用の公式スターターテンプレートを作成しました。Vite と Tauri は、ネイティブアプリの開発において素晴らしい組み合わせとなるでしょう。以下は Tauri チームからの引用です: [「Vite は Tauri の心の中で特別な地位を占めています」](https://twitter.com/TauriApps/status/1381975542753280004)。
+
+## TroisJS
+
+[troisjs](https://troisjs.github.io/) は [ThreeJS](https://threejs.org/)、[Vue 3](https://v3.vuejs.org/)、Vite を組み合わせた、[react-three-fiber](https://docs.pmnd.rs/react-three-fiber) のような Vue 用のライブラリです。[デモは素晴らしい出来](https://stackblitz.com/edit/troisjs-cannonjs.html)です。[@Rich_Harris](https://twitter.com/Rich_Harris) は最近、Svelte 用に宣言型 の 3D コンポーネントベースのシーンを提供する [Svelte Cubed](https://svelte-cubed.vercel.app/) を発表しました。Vite の HMR は 3D シーンをデザインするのに完璧にマッチしており、実際、[react-three-fiber](https://github.com/pmndrs/react-three-fiber/tree/master/example) のいくつかのサンプルは現在 Vite を使用しています。
