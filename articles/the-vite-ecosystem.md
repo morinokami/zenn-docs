@@ -217,3 +217,7 @@ Rollup のエコシステムでは [Rollup org でコアプラグイン](https:/
 ## Vitesse
 
 [Vitesse](https://github.com/antfu/vitesse) は、Vite スターターの良い例です。これは Vue 3 のテンプレートで、[@antfu](https://twitter.com/antfu7) がこのスターターを使って[エコシステムの中でも特に優れたプラグイン](https://github.com/antfu/vitesse#plugins)を紹介しています。また、ファイルベースのルーティング、自動インポート、PWA、Windi CSS、SSG、critical CSS など、[様々な機能が詰め込まれています](https://github.com/antfu/vitesse#features)。さらに、[Cypress](https://patak.dev/vite/ecosystem.html#cypress) を使ったテストのセットアップの好例でもあります。
+
+## WebExtension Vite Starter
+
+[Vitesse](https://github.com/antfu/vitesse) をベースにした [WebExtension Vite Starter](https://github.com/antfu/vitesse-webext) は、Vite を搭載した [WebExtension](https://developer.chrome.com/docs/extensions/mv3/overview/) のスターターテンプレートです。典型的な Web アプリ以外での Vite の使い方を紹介したく、ここに含めています。これは、他の環境において Vite を使用し、Vite の高速な HMR、機能、プラグインを利用できるようにするという試みの一つです。
