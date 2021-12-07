@@ -225,3 +225,10 @@ Rollup のエコシステムでは [Rollup org でコアプラグイン](https:/
 ## Awesome Vite Templates
 
 Vite コミュニティでは、フレームワークとツールのさまざまな組み合わせに対応したテンプレートをメンテナンスしています。[Awesome Vite Templates](https://github.com/vitejs/awesome-vite#templates) には、膨大な選択肢のリストがあります。オンラインでテストしたい場合は、`https://github.com/{user}/{repo}` のようなテンプレートの場合、`https://stackblitz.com/github/{user}/{repo}` にアクセスして試すことができます。ローカルで動かしたい場合は [degit](https://github.com/Rich-Harris/degit#readme) のようなツールを用いて、`degit user/repo` によりテンプレートの新しいコピーを取得できます。
+
+
+# テスト
+
+## mocha-vite-puppeteer
+
+[@larsthorup](https://twitter.com/larsthorup) が開発している [mocha-vite-puppeteer](https://github.com/larsthorup/mocha-vite-puppeteer) は、Mocha のフロントエンドテストを Vite と [Puppeteer](https://pptr.dev/) で実行できるようにするものです。[Vite がコードをバンドルするのと同じ速さでテストを実行](https://www.youtube.com/watch?v=uU5yKjojtq4)することができます。
