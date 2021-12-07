@@ -174,3 +174,13 @@ Windi での経験を経て [@antfu](https://twitter.com/antfu7) は、オンデ
 | [vite-plugin-compress](https://github.com/alloc/vite-plugin-compress#readme) | バンドルとアセットを圧縮する |
 | [vite-plugin-checker](https://github.com/fi3ework/vite-plugin-checker#readme) | ワーカースレッドでの TypeScript、VLS、vue-tsc、ESLint のチェック |
 | [vite-plugin-inspect](https://github.com/antfu/vite-plugin-inspect#readme) | プラグインの中間状態の検査 |
+
+## awesome-rollup
+
+Rollup のエコシステムでは [Rollup org でコアプラグイン](https://github.com/rollup/plugins#readme)をメンテナンスしており、また [Awesome Rollup](https://github.com/rollup/awesome#plugins) にはコミュニティプラグインのリストがあります。[Vite Plugin API](https://vitejs.dev/guide/api-plugin.html) は [Rollup と高い互換性](https://vitejs.dev/guide/api-plugin.html#rollup-plugin-compatibility)があります。また、[Vite Rollup プラグインの互換性](https://vite-rollup-plugins.patak.dev/)のリストも管理されています。Rollup のエコシステムが Vite に近づいているため、将来的には Rollup プラグインのドキュメントにおいて "Works in Vite" (「Vite で動作する」) のバッジが見られるようになることを期待しています。以下は互換性のあるプラグインの例です:
+
+| 名前 | 説明 |
+| ---- | ---- |
+| @rollup/plugin-yaml | YAML ファイルを ES6 モジュールに変換する |
+| rollup-plugin-typescript2 | コンパイラエラーのある typescript を実行する |
+| rollup-plugin-critical | クリティカルな CSS を生成する |
