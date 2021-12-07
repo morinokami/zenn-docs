@@ -198,3 +198,10 @@ Rollup のエコシステムでは [Rollup org でコアプラグイン](https:/
 ## vite-plugin-pwa
 
 [vite-plugin-pwa](https://vite-plugin-pwa.netlify.app/) は、Vite を使用する際に利用できるプラグインの好例であり、フレームワークに依存しない Vite 用ゼロコンフィグ PWA プラグインで、[Workbox](https://developers.google.com/web/tools/workbox) によるオフラインサポートを実現しています。[@antfu](https://twitter.com/antfu7) と [@userquin](https://github.com/userquin) は、あらゆるフレームワークに対する洗練されたシームレスな開発経験を構築しました。
+
+
+# スターター
+
+## Replit
+
+[Replit](https://replit.com/) は、ユーザーにより良い体験を提供するために [Vite を活用した](https://blog.replit.com/vite)最初の企業の一つで、[React スターターテンプレート](https://replit.com/@templates/Reactjs)を Vite に切り替えました。[このテンプレートと CRA のバージョンを比較](https://twitter.com/amasad/status/1355379680275128321)した [@amasad](https://twitter.com/amasad) 氏のツイートは、後に多くのブログ記事や講演において、ロード速度の違いを説明するために使用されました。「コンテナが CRA のファイルを読み込むよりも早く Vite が実行されたのです。」
