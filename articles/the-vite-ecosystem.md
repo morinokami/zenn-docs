@@ -204,7 +204,7 @@ Rollup のエコシステムでは [Rollup org でコアプラグイン](https:/
 
 ## Replit
 
-[Replit](https://replit.com/) は、ユーザーにより良い体験を提供するために [Vite を活用した](https://blog.replit.com/vite)最初の企業の一つで、[React スターターテンプレート](https://replit.com/@templates/Reactjs)を Vite に切り替えました。[このテンプレートと CRA のバージョンを比較](https://twitter.com/amasad/status/1355379680275128321)した [@amasad](https://twitter.com/amasad) 氏のツイートは、後に多くのブログ記事や講演において、ロード速度の違いを説明するために使用されました。「コンテナが CRA のファイルを読み込むよりも早く Vite が実行されたのです。」
+[Replit](https://replit.com/) は、ユーザーにより良い体験を提供するために [Vite を活用した](https://blog.replit.com/vite)最初の企業の一つで、[React スターターテンプレート](https://replit.com/@templates/Reactjs)を Vite に切り替えました。[このテンプレートと CRA のバージョンを比較](https://twitter.com/amasad/status/1355379680275128321)した [@amasad](https://twitter.com/amasad) 氏のツイートは、後に多くのブログ記事や講演において、ロード速度の違いを説明するために使用されました。「コンテナが CRA のファイルを読み込むよりも早く Vite が実行されたのです」。
 
 ## Glitch
 
@@ -251,3 +251,7 @@ TODO: @sodatea is building vite-jest, which aims to provide first-class Vite int
 ## Storybook
 
 [@eirikobo](https://twitter.com/eirikobo)、[@sasan_farrokh](https://twitter.com/sasan_farrokh)、[janvanschooten](https://twitter.com/ianvanschooten) は、Vite を使って Storybook をビルドする [storybook-builder-vite](https://github.com/eirslett/storybook-builder-vite) を作成しました。[Michael Shilman](https://twitter.com/mshilman) が、このツールの仕組みを詳細に説明し、新しいビルダーの利点を強調した[ブログ記事](https://storybook.js.org/blog/storybook-for-vite/)を書いています。具体的な内容としては、劇的に改善されたビルド速度、Vite プロジェクトの設定との互換性、Vite のプラグインエコシステムへのアクセスについてなどです。
+
+## Tauri
+
+[Tauri](https://tauri.studio/) は、Web フロントエンドの技術によりデスクトップアプリケーションを構築するためのフレームワークです。Tauri チームは、主要メンバーである [@Amr__Bashir](https://twitter.com/Amr__Bashir) がメンテナンスしているプラグイン [vite-plugin-tauri](https://github.com/amrbashir/vite-plugin-tauri#readme) を使って、Vite 用の公式スターターテンプレートを作成しました。Vite と Tauri は、ネイティブアプリの開発において素晴らしい組み合わせとなるでしょう。以下は Tauri チームからの引用です: [「Vite は Tauri の心の中で特別な地位を占めています」](https://twitter.com/TauriApps/status/1381975542753280004)。
