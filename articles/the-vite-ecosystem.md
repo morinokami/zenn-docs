@@ -181,6 +181,16 @@ Rollup のエコシステムでは [Rollup org でコアプラグイン](https:/
 
 | 名前 | 説明 |
 | ---- | ---- |
-| @rollup/plugin-yaml | YAML ファイルを ES6 モジュールに変換する |
-| rollup-plugin-typescript2 | コンパイラエラーのある typescript を実行する |
-| rollup-plugin-critical | クリティカルな CSS を生成する |
+| [@rollup/plugin-yaml](https://github.com/rollup/plugins/tree/master/packages/yaml) | YAML ファイルを ES6 モジュールに変換する |
+| [rollup-plugin-typescript2](https://github.com/ezolenko/rollup-plugin-typescript2) | コンパイラエラーのある typescript を実行する |
+| [rollup-plugin-critical](https://github.com/nystudio107/rollup-plugin-critical) | クリティカルな CSS を生成する |
+
+## unplugin
+
+[unplugin](https://github.com/unjs/unplugin#readme) は [@antfu](https://twitter.com/antfu7) の別のプロジェクトで、Vite、Rollup、Webpack、そして将来的には他のバンドラーのための統一的なプラグインシステムです。Anthony は、自身のプラグインをこのライブラリへと移行し、彼が Vite にもたらした DX イノベーションの多くを他のビルドツールにも開放しています。このプロジェクトは [unjs umbrella](https://github.com/unjs) の一部であり、それは Nuxt チームによる特定のバンドラーに依存しないライブラリのコレクションで、使用するビルドツールから Nuxt を抽象化する試みから生まれれたものです。いくつかの例を紹介します:
+
+| 名前 | 説明 |
+| ---- | ---- |
+| [unplugin-icons](https://github.com/antfu/unplugin-icons) | 数千のアイコンをオンデマンドでコンポーネント化 |
+| [unplugin-vue-components](https://github.com/antfu/unplugin-vue-components) | Vue のためのオンデマンドのコンポーネント自動インポート |
+| [unplugin-auto-import](https://github.com/antfu/unplugin-auto-import) | TS をサポートする、オンデマンドの自動インポート API |
