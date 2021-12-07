@@ -213,3 +213,7 @@ Rollup のエコシステムでは [Rollup org でコアプラグイン](https:/
 ## StackBlitz
 
 [StackBlitz](https://stackblitz.com/) は、Vite を彼らのブラウザ IDE の第一級市民としました。彼らは Vite を ([esbuild](https://esbuild.github.io/) をサポートする) [WebContainers](https://github.com/stackblitz/webcontainer-core) と互換性をもたせるようにし、また、Vite エコシステムのチームと協力して、最も人気のある Vite フレームワークがスムーズに動作するようにしました。これはたとえば [SvelteKit](https://blog.stackblitz.com/posts/sveltekit-supported-in-webcontainers/)、[Hydrogen](https://blog.stackblitz.com/posts/shopify-hydrogen-in-stackblitz-webcontainers/)、[Astro](https://blog.stackblitz.com/posts/astro-support/) などです。ローカルにとても近い環境であるため、Vite Core はバグレポートでのミニマルな再現に Stackblitz の使用を推奨しています。また、[Vite のスターター](https://blog.stackblitz.com/posts/vite-new-templates/)として [vite.new](https://vite.new/)、[vite.new/{template}](https://vite.new/vue) を追加し、新しいダッシュボードに Vite を含め、[Vite の最大のスポンサー](https://blog.stackblitz.com/posts/why-were-backing-vite/)となっています。
+
+## Vitesse
+
+[Vitesse](https://github.com/antfu/vitesse) は、Vite スターターの良い例です。これは Vue 3 のテンプレートで、[@antfu](https://twitter.com/antfu7) がこのスターターを使って[エコシステムの中でも特に優れたプラグイン](https://github.com/antfu/vitesse#plugins)を紹介しています。また、ファイルベースのルーティング、自動インポート、PWA、Windi CSS、SSG、critical CSS など、[様々な機能が詰め込まれています](https://github.com/antfu/vitesse#features)。さらに、[Cypress](https://patak.dev/vite/ecosystem.html#cypress) を使ったテストのセットアップの好例でもあります。
