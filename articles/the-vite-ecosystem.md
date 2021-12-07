@@ -221,3 +221,7 @@ Rollup のエコシステムでは [Rollup org でコアプラグイン](https:/
 ## WebExtension Vite Starter
 
 [Vitesse](https://github.com/antfu/vitesse) をベースにした [WebExtension Vite Starter](https://github.com/antfu/vitesse-webext) は、Vite を搭載した [WebExtension](https://developer.chrome.com/docs/extensions/mv3/overview/) のスターターテンプレートです。典型的な Web アプリ以外での Vite の使い方を紹介したく、ここに含めています。これは、他の環境において Vite を使用し、Vite の高速な HMR、機能、プラグインを利用できるようにするという試みの一つです。
+
+## Awesome Vite Templates
+
+Vite コミュニティでは、フレームワークとツールのさまざまな組み合わせに対応したテンプレートをメンテナンスしています。[Awesome Vite Templates](https://github.com/vitejs/awesome-vite#templates) には、膨大な選択肢のリストがあります。オンラインでテストしたい場合は、`https://github.com/{user}/{repo}` のようなテンプレートの場合、`https://stackblitz.com/github/{user}/{repo}` にアクセスして試すことができます。ローカルで動かしたい場合は [degit](https://github.com/Rich-Harris/degit#readme) のようなツールを用いて、`degit user/repo` によりテンプレートの新しいコピーを取得できます。
