@@ -244,3 +244,10 @@ TODO: @sodatea is building vite-jest, which aims to provide first-class Vite int
 ## Web Test Runner
 
 [vite-web-test-runner-plugin](https://github.com/material-svelte/vite-web-test-runner-plugin#readme) は、Vite を使ったプロジェクトをテストするための [@web/test-runner](https://patak.dev/vite/modern-web.dev/docs/test-runner/overview/) プラグインです。このプラグインは、カレントディレクトリにある Vite プロジェクトに自動的に接続し、プロジェクトの設定を読み込み、設定済みの Vite のビルドパイプラインを使用して各テストファイルをビルドします。
+
+
+# その他のツール
+
+## Storybook
+
+[@eirikobo](https://twitter.com/eirikobo)、[@sasan_farrokh](https://twitter.com/sasan_farrokh)、[janvanschooten](https://twitter.com/ianvanschooten) は、Vite を使って Storybook をビルドする [storybook-builder-vite](https://github.com/eirslett/storybook-builder-vite) を作成しました。[Michael Shilman](https://twitter.com/mshilman) が、このツールの仕組みを詳細に説明し、新しいビルダーの利点を強調した[ブログ記事](https://storybook.js.org/blog/storybook-for-vite/)を書いています。具体的な内容としては、劇的に改善されたビルド速度、Vite プロジェクトの設定との互換性、Vite のプラグインエコシステムへのアクセスについてなどです。
