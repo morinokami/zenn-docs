@@ -194,3 +194,7 @@ Rollup のエコシステムでは [Rollup org でコアプラグイン](https:/
 | [unplugin-icons](https://github.com/antfu/unplugin-icons) | 数千のアイコンをオンデマンドでコンポーネント化 |
 | [unplugin-vue-components](https://github.com/antfu/unplugin-vue-components) | Vue のためのオンデマンドのコンポーネント自動インポート |
 | [unplugin-auto-import](https://github.com/antfu/unplugin-auto-import) | TS をサポートする、オンデマンドの自動インポート API |
+
+## vite-plugin-pwa
+
+[vite-plugin-pwa](https://vite-plugin-pwa.netlify.app/) は、Vite を使用する際に利用できるプラグインの好例であり、フレームワークに依存しない Vite 用ゼロコンフィグ PWA プラグインで、[Workbox](https://developers.google.com/web/tools/workbox) によるオフラインサポートを実現しています。[@antfu](https://twitter.com/antfu7) と [@userquin](https://github.com/userquin) は、あらゆるフレームワークに対する洗練されたシームレスな開発経験を構築しました。
