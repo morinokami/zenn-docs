@@ -267,3 +267,7 @@ TODO: @sodatea is building vite-jest, which aims to provide first-class Vite int
 ## Viteshot
 
 [@fwouts](https://twitter.com/fwouts) の [Viteshot](https://viteshot.com/) は、[UI コンポーネントのスクリーンショットを数秒で生成](https://www.youtube.com/watch?v=Ag5NBguCucc)することができます。また、[React Preview](https://reactpreview.com/) (Preview JSに改名される予定です) にも取り組んでおり、Visual Studio Code でコンポーネントや Storybook のストーリーを瞬時にプレビューすることができます。
+
+## Backlight
+
+[Backlight](https://backlight.dev/) は、[<div>RIOTS](https://divriots.com/) によるデザインシステムプラットフォームです。アプリのビルドには Vite、ドキュメントには [VitePress](https://patak.dev/vite/ecosystem.html#vitepress) を使用しており、また、ブラウザ上で使用することを目的とした Vite のフォークである [browser-vite](https://github.com/divriots/browser-vite) にも取り組んでいます (service worker により実行されます)。
