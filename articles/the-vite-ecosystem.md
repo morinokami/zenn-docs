@@ -271,3 +271,8 @@ TODO: @sodatea is building vite-jest, which aims to provide first-class Vite int
 ## Backlight
 
 [Backlight](https://backlight.dev/) は、[<div>RIOTS](https://divriots.com/) によるデザインシステムプラットフォームです。アプリのビルドには Vite、ドキュメントには [VitePress](https://patak.dev/vite/ecosystem.html#vitepress) を使用しており、また、ブラウザ上で使用することを目的とした Vite のフォークである [browser-vite](https://github.com/divriots/browser-vite) にも取り組んでいます (service worker により実行されます)。
+
+
+# 参加しましょう！
+
+ここまで読んだあなたは、きっと Vite のエコシステムに興味が湧いているはずです。もしまだであれば、[Vite Land](https://chat.vitejs.dev/) に参加しましょう。#contributing チャンネルに行って、挨拶したり、アイデアを共有したり、他の人と協力したりしましょう。
