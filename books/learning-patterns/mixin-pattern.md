@@ -1,0 +1,3 @@
+---
+title: "Mixin Pattern"
+---

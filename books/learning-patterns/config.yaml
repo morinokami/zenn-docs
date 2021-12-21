@@ -1,0 +1,57 @@
+title: "Learning Patterns"
+summary: "Learning Patterns の日本語訳"
+topics: [javascript, react, nextjs]
+published: false
+price: 0
+chapters:
+  # Design Patterns
+  - introduction
+  - singleton-pattern
+  - proxy-pattern
+  - provider-pattern
+  - prototype-pattern
+  - presentational-container-pattern
+  - observer-pattern
+  - module-pattern
+  - mixin-pattern
+  - mediator-pattern
+  - render-props-pattern
+  - hooks-pattern
+  - hoc-pattern
+  - flyweight-pattern
+  - factory-pattern
+  - compound-pattern
+  - command-pattern
+  - classic-design-patterns
+  # Rendering Patterns
+  - rendering-patterns
+  - reactjs
+  - nextjs
+  - client-side-rendering
+  - server-side-rendering
+  - static-rendering
+  - incremental-static-rendering
+  - progressive-hydration
+  - ssr
+  - react-server-components
+  - react-selective-hydration
+  - islands-architecture
+  # Performance Patterns
+  - loading-sequence
+  - static-import
+  - dynamic-import
+  - import-on-visibility
+  - import-on-interaction
+  - route-based
+  - bundle-splitting
+  - prpl
+  - tree-shaking
+  - preload
+  - prefetch
+  - third-party
+  - virtual-lists
+  - compression
+  # Case Studies
+  - airbnb-casestudy
+  - case-studies
+  - nextjs-casestudy

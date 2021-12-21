@@ -1,0 +1,3 @@
+---
+title: "Render Props Pattern"
+---
