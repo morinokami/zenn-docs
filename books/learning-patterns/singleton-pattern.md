@@ -8,8 +8,8 @@ title: "シングルトンパターン - "
 
 * インスタンスの値を返す `getInstance` メソッド
 * `counter` 変数の現在値を返す `getCount` メソッド
-* `counter` の値を 1 つ増やす `increment` メソッド
-* `counter` の値を 1 つ減らす `decrement` メソッド
+* `counter` の値を 1 だけ増やす `increment` メソッド
+* `counter` の値を 1 だけ減らす `decrement` メソッド
 
 ```js
 let counter = 0;
@@ -141,6 +141,8 @@ const singletonCounter = Object.freeze(new Counter());
 export default singletonCounter;
 ```
 
+---
+
 `Counter` を実装したアプリケーションを見てみましょう。以下のファイルがあります:
 
 * `counter.js`: `Counter` クラスを定義し、`Counter` インスタンスを default export します
@@ -154,5 +156,55 @@ export default singletonCounter;
 
 `redButton.js` と `blueButton.js` のいずれで `increment` メソッドを呼び出すと、両方のファイルで `Counter` インスタンスの `counter` プロパティの値が更新されます。赤いボタンと青いボタンのどちらをクリックするかは重要ではありません。同じ値がすべてのインスタンスで共有されているのです。このため、異なるファイルでメソッドを呼び出しても、カウンターは 1 ずつ増加します。
 
+---
 
 ## 利点と欠点
+
+インスタンス化を一度に限定することで、メモリ容量を大幅に削減できる可能性があります。新しいインスタンスのためにメモリを毎回確保するのではなく、アプリケーション全体で参照される 1 つのインスタンスのためにメモリを確保すればよいのです。しかし、シングルトンは実際には**アンチパターン**と考えられており、JavaScript ではこれを避けることができます (というよりも、避ける*べき*です)。
+
+Java や C++ などの多くのプログラミング言語では、JavaScript のようにオブジェクトを直接作成することはできません。これらのオブジェクト指向プログラミング言語では、クラスを作成する必要があり、そのクラスがオブジェクトを作成します。作成されたオブジェクトは、上記の JavaScript の例における `instance` のような、クラスのインスタンスの値をもちます。
+
+しかし、上記の例で示したクラスの実装は、実はやり過ぎなのです。JavaScript ではオブジェクトを直接作成できるため、通常のオブジェクトを使用するだけでまったく同じ結果を得ることができるのです。シングルトンを使うことのデメリットをいくつか見てみましょう！
+
+#### 通常のオブジェクトを使う
+
+前回と同じ例を使います。しかし今回は、counter は以下のプロパティをもつ単なるオブジェクトです:
+
+* `count` プロパティ
+* `count` の値を 1 だけ増やす `increment` メソッド
+* `count` の値を 1 だけ減らす `decrement` メソッド
+
+```js
+let count = 0;
+
+const counter = {
+  increment() {
+    return ++count;
+  },
+  decrement() {
+    return --count;
+  }
+};
+
+Object.freeze(counter);
+export { counter };
+```
+
+オブジェクトは参照渡しであるため、`redButton.js` も `blueButton.js` も同じ `counter` オブジェクトへの参照をインポートしていることになります。これらのファイルのどちらかで `count` の値を変更すると、`counter` の値が変更されますが、その結果へはいずれのファイルからでもアクセスすることができます。
+
+### テスト
+
+#### Dependency hiding
+
+### Global behavior
+
+### State management in React
+
+---
+
+### 参考文献
+
+* [Do React Hooks replace Redux - Eric Elliott](https://medium.com/javascript-scene/do-react-hooks-replace-redux-210bab340672)
+* [Working with Singletons in JavaScript - Vijay Prasanna](https://alligator.io/js/js-singletons/)
+* [JavaScript Design Patterns: The Singleton - Samier Saeed](https://www.sitepoint.com/javascript-design-patterns-singleton/)
+* [Singleton - Refactoring Guru](https://refactoring.guru/design-patterns/singleton)
