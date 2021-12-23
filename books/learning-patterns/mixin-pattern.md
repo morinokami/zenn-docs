@@ -7,3 +7,6 @@ title: "Mixin Pattern"
 ---
 
 ### 参考文献
+
+* [Functional Mixins](https://medium.com/javascript-scene/functional-mixins-composing-software-ffb66d5e731c) - Eric Elliott
+* [Mixins](https://javascript.info/mixins) - JavaScript Info

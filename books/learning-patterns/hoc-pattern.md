@@ -7,3 +7,5 @@ title: "HOC Pattern"
 ---
 
 ### 参考文献
+
+* [Higher-Order Components - React](https://reactjs.org/docs/higher-order-components.html)
