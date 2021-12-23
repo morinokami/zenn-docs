@@ -2,6 +2,8 @@
 title: "プロキシパターン: ターゲットオブジェクトとのやり取りをインターセプトし制御する"
 ---
 
+![](/images/proxy-pattern-1280w.jpg)
+
 プロキシオブジェクトを使うと、特定のオブジェクトとのやり取りをより自由にコントロールできるようになります。プロキシオブジェクトは、例えば値の取得や設定などのオブジェクトの操作における挙動を決定することができます。
 
 ---
@@ -57,6 +59,28 @@ const personProxy = new Proxy(person, {
 
 完璧です！では、プロパティを変更したり取得したりするときに何が起こるか見てみましょう。
 
+```js:index.js
+const person = {
+  name: "John Doe",
+  age: 42,
+  nationality: "American"
+};
+
+const personProxy = new Proxy(person, {
+  get: (obj, prop) => {
+    console.log(`The value of ${prop} is ${obj[prop]}`);
+  },
+  set: (obj, prop, value) => {
+    console.log(`Changed ${prop} from ${obj[prop]} to ${value}`);
+    obj[prop] = value;
+    return true;
+  }
+});
+
+personProxy.name;
+personProxy.age = 43;
+```
+
 @[codesandbox](https://codesandbox.io/embed/cocky-bird-rkgyo)
 
 `name` プロパティにアクセスすると、プロキシは `The value of name is John Doe` という、響きの良い文を返しました。
@@ -93,6 +117,39 @@ const personProxy = new Proxy(person, {
 
 誤った値を渡そうとしたときに何が起こるか見てみましょう！
 
+```js:index.js
+const person = {
+  name: "John Doe",
+  age: 42,
+  nationality: "American"
+};
+
+const personProxy = new Proxy(person, {
+  get: (obj, prop) => {
+    if (!obj[prop]) {
+      console.log(`Hmm.. this property doesn't seem to exist`);
+    } else {
+      console.log(`The value of ${prop} is ${obj[prop]}`);
+    }
+  },
+  set: (obj, prop, value) => {
+    if (prop === "age" && typeof value !== "number") {
+      console.log(`Sorry, you can only pass numeric values for age.`);
+    } else if (prop === "name" && value.length < 2) {
+      console.log(`You need to provide a valid name.`);
+    } else {
+      console.log(`Changed ${prop} from ${obj[prop]} to ${value}.`);
+      obj[prop] = value;
+    }
+    return true;
+  }
+});
+
+personProxy.nonExistentProperty;
+personProxy.age = "44";
+personProxy.name = "";
+```
+
 @[codesandbox](https://codesandbox.io/embed/focused-rubin-dgk2v)
 
 プロキシが、誤った値で `person` オブジェクトが変更されることを防ぎ、私たちのデータをクリーンに保ってくれました！
@@ -120,6 +177,28 @@ const personProxy = new Proxy(person, {
 ```
 
 完璧です！`Reflect` オブジェクトにより、ターゲットオブジェクトのプロパティへのアクセスや変更が簡単になりました。
+
+```js:index.js
+const person = {
+  name: "John Doe",
+  age: 42,
+  nationality: "American"
+};
+
+const personProxy = new Proxy(person, {
+  get: (obj, prop) => {
+    console.log(`The value of ${prop} is ${Reflect.get(obj, prop)}`);
+  },
+  set: (obj, prop, value) => {
+    console.log(`Changed ${prop} from ${obj[prop]} to ${value}`);
+    return Reflect.set(obj, prop, value);
+  }
+});
+
+personProxy.name;
+personProxy.age = 43;
+personProxy.name = "Jane Doe";
+```
 
 @[codesandbox](https://codesandbox.io/embed/gallant-violet-o1hjx)
 

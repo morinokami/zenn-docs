@@ -2,6 +2,8 @@
 title: "シングルトンパターン: 単一のインスタンスをアプリケーション全体でシェアする"
 ---
 
+![](/images/singleton-pattern-1280w.jpg)
+
 シングルトンは、一度だけインスタンス化でき、グローバルにアクセスできるクラスです。この*単一のインスタンス*をアプリケーション全体で共有できることから、シングルトンはアプリケーションのグローバルな状態を管理するのに適しています。
 
 まず、ES2015 のクラスを使って、シングルトンがどのようなものかを見てみましょう。例として、以下のメソッドをもつ `Counter` クラスを作成します:
@@ -174,7 +176,7 @@ Java や C++ などの多くのプログラミング言語では、JavaScript �
 * `count` の値を 1 だけ増やす `increment` メソッド
 * `count` の値を 1 だけ減らす `decrement` メソッド
 
-```js
+```js:counter.js
 let count = 0;
 
 const counter = {
@@ -190,7 +192,9 @@ Object.freeze(counter);
 export { counter };
 ```
 
-オブジェクトは参照渡しであるため、`redButton.js` も `blueButton.js` も同じ `singletonCounter` オブジェクト[^1]への参照をインポートしていることになります。これらのファイルのどちらかで `count` の値を変更すると、シングルトン `SingletonCounter` の値が変更されますが、その結果へはいずれのファイルからでもアクセスすることができます。
+@[codesandbox](https://codesandbox.io/embed/competent-moon-rvzrr)
+
+オブジェクトは参照渡しであるため、`redButton.js` も `blueButton.js` も同じ `singletonCounter` オブジェクト[^1]への参照をインポートしていることになります。これらのファイルのどちらかで `count` の値を変更すると、`SingletonCounter` の値が変更されますが、その結果へはいずれのファイルからでもアクセスすることができます。
 
 [^1]: 訳注: この段落に出てくる「`singletonCounter` オブジェクト」は、「`counter` オブジェクト」のことであると思われます。
 
@@ -198,7 +202,7 @@ export { counter };
 
 シングルトンに依存するコードのテストは厄介な場合があります。毎回新しいインスタンスを作成できないため、すべてのテストは直前のテストのグローバルインスタンスに対する変更に依存します。この場合、テストの順番が重要であり、ちょっとした修正によりテストスイート全体が失敗する可能性があります。テスト終了後、テストによる変更をリセットするために、インスタンス全体をリセットする必要があります。
 
-```js
+```js:test.js
 import Counter from "../src/counterTest";
 
 test("incrementing 1 time should be 1", () => {
@@ -219,6 +223,8 @@ test("decrementing 1  times should be 3", () => {
 });
 ```
 
+@[codesandbox](https://codesandbox.io/embed/sweet-cache-n55vi)
+
 #### 依存関係の隠蔽
 
 他のモジュール (ここでは `superCounter.js`) をインポートする際、そのモジュールがシングルトンをインポートしていることが明らかではない場合があります。他のファイル、例えばこの場合は `index.js` などで、そのモジュールをインポートしてメソッドを呼び出すかもしれません。このようにして、誤ってシングルトンの値を変更してしまうことがあります。アプリケーション全体でシングルトンの複数のインスタンスが共有され、それらがすべて変更されてしまうことから、予期せぬ挙動をもたらす可能性があります。
@@ -234,6 +240,8 @@ counter.increment();
 
 console.log("Counter in counter.js: ", Counter.getCount());
 ```
+
+@[codesandbox](https://codesandbox.io/embed/sweet-cache-n55vi)
 
 ### グローバルな動作
 
