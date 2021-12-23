@@ -2,7 +2,7 @@
 title: "Render Props Pattern"
 ---
 
-![](/images/render-props-pattern-1280w.jpg)
+![](/images/learning-patterns/render-props-pattern-1280w.jpg)
 
 ---
 

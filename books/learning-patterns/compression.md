@@ -2,4 +2,4 @@
 title: "Compressing JavaScript"
 ---
 
-![](/images/compression-1280w.jpg)
+![](/images/learning-patterns/compression-1280w.jpg)

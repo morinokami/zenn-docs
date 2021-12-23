@@ -2,7 +2,7 @@
 title: "Prototype Pattern"
 ---
 
-![](/images/prototype-pattern-1280w.jpg)
+![](/images/learning-patterns/prototype-pattern-1280w.jpg)
 
 ---
 

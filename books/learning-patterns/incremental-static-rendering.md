@@ -2,4 +2,4 @@
 title: "Incremental Static Generation"
 ---
 
-![](/images/incremental-static-rendering-1280w.jpg)
+![](/images/learning-patterns/incremental-static-rendering-1280w.jpg)

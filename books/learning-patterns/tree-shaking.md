@@ -2,4 +2,4 @@
 title: "Tree Shaking"
 ---
 
-![](/images/tree-shaking-1280w.jpg)
+![](/images/learning-patterns/tree-shaking-1280w.jpg)

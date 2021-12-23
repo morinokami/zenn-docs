@@ -2,4 +2,4 @@
 title: "Static Import"
 ---
 
-![](/images/static-import-1280w.jpg)
+![](/images/learning-patterns/static-import-1280w.jpg)

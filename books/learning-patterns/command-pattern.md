@@ -2,7 +2,7 @@
 title: "Command Pattern"
 ---
 
-![](/images/command-pattern-1280w.jpg)
+![](/images/learning-patterns/command-pattern-1280w.jpg)
 
 ---
 

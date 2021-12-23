@@ -2,4 +2,4 @@
 title: "Hey.com"
 ---
 
-![](/images/case-studies-1280w.jpg)
+![](/images/learning-patterns/case-studies-1280w.jpg)

@@ -2,4 +2,4 @@
 title: "PRPL Pattern"
 ---
 
-![](/images/prpl-1280w.jpg)
+![](/images/learning-patterns/prpl-1280w.jpg)

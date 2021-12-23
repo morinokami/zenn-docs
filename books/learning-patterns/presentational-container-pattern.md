@@ -2,7 +2,7 @@
 title: "Container/Presentational Pattern"
 ---
 
-![](/images/presentational-container-1280w.jpg)
+![](/images/learning-patterns/presentational-container-1280w.jpg)
 
 ---
 

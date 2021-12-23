@@ -2,7 +2,7 @@
 title: "Hooks Pattern"
 ---
 
-![](/images/hooks-pattern-1280w.jpg)
+![](/images/learning-patterns/hooks-pattern-1280w.jpg)
 
 ---
 

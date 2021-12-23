@@ -2,7 +2,7 @@
 title: "Flyweight Pattern"
 ---
 
-![](/images/flyweight-pattern-1280w.jpg)
+![](/images/learning-patterns/flyweight-pattern-1280w.jpg)
 
 ---
 

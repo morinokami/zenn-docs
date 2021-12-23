@@ -2,4 +2,4 @@
 title: "Progressive Hydration"
 ---
 
-![](/images/progressive-hydration-1280w.jpg)
+![](/images/learning-patterns/progressive-hydration-1280w.jpg)

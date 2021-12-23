@@ -2,4 +2,4 @@
 title: "Static Rendering"
 ---
 
-![](/images/static-rendering-1280w.jpg)
+![](/images/learning-patterns/static-rendering-1280w.jpg)

@@ -2,7 +2,7 @@
 title: "HOC Pattern"
 ---
 
-![](/images/hoc-pattern-1280w.jpg)
+![](/images/learning-patterns/hoc-pattern-1280w.jpg)
 
 ---
 

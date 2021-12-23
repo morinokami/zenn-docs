@@ -2,7 +2,7 @@
 title: "Mediator/Middleware Pattern"
 ---
 
-![](/images/mediator-pattern-1280w.jpg)
+![](/images/learning-patterns/mediator-pattern-1280w.jpg)
 
 ---
 

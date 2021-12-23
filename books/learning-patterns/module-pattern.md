@@ -2,7 +2,7 @@
 title: "Module Pattern"
 ---
 
-![](/images/module-pattern-1280w.jpg)
+![](/images/learning-patterns/module-pattern-1280w.jpg)
 
 ---
 

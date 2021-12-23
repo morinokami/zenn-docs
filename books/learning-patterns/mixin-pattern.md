@@ -2,7 +2,7 @@
 title: "Mixin Pattern"
 ---
 
-![](/images/mixin-pattern-1280w.jpg)
+![](/images/learning-patterns/mixin-pattern-1280w.jpg)
 
 ---
 

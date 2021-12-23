@@ -2,4 +2,4 @@
 title: "Selective Hydration"
 ---
 
-![](/images/react-selective-hydration-1280w.jpg)
+![](/images/learning-patterns/react-selective-hydration-1280w.jpg)

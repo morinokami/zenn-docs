@@ -2,4 +2,4 @@
 title: "Import On Visibility"
 ---
 
-![](/images/import-on-visibility-1280w.jpg)
+![](/images/learning-patterns/import-on-visibility-1280w.jpg)

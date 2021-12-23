@@ -2,7 +2,7 @@
 title: "Observer Pattern"
 ---
 
-![](/images/observer-pattern-1280w.jpg)
+![](/images/learning-patterns/observer-pattern-1280w.jpg)
 
 ---
 

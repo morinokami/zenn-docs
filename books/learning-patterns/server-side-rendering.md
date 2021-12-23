@@ -2,4 +2,4 @@
 title: "Server-side Rendering"
 ---
 
-![](/images/server-side-rendering-1280w.jpg)
+![](/images/learning-patterns/server-side-rendering-1280w.jpg)

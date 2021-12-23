@@ -2,4 +2,4 @@
 title: "Rendering Patterns: Introduction"
 ---
 
-![](/images/rendering-patterns-1280w.jpg)
+![](/images/learning-patterns/rendering-patterns-1280w.jpg)

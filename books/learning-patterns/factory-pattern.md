@@ -2,7 +2,7 @@
 title: "Factory Pattern"
 ---
 
-![](/images/factory-pattern-1280w.jpg)
+![](/images/learning-patterns/factory-pattern-1280w.jpg)
 
 ---
 

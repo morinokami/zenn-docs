@@ -2,7 +2,7 @@
 title: "Compound Pattern"
 ---
 
-![](/images/compound-pattern-1280w.jpg)
+![](/images/learning-patterns/compound-pattern-1280w.jpg)
 
 ---
 

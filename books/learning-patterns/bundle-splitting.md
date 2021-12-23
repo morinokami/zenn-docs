@@ -2,4 +2,4 @@
 title: "Bundle Splitting"
 ---
 
-![](/images/bundle-splitting-1280w.jpg)
+![](/images/learning-patterns/bundle-splitting-1280w.jpg)

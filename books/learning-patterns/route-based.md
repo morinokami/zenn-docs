@@ -2,4 +2,4 @@
 title: "Route Based Splitting"
 ---
 
-![](/images/route-based-1280w.jpg)
+![](/images/learning-patterns/route-based-1280w.jpg)
