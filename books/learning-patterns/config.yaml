@@ -15,9 +15,9 @@ chapters:
   - module-pattern
   - mixin-pattern
   - mediator-pattern
+  - hoc-pattern
   - render-props-pattern
   - hooks-pattern
-  - hoc-pattern
   - flyweight-pattern
   - factory-pattern
   - compound-pattern
