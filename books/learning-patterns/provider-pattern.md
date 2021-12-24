@@ -164,7 +164,7 @@ export default function Boxes() {
 
 @[codesandbox](https://codesandbox.io/embed/busy-oskar-ifz3w)
 
-スイッチを切り替えることで、ユーザーがライトモードとダークモードを切り替えることができるようにしたいと思います。ユーザーがダークモードからライトモードに切り替えるとき、またはその逆のとき、背景色とテキストの色が変わるはずです。現在のテーマの値を各コンポーネントに渡す代わりに、コンポーネントを `ThemeProvider` でラップして、現在のテーマの色をプロバイダに渡すことができます。
+スイッチを切り替えることで、ユーザーがライトモードとダークモードを切り替えることができるようにしたいと思います。ユーザーがダークモードからライトモードに切り替えるとき、またはその逆のとき、背景色とテキストの色が変わるはずです。現在のテーマの値を各コンポーネントに渡す代わりに、コンポーネントを `ThemeProvider` でラップして、現在のテーマカラーをプロバイダに渡すことができます。
 
 ```js
 export const ThemeContext = React.createContext();
@@ -202,6 +202,288 @@ export default function App() {
   );
 }
 ```
+
+`Toggle` コンポーネントと `List` コンポーネントはともに `ThemeContext` プロバイダの中にラップされているので、プロバイダに値として渡される `theme` と `toggleTheme` にアクセスすることができます。
+
+`Toggle` コンポーネント内では、`toggleTheme` 関数を使用してテーマを適宜更新することができます。
+
+```js
+import React, { useContext } from "react";
+import { ThemeContext } from "./App";
+
+export default function Toggle() {
+  const theme = useContext(ThemeContext);
+
+  return (
+    <label className="switch">
+      <input type="checkbox" onClick={theme.toggleTheme} />
+      <span className="slider round" />
+    </label>
+  );
+}
+```
+
+`List` コンポーネント自体は、現在のテーマの値を気にしません。しかし、`ListItem` コンポーネントは異なります！`ListItem` の中で、`theme` Context を直接使用することができます。
+
+```js
+import React, { useContext } from "react";
+import { ThemeContext } from "./App";
+
+export default function ListItem() {
+  const theme = useContext(ThemeContext);
+
+  return <li style={theme.theme}>...</li>;
+}
+```
+
+完璧です！テーマの現在値に関心がないコンポーネントにデータを渡す必要がなくなりました。
+
+@[codesandbox](https://codesandbox.io/embed/quirky-sun-9djpl)
+
+---
+
+## フック (Hooks)
+
+コンポーネントに Context を提供するフックを作ることができます。各コンポーネントで `useContext` と Context をインポートする代わりに、必要な Context を返すフックを使うのです。
+
+```js
+function useThemeContext() {
+  const theme = useContext(ThemeContext);
+  return theme;
+}
+```
+
+テーマが必ず有効なものとなるように、`useContext(ThemeContext)` が偽値 (falsy value) を返したらエラーを投げるようにしましょう。
+
+```js
+function useThemeContext() {
+  const theme = useContext(ThemeContext);
+  if (!theme) {
+    throw new Error("useThemeContext must be used within ThemeProvider");
+  }
+  return theme;
+}
+```
+
+コンポーネントを `ThemeContext.Provider` コンポーネントで直接ラップする代わりに、提供された値とともにこのコンポーネントを返す HOC を作成することができます。こうすれば、Context のロジックをレンダリングコンポーネントから分離することができ、プロバイダの再利用性が向上します。
+
+```js
+function ThemeProvider({children}) {
+  const [theme, setTheme] = useState("dark");
+
+  function toggleTheme() {
+    setTheme(theme === "light" ? "dark" : "light");
+  }
+
+  const providerValue = {
+    theme: themes[theme],
+    toggleTheme
+  };
+
+  return (
+    <ThemeContext.Provider value={providerValue}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export default function App() {
+  return (
+    <div className={`App theme-${theme}`}>
+      <ThemeProvider>
+        <Toggle />
+        <List />
+      </ThemeProvider>
+    </div>
+  );
+}
+```
+
+`ThemeContext` にアクセスする必要のある各コンポーネントは、これで単に `useThemeContext` フックを使えばよくなりました。
+
+```js
+export default function ListItem() {
+  const theme = useThemeContext();
+
+  return <li style={theme.theme}>...</li>;
+}
+```
+
+異なる Context 用のフックを作ることで、プロバイダのロジックとデータをレンダリングするコンポーネントを簡単に切り離すことができるのです。
+
+---
+
+## ケーススタディ
+
+組み込みのプロバイダを提供するライブラリにより、そこで提供される値をコンポーネントの中で使用することができます。[styled-components](https://styled-components.com/docs/advanced) が良い例です。
+
+> 「この例を理解するために、styled-components の経験は必要ありません。」
+
+styled-components ライブラリは `ThemeProvider` を提供します。*スタイルを付与されたコンポーネント* (styled component) は、このプロバイダの値にアクセスすることが出来ます。自ら Context API を作る代わりに、提供されたものを使うことが出来るのです！
+
+同じ List の例を使い、styled-component ライブラリからインポートされた ThemeProvider でコンポーネントをラップしてみましょう。
+
+```js
+import { ThemeProvider } from "styled-components";
+
+export default function App() {
+  const [theme, setTheme] = useState("dark");
+
+  function toggleTheme() {
+    setTheme(theme === "light" ? "dark" : "light");
+  }
+
+  return (
+    <div className={`App theme-${theme}`}>
+      <ThemeProvider theme={themes[theme]}>
+        <>
+          <Toggle toggleTheme={toggleTheme} />
+          <List />
+        </>
+      </ThemeProvider>
+    </div>
+  );
+}
+```
+
+`ListItem` コンポーネントにインラインで `style` prop を渡す代わりに、`ListItem` コンポーネントを `styled.li` コンポーネントへと変更します。このコンポーネントはスタイルを付与されたコンポーネントであるため、`theme` の値にアクセスすることができます！
+
+```js
+import styled from "styled-components";
+
+export default function ListItem() {
+  return (
+    <Li>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+      commodo consequat.
+    </Li>
+  );
+}
+
+const Li = styled.li`
+  ${({ theme }) => `
+     background-color: ${theme.backgroundColor};
+     color: ${theme.color};
+  `}
+`;
+```
+
+これで `ThemeProvider` を使って、すべてのスタイル付きコンポーネントに簡単にスタイルを適用できるようになりました！
+
+```js:App.js
+import React, { useState } from "react";
+import { ThemeProvider } from "styled-components";
+import "./styles.css";
+
+import List from "./List";
+import Toggle from "./Toggle";
+
+export const themes = {
+  light: {
+    background: "#fff",
+    color: "#000"
+  },
+  dark: {
+    background: "#171717",
+    color: "#fff"
+  }
+};
+
+export default function App() {
+  const [theme, setTheme] = useState("dark");
+
+  function toggleTheme() {
+    setTheme(theme === "light" ? "dark" : "light");
+  }
+
+  return (
+    <div className={`App theme-${theme}`}>
+      <ThemeProvider theme={themes[theme]}>
+        <>
+          <Toggle toggleTheme={toggleTheme} />
+          <List />
+        </>
+      </ThemeProvider>
+    </div>
+  );
+}
+```
+
+```js:ListItem.js
+import React from "react";
+import styled from "styled-components";
+
+export default function ListItem() {
+  return (
+    <Li>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+      commodo consequat.
+    </Li>
+  );
+}
+
+const Li = styled.li`
+  ${({ theme }) => `
+    background-color: ${theme.backgroundColor};
+    color: ${theme.color};
+  `}
+`;
+```
+
+@[codesandbox](https://codesandbox.io/embed/divine-platform-gbuls)
+
+---
+
+### Pros
+
+プロバイダパターン、Context API を使うと、コンポーネントの各レイヤーに手動でデータを渡すことなく、たくさんのコンポーネントにデータを届けることができるようになります。
+
+これにより、コードをリファクタリングするときに、誤ってバグを導入するリスクが減りました。以前は、あとで prop の名前を変更したくなった場合、アプリケーションでこの値が使われている箇所すべてで prop の名前を変更しなければなりませんでした。
+
+アンチパターンともいえる *prop のバケツリレー*に対処する必要がなくなったのです。以前は、prop の値がどこから来たのかが必ずしも明確ではないことにより、アプリケーションのデータの流れを理解することは簡単ではありませんでした。プロバイダパターンを使えば、データを必要としないコンポーネントに無駄に prop を渡さなくてもよくなります。
+
+ある種のグローバルな状態を保つことが、各コンポーネントがそのグローバルな状態にアクセスできるようになるという意味で、プロバイダパターンによって容易になったと言えます。
+
+---
+
+### Cons
+
+特定のケースでは、プロバイダパターンを使いすぎるとパフォーマンスの問題が発生することがあります。Context を*消費する*すべてのコンポーネントは、状態が変化するたびに再レンダリングするのです。
+
+単純なカウンターの例を見てみましょう。`Button` コンポーネントの `Increment` ボタンをクリックするたびに値が増加するとします。また、`Reset` コンポーネントには `Reset` ボタンがあり、カウントを `0` にリセットします。
+
+ここで、`Increment` をクリックすると、再レンダリングされるのはカウントだけでないことがわかります。`Reset` コンポーネントの日付も再レンダリングされるのです。
+
+```js:index.js
+import React, { useState, createContext, useContext, useEffect } from "react";
+import ReactDOM from "react-dom";
+import moment from "moment";
+
+import "./styles.css";
+
+const CountContext = createContext(null);
+
+function Reset() {
+  const { setCount } = useCountContext();
+
+  return (
+    <div className="app-col">
+      <button onClick={() => setCount(0)}>Reset count</button>
+      <div>Last reset: {moment().format("h:mm:ss a")}</div>
+    </div>
+  );
+}
+```
+
+@[codesandbox](https://codesandbox.io/embed/provider-pattern-2-4ke0w)
+
+`Reset` コンポーネントが再レンダリングされるのは、`useCountContext` を消費しているためです。小規模なアプリケーションでは、これはそれほど問題にはなりません。しかし、大規模なアプリケーションでは、頻繁に更新される値を多くのコンポーネントに渡すと、パフォーマンスに悪影響が出る可能性があります。
+
+更新される可能性のある値を含むプロバイダをコンポーネントが不必要に消費しないよう、個別のユースケースごとに複数のプロバイダを作成するとよいでしょう。
 
 ---
 
