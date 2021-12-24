@@ -1,5 +1,5 @@
 ---
-title: "Prototype Pattern"
+title: "プロトタイプパターン: Share properties among many objects of the same type"
 ---
 
 ![](/images/learning-patterns/prototype-pattern-1280w.jpg)
