@@ -1,5 +1,5 @@
 ---
-title: "オブザーバーパターン: Use observables to notify subscribers when an event occurs"
+title: "オブザーバーパターン: イベントの発生を Observable により Subscriber に通知する"
 ---
 
 ![](/images/learning-patterns/observer-pattern-1280w.jpg)
