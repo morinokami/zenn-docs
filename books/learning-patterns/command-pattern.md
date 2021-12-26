@@ -1,5 +1,5 @@
 ---
-title: "Command Pattern"
+title: "コマンドパターン: Commander にコマンドを送信することで、タスクを実行するメソッドを分離する"
 ---
 
 ![](/images/learning-patterns/command-pattern-1280w.jpg)
