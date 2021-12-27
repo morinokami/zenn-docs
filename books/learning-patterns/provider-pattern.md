@@ -319,7 +319,7 @@ export default function ListItem() {
 
 組み込みのプロバイダを提供するライブラリにより、そこで提供される値をコンポーネントの中で使用することができます。[styled-components](https://styled-components.com/docs/advanced) が良い例です。
 
-> 「この例を理解するために、styled-components の経験は必要ありません。」
+> この例を理解するために、styled-components の経験は必要ありません。
 
 styled-components ライブラリは `ThemeProvider` を提供します。*スタイルを付与されたコンポーネント* (styled component) は、このプロバイダの値にアクセスすることが出来ます。自ら Context API を作る代わりに、提供されたものを使うことが出来るのです！
 

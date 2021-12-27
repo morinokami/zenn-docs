@@ -136,6 +136,129 @@ HOC パターンを使うと、複数のコンポーネントに同一のロジ�
 
 複数の高階コンポーネントを**合成する (compose)** こともできます。たとえば、ユーザーが `DogImages` リストをホバーしたときに、`Hovering!` というテキストボックスを表示する機能を追加したいとします。
 
+渡された要素に `hovering` prop を提供する HOC を作成します。その prop を使えば、ユーザーが `DogImages` リストの上をホバーしているかどうかに基づいて、テキストボックスを条件付きでレンダリングすることができます。
+
+```js:withHover.js
+import React, { useState } from "react";
+
+export default function withHover(Element) {
+  return props => {
+    const [hovering, setHover] = useState(false);
+
+    return (
+      <Element
+        {...props}
+        hovering={hovering}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+      />
+    );
+  };
+}
+```
+
+こうすれば、`withHover` HOC により `withLoader` HOC をラップすることができます。
+
+```js:DogImages.js
+import React from "react";
+import withLoader from "./withLoader";
+import withHover from "./withHover";
+
+function DogImages(props) {
+  return (
+    <div {...props}>
+      {props.hovering && <div id="hover">Hovering!</div>}
+      <div id="list">
+        {props.data.message.map((dog, index) => (
+          <img src={dog} alt="Dog" key={index} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default withHover(
+  withLoader(DogImages, "https://dog.ceo/api/breed/labrador/images/random/6")
+);
+```
+
+@[codesandbox](https://codesandbox.io/embed/withhover-withloader-whhh0)
+
+`DogImages` 要素が、`withHover` と `withLoader` の両方から渡されるすべての props を使うようになりました。これで、`hovering` prop の値が `true` か `false` かという条件付きで `Hovering!` テキストボックスを表示することができるようになりました。
+
+> HOC を作成するために使用されるよく知られたライブラリとして [recompose](https://github.com/acdlite/recompose) があります。HOC は React のフックでかなりの部分を置き換えられるため、recompose ライブラリはもうメンテナンスされておらず、したがってこの記事で取り上げることもありません。
+
+---
+
+## フック (Hooks)
+
+HOC パターンを React のフックで置き換えることができる場合があります。
+
+`withHover` HOCを `useHover` フックに置き換えてみましょう。高階コンポーネントを使用する代わりに、要素に `mouseOver` と `mouseLeave` のイベントリスナーを追加するフックをエクスポートします。HOC でやったように要素を渡すことはもうできません。その代わり、`mouseOver` と `mouseLeave` イベントを取得するためのフックから `ref` を返すことにします。
+
+```js:useHover.js
+import { useState, useRef, useEffect } from "react";
+
+export default function useHover() {
+  const [hovering, setHover] = useState(false);
+  const ref = useRef(null);
+
+  const handleMouseOver = () => setHover(true);
+  const handleMouseOut = () => setHover(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (node) {
+      node.addEventListener("mouseover", handleMouseOver);
+      node.addEventListener("mouseout", handleMouseOut);
+
+      return () => {
+        node.removeEventListener("mouseover", handleMouseOver);
+        node.removeEventListener("mouseout", handleMouseOut);
+      };
+    }
+  }, [ref.current]);
+
+  return [ref, hovering];
+}
+```
+
+`useEffect` フックはイベントリスナーをコンポーネントに追加し、ユーザーが要素の上ホバーしているかどうかによって、`hovering` を` true` か` false` に設定します。フックからは `ref` と `hovering` の両方の値を返す必要があります。`ref` は `mouseOver` と `mouseLeave` イベントを受け取るべきコンポーネントへの参照を追加するために、`hovering` は `Hovering!` というテキストボックスを条件に応じて表示するために使います。
+
+`DogImages` コンポーネントを `withHover` HOC でラップする代わりに、`DogImages` コンポーネントの内部で `useHover` フックを使うことができます。
+
+```js:DogImages.js
+import React from "react";
+import withLoader from "./withLoader";
+import useHover from "./useHover";
+
+function DogImages(props) {
+  const [hoverRef, hovering] = useHover();
+
+  return (
+    <div ref={hoverRef} {...props}>
+      {hovering && <div id="hover">Hovering!</div>}
+      <div id="list">
+        {props.data.message.map((dog, index) => (
+          <img src={dog} alt="Dog" key={index} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default withLoader(
+  DogImages,
+  "https://dog.ceo/api/breed/labrador/images/random/6"
+);
+```
+
+@[codesandbox](https://codesandbox.io/embed/usehover-withloader-npo50)
+
+完璧です！`DogImages` コンポーネントを `withHover` コンポーネントでラップする代わりに、コンポーネント内で `useHover` フックを直接使えばよいのです。
+
+---
+
 ---
 
 ### 参考文献
