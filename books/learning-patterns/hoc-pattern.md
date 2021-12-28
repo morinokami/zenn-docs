@@ -2,6 +2,8 @@
 title: "HOC パターン: アプリケーション全体で再利用可能なロジックを props としてコンポーネントに渡す"
 ---
 
+<!-- TODO: 出来が悪いので見直し必須 -->
+
 ![](/images/learning-patterns/hoc-pattern-1280w.jpg)
 
 アプリケーションの中で、同じロジックを複数のコンポーネントにおいて使いたいことがよくあります。このロジックには、コンポーネントに特定のスタイルを適用すること、認可を要求すること、グローバルな状態を追加することなどが含まれます。
@@ -258,6 +260,171 @@ export default withLoader(
 完璧です！`DogImages` コンポーネントを `withHover` コンポーネントでラップする代わりに、コンポーネント内で `useHover` フックを直接使えばよいのです。
 
 ---
+
+一般に、React フックは HOC パターンを置き換えるものではありません。
+
+「多くの場合はフックで十分であり、これによりツリー内のネストを減らすことができます。」- [React Docs](https://reactjs.org/docs/hooks-faq.html#do-hooks-replace-render-props-and-higher-order-components)
+
+React のドキュメントにあるように、フックを使うことでコンポーネントツリーの深さを減らすことができます。HOC パターンを使用すると、深くネストしたコンポーネントツリーになってしまいがちです。
+
+```js
+<withAuth>
+  <withLayout>
+    <withLogging>
+      <Component />
+    </withLogging>
+  </withLayout>
+</withAuth>
+```
+
+コンポーネントに直接フックを追加することで、コンポーネントをラップする必要がなくなるのです。
+
+高階コンポーネントを使用することで、多くのコンポーネントに同じロジックを提供しながらも、そのロジックはすべて一つの場所で管理することができます。フックにより、コンポーネント内からカスタマイズされた動作を追加することができますが、複数のコンポーネントがこの動作に依存している場合、HOC パターンと比較してバグを生むリスクが高まる可能性があります。
+
+<!-- TODO: Do it -->
+<!-- HOC が最適なユースケース: -->
+
+<!-- * 同一の、カスタマイズ不要なロジックが、アプリケーション全体で多くのコンポーネントによって使われる。 -->
+<!-- * コンポーネントは、追加のカスタムロジックなしで、独立して動作する。 -->
+
+<!-- フックが最適なユースケース: -->
+
+<!-- * フックを使用する各コンポーネントごとにロジックがカスタマイズされなければならない。 -->
+<!-- * ロジックがアプリケーション全体に広がっておら、1つまたはいくつかのコンポーネントだけが動作を使用する。 -->
+<!-- * ロジックによってコンポーネントに多くのプロパティが追加される。 -->
+
+---
+
+## ケーススタディ
+
+HOC パターンに依存していたライブラリの一部は、フックのリリース後にそのサポートを追加しました。その一例に [Apollo Client](https://www.apollographql.com/docs/react) があります。
+
+> この例を理解するために、Apollo Client の経験は必要ありません。
+
+Apollo Client を使う方の一つが、高階コンポーネント `graphql()` を使うものです。
+
+```js:InputHOC.js
+import React from "react";
+import "./styles.css";
+
+import { graphql } from "react-apollo";
+import { ADD_MESSAGE } from "./resolvers";
+
+class Input extends React.Component {
+  constructor() {
+    super();
+    this.state = { message: "" };
+  }
+
+  handleChange = (e) => {
+    this.setState({ message: e.target.value });
+  };
+
+  handleClick = () => {
+    this.props.mutate({ variables: { message: this.state.message } });
+  };
+
+  render() {
+    return (
+      <div className="input-row">
+        <input
+          onChange={this.handleChange}
+          type="text"
+          placeholder="Type something..."
+        />
+        <button onClick={this.handleClick}>Add</button>
+      </div>
+    );
+  }
+}
+
+export default graphql(ADD_MESSAGE)(Input);
+```
+
+`graphql()` HOC を使うと、クライアントからのデータを、高階コンポーネントによってラップされたコンポーネントから利用できるようになるのです。ところで、現在も `graphql()` HOC を使うことはできますが、いくつか欠点もあります。
+
+コンポーネントが複数のリゾルバにアクセスする必要がある場合、それを実現するために複数の `graphql()` 高階コンポーネントを**組み合わせる**必要があります。複数の HOC を組み合わせると、データがコンポーネントにどのように渡されるかを理解することが難しくなります。HOC の順序が問題になることもあり、コードのリファクタリング時にバグにつながりやすくなります。
+
+フックのリリース後、Apollo は Apollo Client ライブラリにフックのサポートを追加しました。`graphql()` 高階コンポーネントを使用する代わりに、開発者はライブラリが提供するフックを介して直接データにアクセスできるようになりました。
+
+`graphql()` 高階コンポーネントを使った例で見たものとまったく同じデータを使った例を見てみましょう。今回は Apollo Clientが提供する `useMutation` フックを使ってコンポーネントにデータを提供します。
+
+```js:InputHooks.js
+import React, { useState } from "react";
+import "./styles.css";
+
+import { useMutation } from "@apollo/react-hooks";
+import { ADD_MESSAGE } from "./resolvers";
+
+export default function Input() {
+  const [message, setMessage] = useState("");
+  const [addMessage] = useMutation(ADD_MESSAGE, {
+    variables: { message }
+  });
+
+  return (
+    <div className="input-row">
+      <input
+        onChange={(e) => setMessage(e.target.value)}
+        type="text"
+        placeholder="Type something..."
+      />
+      <button onClick={addMessage}>Add</button>
+    </div>
+  );
+}
+```
+
+@[codesandbox](https://codesandbox.io/embed/apollo-hoc-hooks-n3td8)
+
+`useMutation` フックにより、コンポーネントにデータを提供するために必要なコードの量を減らすことができました。
+
+定型処理の削減に加えて、コンポーネント内で複数のリゾルバのデータを使用することも非常に簡単になりました。複数の高階コンポーネントを組み合わせる代わりに、コンポーネントの中に複数のフックを書くだけでよいのです。コンポーネントに渡されるデータを把握するには、この方法の方がはるかに容易ですし、コンポーネントをリファクタリングしたり、より小さな断片に分解したりする際の開発体験も向上します。
+
+---
+
+### Pros
+
+HOC パターンを使うと、再利用したいロジックを一カ所にまとめておくことができます。つまり、コードが複数ヶ所で重複し、重複する都度新しいバグが発生する可能性を広げることで、意図せずしてアプリケーション全体にバグを拡散してしまうようなリスクを低減することができるのです。また、ロジックを一箇所にまとめることは、`DRY` なコードを維持し、**関心の分離**を実現しやすくすることにもつながります。
+
+---
+
+### Cons
+
+HOC が要素に渡す prop の名前が、他の名前と衝突する可能性があります。
+
+```js
+function withStyles(Component) {
+  return props => {
+    const style = { padding: '0.2rem', margin: '1rem' }
+    return <Component style={style} {...props} />
+  }
+}
+
+const Button = () = <button style={{ color: 'red' }}>Click me!</button>
+const StyledButton = withStyles(Button)
+```
+
+この場合、`withStyles` HOC は、`style` という名前の prop を、渡された要素に追加します。しかし、`Button` コンポーネントはすでに `style` という名前の prop をもっており、これが上書きされてしまいます！prop の名前を変更するか、props をマージすることによって、HOC が意図しない名前の衝突を回避できるようにする必要があります。
+
+```js
+function withStyles(Component) {
+  return props => {
+    const style = {
+      padding: '0.2rem',
+      margin: '1rem',
+      ...props.style
+    }
+
+    return <Component style={style} {...props} />
+  }
+}
+
+const Button = () = <button style={{ color: 'red' }}>Click me!</button>
+const StyledButton = withStyles(Button)
+```
+
+ラップされた要素に props を渡すような HOC を複数**組み合わせて**使うと、どの prop がどの HOC に由来するのかを把握することが困難な場合があります。これは、アプリケーションのデバッグとスケーリングを難しくする原因となります。
 
 ---
 
