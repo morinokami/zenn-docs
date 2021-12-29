@@ -267,7 +267,7 @@ export default withLoader(
 
 React のドキュメントにあるように、フックを使うことでコンポーネントツリーの深さを減らすことができます。HOC パターンを使用すると、深くネストしたコンポーネントツリーになってしまいがちです。
 
-```js
+```jsx
 <withAuth>
   <withLayout>
     <withLogging>
