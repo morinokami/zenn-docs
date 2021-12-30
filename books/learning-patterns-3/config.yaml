@@ -1,0 +1,21 @@
+title: "フロントエンドのパフォーマンスパターン"
+summary: "Learning Patterns の日本語訳"
+topics: [javascript, react, nextjs]
+published: false
+price: 0
+chapters:
+  # Performance Patterns
+  - loading-sequence
+  - static-import
+  - dynamic-import
+  - import-on-visibility
+  - import-on-interaction
+  - route-based
+  - bundle-splitting
+  - prpl
+  - tree-shaking
+  - preload
+  - prefetch
+  - third-party
+  - virtual-lists
+  - compression
