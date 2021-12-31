@@ -4,13 +4,13 @@ title: "フックパターン"
 
 ---
 
-> 関数を使いアプリケーション内の複数のコンポーネントでステートフルなロジックを再利用する
+> 関数を使い、アプリケーション内の複数のコンポーネントでステートフルなロジックを再利用する
 
 ---
 
 ![](/images/learning-patterns/hooks-pattern-1280w.jpg)
 
-React 16.8 では、[フック](https://reactjs.org/docs/hooks-intro.html)と呼ばれる新機能が導入されました。フックにより、ES2015 のクラスコンポーネントを使わなくても、React の状態やライフサイクルメソッドを利用することができるようになります。
+React 16.8 は、[フック](https://reactjs.org/docs/hooks-intro.html)と呼ばれる新機能が導入されました。フックにより、ES2015 のクラスコンポーネントを使わなくても、React の状態やライフサイクルメソッドを利用することができるようになります。
 
 フックは必ずしもデザインパターンというわけではありませんが、アプリケーションの設計において非常に重要な役割を果たします。従来のデザインパターンの多くは、フックによって置き換えることができます。
 
@@ -226,7 +226,7 @@ App コンポーネントの構造は、次のように可視化できます:
 
 まず、フックを使って関数コンポーネントにステートを追加する方法について説明します。
 
-### State フック
+### ステートフック
 
 Reactには、`useState` という、関数コンポーネント内のステートを管理するためのフックがあります。
 
@@ -300,4 +300,215 @@ export default function Input() {
 
 @[codesandbox](https://codesandbox.io/embed/nervous-hoover-oicu6)
 
-### Effect フック
+### 副作用フック
+
+`useState` フックを使って関数コンポーネント内のステートを管理できることを見てきましたが、クラスコンポーネントのもう一つの利点は、コンポーネントにライフサイクルメソッドを追加できることでした。
+
+`useEffect` フックを使えば、コンポーネントのライフサイクルに「接続する (hook into)」ことができます。`useEffect` フックは、`componentDidMount`、`componentDidUpdate`、`componentWillUnmount` ライフサイクルメソッドを統合したものです。
+
+```js
+componentDidMount() { ... }
+useEffect(() => { ... }, [])
+
+componentWillUnmount() { ... }
+useEffect(() => { return () => { ... } })
+
+componentDidUpdate() { ... }
+useEffect(() => { ... })
+```
+
+ステートフックのセクションで使ったインプットの例を使ってみましょう。ユーザーが入力フィールドに何か入力するたびに、その値をコンソールに出力したいと思います。
+
+そのためには、入力値を「リッスン」する `useEffect` フックを使用する必要があります。`useEffect` フックの**依存配列**に `input` を追加することで、それが可能になります。依存配列は、`useEffect` フックが受け取る 2 番目の引数です。
+
+```js
+useEffect(() => {
+  console.log(`The user typed ${input}`);
+}, [input]);
+```
+
+では試してみましょう！
+
+```jsx:Input.js
+import React, { useState, useEffect } from "react";
+
+export default function Input() {
+  const [input, setInput] = useState("");
+
+  useEffect(() => {
+    console.log(`The user typed ${input}`);
+  }, [input]);
+
+  return (
+    <input
+      onChange={e => setInput(e.target.value)}
+      value={input}
+      placeholder="Type something..."
+    />
+  );
+}
+```
+
+@[codesandbox](https://codesandbox.io/embed/blissful-ramanujan-p237n)
+
+ユーザーが値を入力するたびに、入力された値がコンソールに出力されるようになりました。
+
+---
+
+## カスタムフック
+
+React が提供する組み込みのフック (`useState`、`useEffect`、`useReducer`、`useRef`、`useContext`、`useMemo`、`useImperativeHandle`、`useLayoutEffect`、`useDebugValue`、`useCallback`) 以外にも、簡単に独自のカスタムフックを作成することが可能です。
+
+すべてのフックの名前が `use` で始まっていることに気付いたかもしれません。[フックのルール](https://reactjs.org/docs/hooks-rules.html)に違反していないかどうか React がチェックするために、フックの名前を `use` で始めることは重要です。
+
+例えば、入力時にユーザーが押した特定のキーを記録しておきたいとします。カスタムフックは、対象となるキーを引数として受け取るようにします。
+
+```js
+function useKeyPress(targetKey) {}
+```
+
+このフックのユーザーが引数として渡したキーに対して、`keydown` と `keyup` のイベントリスナーを追加しようと思います。ユーザーがそのキーを押したとき、つまり `keydown` イベントが発生したとき、フック内のステートは `true` へと切り替わります。そうでない場合、すなわち、ユーザーがそのボタンを押すのをやめたとき、`keyup` イベントが発生して、ステートが `false` へと切り替わります。
+
+```js
+function useKeyPress(targetKey) {
+  const [keyPressed, setKeyPressed] = React.useState(false);
+
+  function handleDown({ key }) {
+    if (key === targetKey) {
+      setKeyPressed(true);
+    }
+  }
+
+  function handleUp({ key }) {
+    if (key === targetKey) {
+      setKeyPressed(false);
+    }
+  }
+
+  React.useEffect(() => {
+    window.addEventListener("keydown", handleDown);
+    window.addEventListener("keyup", handleUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleDown);
+      window.addEventListener("keyup", handleUp);
+    };
+  }, []);
+
+  return keyPressed;
+}
+```
+
+完璧です！このカスタムフックは、上で見たインプットアプリケーションで使うことができます。ユーザーが `q`、`l`、`w` キーを押すごとに、コンソールにログを出力してみましょう。
+
+```jsx:Input.js
+import React from "react";
+import useKeyPress from "./useKeyPress";
+
+export default function Input() {
+  const [input, setInput] = React.useState("");
+  const pressQ = useKeyPress("q");
+  const pressW = useKeyPress("w");
+  const pressL = useKeyPress("l");
+
+  React.useEffect(() => {
+    console.log(`The user pressed Q!`);
+  }, [pressQ]);
+
+  React.useEffect(() => {
+    console.log(`The user pressed W!`);
+  }, [pressW]);
+
+  React.useEffect(() => {
+    console.log(`The user pressed L!`);
+  }, [pressL]);
+
+  return (
+    <input
+      onChange={e => setInput(e.target.value)}
+      value={input}
+      placeholder="Type something..."
+    />
+  );
+}
+```
+
+@[codesandbox](https://codesandbox.io/embed/billowing-pine-xplez)
+
+キー押下のロジックを `Input` コンポーネントの内部に閉じ込める代わりに、複数のコンポーネントで `useKeyPress` フックを再利用することができます。同じロジックを何度も繰り返し書く必要はないのです。
+
+フックのもう一つの大きなメリットは、コミュニティがフックを作って共有できることです。ここでは `useKeyPress` フックを自分たちで書きましたが、実はその必要はまったくありませんでした。このフックはすでに他の人が[作ってくれており](https://github.com/streamich/react-use/blob/master/docs/useKeyPress.md)、それをインストールすればすぐに使うことができたのです。
+
+コミュニティによって作成され、すぐに使えるようになっているフックのリストを掲載したウェブサイトをいくつか紹介します。
+
+* [React Use](https://github.com/streamich/react-use)
+* [useHooks](https://usehooks.com/)
+* [Collection of React Hooks](https://nikgraf.github.io/react-hooks/)
+
+---
+
+前節で見た `Counter` と `Width` の例を書き換えてみましょう。クラスコンポーネントは使わず、フックを使って書き換えていきます。
+
+```jsx:App.js
+import React, { useState, useEffect } from "react";
+import "./styles.css";
+
+import { Count } from "./Count";
+import { Width } from "./Width";
+
+function useCounter() {
+  const [count, setCount] = useState(0);
+
+  const increment = () => setCount(count + 1);
+  const decrement = () => setCount(count - 1);
+
+  return { count, increment, decrement };
+}
+
+function useWindowWidth() {
+  const [width, setWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.addEventListener("resize", handleResize);
+  });
+
+  return width;
+}
+
+export default function App() {
+  const counter = useCounter();
+  const width = useWindowWidth();
+
+  return (
+    <div className="App">
+      <Count
+        count={counter.count}
+        increment={counter.increment}
+        decrement={counter.decrement}
+      />
+      <div id="divider" />
+      <Width width={width} />
+    </div>
+  );
+}
+```
+
+@[codesandbox](https://codesandbox.io/embed/eloquent-bhabha-2w0ll)
+
+App 関数内のロジックを分割しました:
+
+* `useCounter`: `count` の現在値、`increment` メソッド、`decrement` メソッドを返すカスタムフック
+* `useWindowWidth`: ウィンドウの現在の幅を返すカスタムフック
+* `App`: `Counter` と `Width` コンポーネントを返す、ステートフルな関数コンポーネント
+
+クラスコンポーネントの代わりにフックを使用することで、再利用可能な小さなまとまりへとロジックを分割することができました。
+
+今おこなった変更を、以前の `App` クラスコンポーネントと比較して可視化してみましょう。
+
+![](/images/learning-patterns/hooks-pattern-2.png)
+
+フックを使用することで、コンポーネントのロジックをいくつかの小さなまとまりへと**分割する**ことが、より明確になりました。同じステートフルなロジックを*再利用する*ことがより容易になり、コンポーネントをステートフルにしたい場合に関数コンポーネントをクラスコンポーネントへと書き換える必要もなくなりました。ES2015 クラスに関する深い理解はもはや不要となり、そして、再利用可能なステートフルロジックにより、コンポーネントのテスト可能性、柔軟性、可読性が向上します。
+
+## Additional Hooks guidance
