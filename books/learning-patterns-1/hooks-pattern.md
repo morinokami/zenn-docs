@@ -511,4 +511,135 @@ App 関数内のロジックを分割しました:
 
 フックを使用することで、コンポーネントのロジックをいくつかの小さなまとまりへと**分割する**ことが、より明確になりました。同じステートフルなロジックを*再利用する*ことがより容易になり、コンポーネントをステートフルにしたい場合に関数コンポーネントをクラスコンポーネントへと書き換える必要もなくなりました。ES2015 クラスに関する深い理解はもはや不要となり、そして、再利用可能なステートフルロジックにより、コンポーネントのテスト可能性、柔軟性、可読性が向上します。
 
-## Additional Hooks guidance
+## フックに関する追加的ガイダンス
+
+### フックを追加する
+
+他のコンポーネントと同様に、コードにフックを追加したい場合に使用する特別な関数があります。ここでは、いくつかの一般的なフック関数について簡単に説明します。
+
+**1. useState**
+
+`useState` フックを使うと、開発者はクラスコンポーネントに変換する必要なしに、関数コンポーネント内のステートを更新したり操作したりすることができます。このフックの利点は、シンプルで、他のフックほどの複雑さがないことです。
+
+**2. useEffect**
+
+`useEffect` フックは、関数コンポーネントで主なライフサイクルイベント中にコードを実行するために使用されます。関数コンポーネントの本体では、ミューテーション、サブスクリプション、タイマー、ロギング、その他の副作用は許可されていません。それらが許可されてしまうと、ややこしいバグや UI の不整合を引き起こす可能性があるからです。`useEffect` フックは、これらの「副作用」をすべて防ぎ、UI をスムーズに動作させます。`componentDidMount`、`componentDidUpdate`、`componentWillUnmount` を 1 つに統合したものといえます。
+
+**3. useContext**
+
+`useContext` フックは、`React.createContext` から返されるコンテクストオブジェクトを受け取り、そのコンテクストの現在値を返します。`useContext` フックは React のコンテクスト APIと連携し、props を様々な階層で受け渡していく必要なしに、アプリケーション全体でデータを共有できるようにします。
+
+`useContext` フックに渡される引数はコンテクストオブジェクトそのものでなければならず、`useContext` を呼び出すコンポーネントは、コンテクストの値が変わるたびに常に再レンダリングされることに注意してください。
+
+**4. useReducer**
+
+`useReducer` フックは `setState` の代替であり、複数の値にまたがる複雑なステートロジックをもつ場合や、次のステートが前のステートに依存する場合に、特に使用が推奨されます。`useReducer` は、`reducer` 関数とステートの初期値を受け取り、配列の分割代入によって現在のステートと `dispatch` 関数を返します。また、`useReducer` は、複数階層にまたがる更新を引き起こすコンポーネントのパフォーマンス最適化もおこないます。
+
+**フックの長所と短所**
+
+フックを利用することで、以下のようなメリットがあります:
+
+**コード行数の削減**
+
+フックにより、ライフサイクルではなく、関心事や機能によりコードをグループ化することができます。その結果、コードがすっきりと簡潔になるだけでなく、記述量も少なくなります。以下は、React を使用した、検索可能な商品データテーブルを表わすシンプルなステートレスコンポーネントと、`useState` フックを使用した場合の見え方を比較したものです。
+
+**ステートレスコンポーネント**
+
+```jsx
+class TweetSearchResults extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      filterText: '',
+      inThisLocation: false
+    };
+
+    this.handleFilterTextChange = this.handleFilterTextChange.bind(this);
+    this.handleInThisLocationChange = this.handleInThisLocationChange.bind(this);
+  }
+
+  handleFilterTextChange(filterText) {
+    this.setState({
+      filterText: filterText
+    });
+  }
+
+  handleInThisLocationChange(inThisLocation) {
+    this.setState({
+      inThisLocation: inThisLocation
+    })
+  }
+
+  render() {
+    return (
+      <div>
+        <SearchBar
+          filterText={this.state.filterText}
+          inThisLocation={this.state.inThisLocation}
+          onFilterTextChange={this.handleFilterTextChange}
+          onInThisLocationChange={this.handleInThisLocationChange}
+        />
+        <TweetList
+          tweets={this.props.tweets}
+          filterText={this.state.filterText}
+          inThisLocation={this.state.inThisLocation}
+        />
+      </div>
+    );
+  }
+}
+```
+
+**フックを使用した場合**
+
+```jsx
+const TweetSearchResults = ({tweets}) => {
+  const [filterText, setFilterText] = useState('');
+  const [inThisLocation, setInThisLocation] = useState(false);
+  return (
+    <div>
+      <SearchBar
+        filterText={filterText}
+        inThisLocation={inThisLocation}
+        setFilterText={setFilterText}
+        setInThisLocation={setInThisLocation}
+      />
+      <TweetList
+        tweets={tweets}
+        filterText={filterText}
+        inThisLocation={inThisLocation}
+      />
+    </div>
+  );
+}
+```
+
+**複雑なコンポーネントをシンプルにする**
+
+JavaScript のクラスは管理が難しく、ホットリロードとの相性が悪く、またミニファイがうまくいかないこともあります。フックはこれらの問題を解決し、関数型プログラミングを簡単におこなえるようにしました。フックの実装により、クラスコンポーネントは不要となりました。
+
+**ステートフルなロジックを再利用する**
+
+JavaScript のクラスは多段階の継承を助長し、全体的な複雑さとエラーの可能性を急速に増大させます。しかし、フックを使えば、クラスを書かずにステートや他の React の機能を使うことができます。React では、コードを何度も書き直す必要なしに、常にステートフルなロジックを再利用することができます。そのため、エラーが発生する可能性は下がり、プレーンな関数と組み合わせることも可能となります。
+
+
+**見た目と関係しないロジックの共有**
+
+フックが実装されるまで、React には見た目と関係しないロジックを抜き出して共有する方法がありませんでした。そのため、よくある問題を解決するためだけに、HOC パターンやレンダープロップなど、より複雑な仕組みを導入せざるを得ませんでした。しかし、フックの登場により、ステートフルなロジックをシンプルな JavaScript の関数として抽出できるようになり、この問題が解決されました。
+
+もちろん、フックには留意すべき潜在的な欠点もあります。
+
+* フックごとのルールを尊重しなければならないが、リンタープラグインなしでは、どのルールが破られているか気付くことが難しい
+* 正しく使うにはかなりの練習を必要とする (例: useEffect)
+* 使い方を間違えないよう気を付けなければならない (例: useCallback、useMemo)
+
+### フックとクラスの比較
+
+React にフックが導入されたとき、新たな問題が発生しました。フックを使った関数コンポーネントとクラスコンポーネントの使い分けはどうすればいいのでしょうか？フックの助けを借りれば、関数コンポーネントでもステートや一部のライフサイクルフックを取得することが可能です。また、フックを使うことで、クラスを書かずにローカルなステートやその他の React の機能を利用することもできます。
+
+以下でフックとクラスの相違点をいくつか紹介しますので、判断材料としてください:
+
+| フック | クラス |
+| ---- | ---- |
+| 多層化した構造を避け、コードを明確にすることができる | 一般に、HOC やレンダープロップを使用する場合、開発者ツールで確認するために、アプリケーションを複数の階層にわたって再構築しなければならない |
+| コンポーネント間で統一性をもたせることができる | バインディングや関数が呼び出されるコンテクストを理解する必要があるため、人間と機械の両方を混乱させる |
