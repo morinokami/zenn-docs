@@ -2,6 +2,12 @@
 title: "レンダープロップパターン"
 ---
 
+---
+
+> 
+
+---
+
 ![](/images/learning-patterns/render-props-pattern-1280w.jpg)
 
 <!-- TODO: パスがあっているか確認 -->

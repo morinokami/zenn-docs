@@ -1,5 +1,11 @@
 ---
-title: "Flyweight パターン: 同一のオブジェクトを扱う際に既存のインスタンスを再利用する"
+title: "Flyweight パターン"
+---
+
+---
+
+> 同一のオブジェクトを扱う際に既存のインスタンスを再利用する
+
 ---
 
 ![](/images/learning-patterns/flyweight-pattern-1280w.jpg)

@@ -1,5 +1,11 @@
 ---
-title: "Mediator/Middleware パターン: 中央の Mediator オブジェクトを介してコンポーネント間のやり取りを処理する"
+title: "Mediator/Middleware パターン"
+---
+
+---
+
+> 中央の Mediator オブジェクトを介してコンポーネント間のやり取りを処理する
+
 ---
 
 ![](/images/learning-patterns/mediator-pattern-1280w.jpg)

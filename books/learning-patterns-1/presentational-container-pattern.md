@@ -1,5 +1,11 @@
 ---
-title: "Container/Presentational パターン: ビューとアプリケーションロジックの分離により、関心の分離を実現する"
+title: "Container/Presentational パターン"
+---
+
+---
+
+> ビューとアプリケーションロジックを分け、関心の分離を実現する
+
 ---
 
 ![](/images/learning-patterns/presentational-container-1280w.jpg)

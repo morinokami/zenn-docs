@@ -1,5 +1,5 @@
 title: "フロントエンドのデザインパターン"
-summary: "本書は、Lydia Hallie 氏 や Addy Osmani 氏らによる Learning Patterns (https://www.patterns.dev/) の日本語訳です。原著は大きく 3 つのセクションに分かれていますが、本書は、その最初のセクションである Design Patterns を訳したものとなります。"
+summary: "本書は、Lydia Hallie 氏 と Addy Osmani 氏らによる Learning Patterns (https://www.patterns.dev/) の日本語訳です。原著は大きく 3 つのセクションに分かれていますが、本書は、その最初のセクションである Design Patterns を訳したものとなります。"
 topics: [javascript, react, nextjs]
 published: false
 price: 0
