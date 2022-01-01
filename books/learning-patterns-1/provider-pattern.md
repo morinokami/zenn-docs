@@ -8,21 +8,19 @@ title: "プロバイダパターン"
 
 ---
 
-<!-- TODO: Context をカタカナにするか、context とするか -->
-
 ![](/images/learning-patterns/provider-pattern-1280w.jpg)
 
-アプリケーション内の (すべてではないにせよ) 多くのコンポーネントからデータを利用できるようにしたい場合があります。`props` を使用してコンポーネントにデータを渡すことはできますが、アプリケーション内のほぼすべてのコンポーネントが props の値にアクセスする必要がある場合には、これは困難となります。
+アプリケーション内の (すべてではないにせよ) 多くのコンポーネントからデータを利用できるようにしたい場合があります。`props` を使用してコンポーネントにデータを渡すことはできますが、アプリケーション内のほぼすべてのコンポーネントがその props の値にアクセスする必要がある場合には、これは困難となります。
 
-コンポーネントツリーのずっと下の方に prop を渡していく、*prop のバケツリレー* (prop drilling) と呼ばれる事態に陥ることがよくあります。props に依存するコードのリファクタリングはほとんど不可能となり、あるデータがどこから来たのかを知ることも難しくなります。
+コンポーネントツリーのずっと下の方に props を渡していく、*prop のバケツリレー* (prop drilling) と呼ばれる事態に陥ることがよくあります。その props に依存するコードのリファクタリングはほとんど不可能となり、あるデータがどこから来たのかを把握することも難しくなります。
 
-例えば、あるデータを含む `App` コンポーネントがあるとします。そしてコンポーネントツリーのずっと下の方に、`ListItem`、`Header`、`Text` コンポーネントがあり、これらはすべてこのデータを必要とします。これらのコンポーネントにデータを届けるには、何層ものコンポーネントを経由して受け渡していかなければなりません。
+たとえば、あるデータを含む `App` コンポーネントがあるとします。そしてコンポーネントツリーのずっと下の方に、`ListItem`、`Header`、`Text` コンポーネントがあり、これらはすべてこのデータを必要とします。これらのコンポーネントにデータを届けるには、何層ものコンポーネントを経由してデータを受け渡していかなければなりません。
 
-<video width="100%" src="https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-48_jxmuyy.mp4" autoplay="" controls=""><source src="https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-48_jxmuyy.mp4"></video>
+[動画による説明](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-48_jxmuyy.mp4)
 
-我々のコードベースは、以下のようになります:
+これをコードにより表現すると、以下のようになります:
 
-```js
+```jsx
 function App() {
   const data = { ... }
 
@@ -51,13 +49,13 @@ const Text = ({ data }) => <h1>{data.text}</h1>
 
 このように props を渡していると、かなり面倒なことになります。もし将来 `data` prop の名前を変更したくなった場合、すべてのコンポーネントで名前を変更しなければなりません。アプリケーションが大きくなればなるほど、prop のバケツリレーはやっかいなものとなっていきます。
 
-このデータを使う必要のないコンポーネントのレイヤーをすべてスキップできれば最善です。prop のバケツリレーをせず、`data` の値にアクセスする必要のあるコンポーネントが、直接そこにアクセスできるような仕組みが必要です。
+このデータを使う必要のないコンポーネントのレイヤーをすべてスキップできれば最善です。prop のバケツリレーなしに、`data` の値にアクセスする必要のあるコンポーネントを、直接それにアクセスできるようにする仕組みが必要です。
 
-ここで**プロバイダパターン**が役に立ちます。プロバイダパターンにより、複数のコンポーネントがデータを利用できるようになります。props を通じて各レイヤーにデータを渡していくのではなく、すべてのコンポーネントを `Provider` でラップするのです。Provider は、`Context` オブジェクトによって提供される高階 (higher order) コンポーネントです。Context オブジェクトは、React が提供する `createContext` メソッドを使って作成することができます。
+ここで**プロバイダパターン**が役に立ちます。プロバイダパターンにより、複数のコンポーネントがデータを利用できるようになります。props を通じて各レイヤーにデータを渡していくのではなく、すべてのコンポーネントを `Provider` でラップするのです。プロバイダは、`Context` オブジェクトによって提供される高階コンポーネントです。コンテクストオブジェクトは、React が提供する `createContext` メソッドにより作成することができます。
 
-Provider は、受け渡したいデータが格納されている `value` prop を受け取ります。この Provider にラップされている*すべての*コンポーネントは、`value` prop の値にアクセスすることができます。
+プロバイダは、受け渡したいデータを格納する `value` prop を受け取ります。このプロバイダにラップされている*すべての*コンポーネントは、`value` prop の値にアクセスすることができます。
 
-```js
+```jsx
 const DataContext = React.createContext()
 
 function App() {
@@ -74,11 +72,11 @@ function App() {
 }
 ```
 
-手動で各コンポーネントに `data` prop を渡す必要はもうありません！では、`ListItem`、`Header`、`Text` コンポーネントは、どのようにして `data` の値にアクセスできるのでしょうか？
+手動で各コンポーネントに `data` prop を渡していく必要はもうありません！では、`ListItem`、`Header`、`Text` コンポーネントは、どのようにして `data` の値にアクセスできるのでしょうか？
 
-各コンポーネントは、`useContext` フックを使って `data` にアクセスすることができます。このフックは、`data` を参照する Context (この場合は `DataContext`) を受け取ります。`useContext` フックにより、Context オブジェクトを通じてデータの読み書きができるようになるのです。
+各コンポーネントは、`useContext` フックを使って `data` にアクセスすることができます。このフックは、`data` を参照するコンテクスト (この場合は `DataContext`) を受け取ります。`useContext` フックにより、コンテクストオブジェクトを通じてデータの読み書きができるようになるのです。
 
-```js
+```jsx
 const DataContext = React.createContext();
 
 function App() {
@@ -86,8 +84,10 @@ function App() {
 
   return (
     <div>
-      <SideBar />
-      <Content />
+      <DataContext.Provider value={data}>
+        <SideBar />
+        <Content />
+      </DataContext.Provider>
     </div>
   )
 }
@@ -95,7 +95,7 @@ function App() {
 const SideBar = () => <List />
 const List = () => <ListItem />
 const Content = () => <div><Header /><Block /></div>
-
+const Block = () => <Text />
 
 function ListItem() {
   const { data } = React.useContext(DataContext);
@@ -113,32 +113,17 @@ function Header() {
 }
 ```
 
-`data` の値を使用しないコンポーネントは、`data` について気にする必要がまったくなくなります。props の値を使用しないコンポーネントを何階層も経由して props を受け渡していく必要がなくなるため、リファクタリングがとても楽になります。
+`data` の値を使用しないコンポーネントは、`data` について気にする必要がまったくなくなりました。props の値を使用しないコンポーネントを何階層も経由して props を受け渡していく必要がなくなったため、リファクタリングがとても楽になります。
 
-<video width="100%" src="https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056519/patterns.dev/jspat-49_ksvtl8.mp4" autoplay="" controls=""><source src="https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056519/patterns.dev/jspat-49_ksvtl8.mp4"></video>
+[動画による説明](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056519/patterns.dev/jspat-49_ksvtl8.mp4)
 
 ---
 
-プロバイダパターンは、グローバルなデータを共有するのに非常に有効です。プロバイダパターンの一般的な使用例としては、UI テーマに関する状態を多くのコンポーネントで共有することが挙げられます。
+プロバイダパターンは、グローバルなデータの共有に非常に有効です。プロバイダパターンの一般的なユースケースとしては、UI テーマに関するステートを多くのコンポーネントで共有することが挙げられます。
 
-例えば、リストを表示するシンプルなアプリケーションがあるとします。
+たとえば、リストを表示するシンプルなアプリケーションがあるとします。
 
-```js:index.js
-import React from "react";
-import ReactDOM from "react-dom";
-
-import App from "./App";
-
-const rootElement = document.getElementById("root");
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  rootElement
-);
-```
-
-```js:App.js
+```jsx:App.js
 import React from "react";
 import "./styles.css";
 
@@ -155,7 +140,7 @@ export default function App() {
 }
 ```
 
-```js:List.js
+```jsx:List.js
 import React from "react";
 import ListItem from "./ListItem";
 
@@ -172,9 +157,9 @@ export default function Boxes() {
 
 @[codesandbox](https://codesandbox.io/embed/busy-oskar-ifz3w)
 
-スイッチを切り替えることで、ユーザーがライトモードとダークモードを切り替えることができるようにしたいと思います。ユーザーがダークモードからライトモードに切り替えるとき、またはその逆のとき、背景色とテキストの色が変わるはずです。現在のテーマの値を各コンポーネントに渡す代わりに、コンポーネントを `ThemeProvider` でラップして、現在のテーマカラーをプロバイダに渡すことができます。
+スイッチを切り替えることで、ユーザーがライトモードとダークモードを切り替えることができるようにしたいと思います。ユーザーがダークモードからライトモードに切り替えるとき、またはその逆のとき、背景色とテキストの色が変わるはずです。現在のテーマの値を各コンポーネントに渡していく代わりに、コンポーネントを `ThemeContext` でラップし、現在のテーマカラーをそのプロバイダに渡すことができます。
 
-```js
+```jsx
 export const ThemeContext = React.createContext();
 
 const themes = {
@@ -211,11 +196,11 @@ export default function App() {
 }
 ```
 
-`Toggle` コンポーネントと `List` コンポーネントはともに `ThemeContext` プロバイダの中にラップされているので、プロバイダに値として渡される `theme` と `toggleTheme` にアクセスすることができます。
+`Toggle` コンポーネントと `List` コンポーネントはどちらも `ThemeContext` プロバイダの中にラップされているため、プロバイダに `value` として渡される `theme` と `toggleTheme` の値にアクセスすることができます。
 
 `Toggle` コンポーネント内では、`toggleTheme` 関数を使用してテーマを適宜更新することができます。
 
-```js
+```jsx
 import React, { useContext } from "react";
 import { ThemeContext } from "./App";
 
@@ -231,9 +216,9 @@ export default function Toggle() {
 }
 ```
 
-`List` コンポーネント自体は、現在のテーマの値を気にしません。しかし、`ListItem` コンポーネントは異なります！`ListItem` の中で、`theme` Context を直接使用することができます。
+`List` コンポーネント自体は、現在のテーマの値を気にしません。しかし、`ListItem` コンポーネントは異なります！`ListItem` の中で、`theme` コンテクストを直接使用することができます。
 
-```js
+```jsx
 import React, { useContext } from "react";
 import { ThemeContext } from "./App";
 
@@ -250,9 +235,9 @@ export default function ListItem() {
 
 ---
 
-## フック (Hooks)
+## フック
 
-コンポーネントに Context を提供するフックを作ることができます。各コンポーネントで `useContext` と Context をインポートする代わりに、必要な Context を返すフックを使うのです。
+コンポーネントにコンテクストを提供するフック (hook) を作ることができます。各コンポーネントで `useContext` とコンテクストをインポートする代わりに、必要となるコンテクストを返すフックを使うのです。
 
 ```js
 function useThemeContext() {
@@ -273,9 +258,9 @@ function useThemeContext() {
 }
 ```
 
-コンポーネントを `ThemeContext.Provider` コンポーネントで直接ラップする代わりに、提供された値とともにこのコンポーネントを返す HOC を作成することができます。こうすれば、Context のロジックをレンダリングコンポーネントから分離することができ、プロバイダの再利用性が向上します。
+コンポーネントを `ThemeContext.Provider` コンポーネントにより直接ラップする代わりに、提供された値 (provided value) とともにこのコンポーネントを返す HOC を作成することができます。こうすれば、コンテクストのロジックをレンダリングコンポーネントから分離することができ、プロバイダの再利用性が向上します。
 
-```js
+```jsx
 function ThemeProvider({children}) {
   const [theme, setTheme] = useState("dark");
 
@@ -307,9 +292,9 @@ export default function App() {
 }
 ```
 
-`ThemeContext` にアクセスする必要のある各コンポーネントは、これで単に `useThemeContext` フックを使えばよくなりました。
+これで、`ThemeContext` にアクセスする必要のある各コンポーネントは、シンプルに `useThemeContext` フックを使えばよくなりました。
 
-```js
+```jsx
 export default function ListItem() {
   const theme = useThemeContext();
 
@@ -317,21 +302,21 @@ export default function ListItem() {
 }
 ```
 
-異なる Context 用のフックを作ることで、プロバイダのロジックとデータをレンダリングするコンポーネントを簡単に切り離すことができるのです。
+異なるコンテクスト用のフックを作ることで、プロバイダのロジックとデータをレンダリングするコンポーネントを簡単に切り離すことができるのです。
 
 ---
 
 ## ケーススタディ
 
-組み込みのプロバイダを提供するライブラリにより、そこで提供される値をコンポーネントの中で使用することができます。[styled-components](https://styled-components.com/docs/advanced) が良い例です。
+ライブラリが組み込みのプロバイダをもつ場合は、そこで提供される値をコンポーネントの中で使用することができます。[styled-components](https://styled-components.com/docs/advanced) が良い例です。
 
 > この例を理解するために、styled-components の経験は必要ありません。
 
-styled-components ライブラリは `ThemeProvider` を提供します。*スタイルを付与されたコンポーネント* (styled component) は、このプロバイダの値にアクセスすることが出来ます。自ら Context API を作る代わりに、提供されたものを使うことが出来るのです！
+styled-components ライブラリは `ThemeProvider` を提供します。*スタイル付きコンポーネント* (styled component) は、このプロバイダの値にアクセスすることが出来ます。自らコンテクスト API を作る代わりに、提供されたものを使うことが出来るのです！
 
-同じ List の例を使い、styled-component ライブラリからインポートされた ThemeProvider でコンポーネントをラップしてみましょう。
+同じ List の例を用い、styled-component ライブラリからインポートされた `ThemeProvider` でコンポーネントをラップしてみましょう。
 
-```js
+```jsx
 import { ThemeProvider } from "styled-components";
 
 export default function App() {
@@ -354,9 +339,9 @@ export default function App() {
 }
 ```
 
-`ListItem` コンポーネントにインラインで `style` prop を渡す代わりに、`ListItem` コンポーネントを `styled.li` コンポーネントへと変更します。このコンポーネントはスタイルを付与されたコンポーネントであるため、`theme` の値にアクセスすることができます！
+`ListItem` コンポーネントにインラインで `style` prop を渡す代わりに、`ListItem` コンポーネントを `styled.li` コンポーネントへと変更します。このコンポーネントはスタイル付きコンポーネントであるため、`theme` の値にアクセスすることができます！
 
-```js
+```jsx
 import styled from "styled-components";
 
 export default function ListItem() {
@@ -378,9 +363,9 @@ const Li = styled.li`
 `;
 ```
 
-これで `ThemeProvider` を使って、すべてのスタイル付きコンポーネントに簡単にスタイルを適用できるようになりました！
+`ThemeProvider` を使って、すべてのスタイル付きコンポーネントに簡単にスタイルを適用できるようになりました！
 
-```js:App.js
+```jsx:App.js
 import React, { useState } from "react";
 import { ThemeProvider } from "styled-components";
 import "./styles.css";
@@ -419,7 +404,7 @@ export default function App() {
 }
 ```
 
-```js:ListItem.js
+```jsx:ListItem.js
 import React from "react";
 import styled from "styled-components";
 
@@ -448,25 +433,25 @@ const Li = styled.li`
 
 ### Pros
 
-プロバイダパターン、Context API を使うと、コンポーネントの各レイヤーに手動でデータを渡すことなく、たくさんのコンポーネントにデータを届けることができるようになります。
+プロバイダパターン (コンテクスト API) により、コンポーネントの各レイヤーに手動でデータを渡していくことなく、多くのコンポーネントにデータを届けることができるようになります。
 
-これにより、コードをリファクタリングするときに、誤ってバグを導入するリスクが減りました。以前は、あとで prop の名前を変更したくなった場合、アプリケーションでこの値が使われている箇所すべてで prop の名前を変更しなければなりませんでした。
+これにより、コードをリファクタリングするときに、誤ってバグを導入するリスクが減ります。以前は、あとで prop の名前を変更したくなった場合、アプリケーション内のこの値が使われているすべて箇所で prop の名前を変更しなければなりませんでした。
 
-アンチパターンともいえる *prop のバケツリレー*に対処する必要がなくなったのです。以前は、prop の値がどこから来たのかが必ずしも明確ではないことにより、アプリケーションのデータの流れを理解することは簡単ではありませんでした。プロバイダパターンを使えば、データを必要としないコンポーネントに無駄に prop を渡さなくてもよくなります。
+アンチパターンともいえる *prop のバケツリレー*に対処する必要がなくなったのです。以前は、prop の値がどこから来たのかが必ずしも明確ではないことにより、アプリケーションのデータの流れを理解することは簡単ではありませんでした。プロバイダパターンにより、データを必要としないコンポーネントに無駄に prop を渡さなくてもよくなるのです。
 
-ある種のグローバルな状態を保つことが、各コンポーネントがそのグローバルな状態にアクセスできるようになるという意味で、プロバイダパターンによって容易になったと言えます。
+ある種のグローバルな状態を保つことが、各コンポーネントがそのグローバルな状態にアクセスできるようになるという意味で、プロバイダパターンによって容易になったといえます。
 
 ---
 
 ### Cons
 
-特定のケースでは、プロバイダパターンを使いすぎるとパフォーマンスの問題が発生することがあります。Context を*消費する*すべてのコンポーネントは、状態が変化するたびに再レンダリングするのです。
+特定のケースでは、プロバイダパターンを使いすぎるとパフォーマンスの問題が発生することがあります。コンテクストを*消費する*すべてのコンポーネントは、ステートが変化するたびに再レンダリングするのです。
 
-単純なカウンターの例を見てみましょう。`Button` コンポーネントの `Increment` ボタンをクリックするたびに値が増加するとします。また、`Reset` コンポーネントには `Reset` ボタンがあり、カウントを `0` にリセットします。
+単純なカウンターの例を見てみましょう。`Button` コンポーネントの `Increment` ボタンをクリックすると値が増加するとします。また、`Reset` コンポーネントにはリセットボタンがあり、カウントを `0` にリセットします。
 
-ここで、`Increment` をクリックすると、再レンダリングされるのはカウントだけでないことがわかります。`Reset` コンポーネントの日付も再レンダリングされるのです。
+ここで、`Increment` をクリックすると、再レンダリングされるのはカウントだけでないことがわかります。`Reset` コンポーネントの日付も再レンダリングされるのです！
 
-```js:index.js
+```jsx:index.js
 import React, { useState, createContext, useContext, useEffect } from "react";
 import ReactDOM from "react-dom";
 import moment from "moment";
