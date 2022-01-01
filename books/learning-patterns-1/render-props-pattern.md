@@ -4,7 +4,7 @@ title: "レンダープロップパターン"
 
 ---
 
-> 
+> props を 通じて JSX 要素をコンポーネントに渡す
 
 ---
 
@@ -15,7 +15,7 @@ title: "レンダープロップパターン"
 
 コンポーネントを再利用しやすくするもう一つの方法が、レンダープロップ (render prop) パターンです。レンダープロップとはコンポーネントの prop であり、その値は JSX の要素を返す関数です。コンポーネント自身は、レンダープロップ以外のものをレンダリングしません。コンポーネントは、独自のレンダリングロジックを実装する代わりに、単にレンダープロップを呼び出すだけとなります。
 
-`Title` コンポーネントがあると想像してください。Title コンポーネントは、渡された値をレンダリングする以外のことをしてはいけません。ここでレンダープロップを使うことができます！`Title` コンポーネントにレンダリングさせたい値を `render` prop に渡してみましょう。
+`Title` コンポーネントがあると想像してください。`Title` コンポーネントは、渡された値をレンダリングする以外のことをしてはいけません。ここでレンダープロップを使うことができます！`Title` コンポーネントにレンダリングさせたい値を `render` prop に渡してみましょう。
 
 ```jsx
 <Title render={() => <h1>I am a render prop!</h1>} />
@@ -206,7 +206,7 @@ export default function App() {
 
 ### レンダープロップ
 
-ここでレンダープロップの出番です！`Input` コンポーネントを、レンダープロップを受け取るように変更しましょう。
+ここでレンダープロップの出番です！`Input` コンポーネントが、レンダープロップを受け取るように変更しましょう。
 
 ```js
 function Input(props) {
@@ -246,19 +246,193 @@ export default function App() {
 
 ---
 
-## Children as a function
+## 関数を子として与える
+
+React のコンポーネントには、通常の JSX コンポーネント以外に、関数を子として渡すことができます。この関数は `children` prop を通じて利用することができ、技術的には `render` プロップであるといえます。
+
+`Input` コンポーネントを変更してみましょう。明示的に `render` prop を渡す代わりに、`Input` コンポーネントの子として関数を渡すことにします。
+
+```jsx
+export default function App() {
+  return (
+    <div className="App">
+      <h1>☃️ Temperature Converter 🌞</h1>
+      <Input>
+        {value => (
+          <>
+            <Kelvin value={value} />
+            <Fahrenheit value={value} />
+          </>
+        )}
+      </Input>
+    </div>
+  );
+}
+```
+
+この関数には、`Input` コンポーネントから利用可能な `props.children` prop を通じてアクセスすることができます。ユーザーが入力した値で `props.render` を呼び出す代わりに、ユーザーが入力した値で `props.children` を呼び出すことにします。
+
+```jsx
+function Input(props) {
+  const [value, setValue] = useState("");
+
+  return (
+    <>
+      <input
+        type="text"
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        placeholder="Temp in °C"
+      />
+      {props.children(value)}
+    </>
+  );
+}
+```
+
+このようにすると、`Kelvin` と `Fahrenheit` コンポーネントは、`render` prop の名前を気にする必要なく、値にアクセスすることができるのです。
 
 ---
 
 ## Hooks
 
+レンダープロップをフックに置き換えられる場合もあります。この良い例が Apollo Client です。
+
+> この例を理解するために、Apollo Client の経験は必要ありません。
+
+Apollo Client を使う方法の一つに、`Mutation` コンポーネントと `Query` コンポーネントによるものがあります。高階コンポーネントのセクションで取り上げたものと同じ `Input` の例を見てみましょう。ここでは、`graphql()` 高階コンポーネントの代わりに、レンダープロップを受け取る `Mutation` コンポーネントを使用します。
+
+```jsx:InputRenderProp.js
+import React from "react";
+import "./styles.css";
+
+import { Mutation } from "react-apollo";
+import { ADD_MESSAGE } from "./resolvers";
+
+export default class Input extends React.Component {
+  constructor() {
+    super();
+    this.state = { message: "" };
+  }
+
+  handleChange = (e) => {
+    this.setState({ message: e.target.value });
+  };
+
+  render() {
+    return (
+      <Mutation
+        mutation={ADD_MESSAGE}
+        variables={{ message: this.state.message }}
+        onCompleted={() =>
+          console.log(`Added with render prop: ${this.state.message} `)
+        }
+      >
+        {(addMessage) => (
+          <div className="input-row">
+            <input
+              onChange={this.handleChange}
+              type="text"
+              placeholder="Type something..."
+            />
+            <button onClick={addMessage}>Add</button>
+          </div>
+        )}
+      </Mutation>
+    );
+  }
+}
+```
+
+@[codesandbox](https://codesandbox.io/embed/confident-lederberg-jfdxg)
+
+`Mutation` コンポーネントからデータを必要とする要素にデータを渡すために、子要素として関数を渡します。この関数は、引数を通じてデータの値を受け取ります。
+
+```jsx
+<Mutation mutation={...} variables={...}>
+  {addMessage => <div className="input-row">...</div>}
+</Mutation>
+```
+
+レンダープロップパターンを使用することは現在も可能であり、HOC パターンと比較して好ましいことが多いですが、欠点もあります。
+
+欠点のひとつは、コンポーネントのネストが深くなることです。コンポーネントが複数のミューテーションやクエリにアクセスする必要がある場合、複数の `Mutation` や `Query` コンポーネントをネストすることができます。
+
+```jsx
+<Mutation mutation={FIRST_MUTATION}>
+  {firstMutation => (
+    <Mutation mutation={SECOND_MUTATION}>
+      {secondMutation => (
+        <Mutation mutation={THIRD_MUTATION}>
+          {thirdMutation => (
+            <Element
+              firstMutation={firstMutation}
+              secondMutation={secondMutation}
+              thirdMutation={thirdMutation}
+            />
+          )}
+        </Mutation>
+      )}
+    </Mutation>
+  )}
+</Mutation>
+```
+
+フックのリリース後、Apollo は Apollo Client ライブラリにフックのサポートを追加しました。その結果、`Mutation` や `Query` レンダープロップを使用する代わりに、ライブラリが提供するフックを介して直接データにアクセスできるようになりました。
+
+`Mutation` レンダープロップを使用した例とまったく同じデータを使用する例を見てみましょう。今回は、Apollo Client が提供する `useMutation` フックを使って、コンポーネントにデータを提供します。
+
+```jsx:InputHooks.js
+import React, { useState } from "react";
+import "./styles.css";
+
+import { useMutation } from "@apollo/react-hooks";
+import { ADD_MESSAGE } from "./resolvers";
+
+export default function Input() {
+  const [message, setMessage] = useState("");
+  const [addMessage] = useMutation(ADD_MESSAGE, {
+    variables: { message }
+  });
+
+  return (
+    <div className="input-row">
+      <input
+        onChange={(e) => setMessage(e.target.value)}
+        type="text"
+        placeholder="Type something..."
+      />
+      <button onClick={addMessage}>Add</button>
+    </div>
+  );
+}
+```
+
+@[codesandbox](https://codesandbox.io/embed/apollo-hoc-hooks-n3td8)
+
+`useMutation` フックを使うことで、コンポーネントにデータを提供するために必要なコードの量を減らすことができました。
+
 ---
 
+<!-- TODO: 色々見直す -->
 ### Pros
 
+レンダープロップパターンを使えば、複数のコンポーネント間でロジックやデータを共有することが簡単にできます。render や `children` prop を使用することで、コンポーネントの再利用性が高まります。HOC パターンも基本的に**再利用性**と**データの共有**という共通の問題を解決しますが、レンダープロップパターンは HOC パターンにより発生する可能性のあるいくつかの問題を解決してくれます。
+
+HOC パターンにより発生する可能性のある**名前の衝突**の問題は、props を自動的にマージすることがなくなることで、レンダープロップパターンにおいては解消されます。親コンポーネントによって提供される値により、子コンポーネントに明示的に props を渡します。
+
+明示的に props を渡すことで、HOC の**暗黙の props** の問題は解決されます。要素に渡すべき props は、レンダープロップの引数のリストですべて確認することができます。このようにして、特定の props がどこから来るのかを正確に把握することができるのです。
+
+レンダープロップを通じて、レンダリングを担うコンポーネントからアプリケーションのロジックを分離することができます。レンダープロップを受け取ったステートフルコンポーネントは、データをレンダリングするだけのステートレスコンポーネントにデータを渡すことができます。
+
 ---
 
+<!-- TODO: 色々見直す -->
 ### Cons
+
+レンダープロップで解決しようとした問題の大部分は、フックに取って代わられました。フックは、再利用性とデータ共有をコンポーネントに追加する方法を変えたため、多くの場合、レンダープロップパターンを置き換えることができます。
+
+レンダープロップにはライフサイクルメソッドを追加することができないため、受け取ったデータを変更する必要のないコンポーネントにのみ使用することができます。
 
 ---
 
