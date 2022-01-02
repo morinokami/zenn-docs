@@ -36,7 +36,7 @@ class OrderManager() {
 }
 ```
 
-`OrderManager` クラスの `placeOrder`、`trackOrder`、`cancelOrder` メソッドにアクセスすることができます。これらのメソッドを直接使用しても、JavaScript としてまったく問題はありません。
+ここでは `OrderManager` クラスの `placeOrder`、`trackOrder`、`cancelOrder` メソッドにアクセスすることができます。これらのメソッドを直接使用しても、JavaScript としてまったく問題はありません。
 
 ```js
 const manager = new OrderManager();

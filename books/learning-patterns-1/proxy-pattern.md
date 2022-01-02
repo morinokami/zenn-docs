@@ -49,7 +49,7 @@ const personProxy = new Proxy(person, {});
 
 [動画による説明](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056520/patterns.dev/jspat-51_xvbob9.mp4)
 
-`person` オブジェクトと直接やり取りするのではなく、`personProxy` とやり取りするのです。
+`person` オブジェクトと直接やり取りする代わりに、`personProxy` とやり取りするのです。
 
 `personProxy` プロキシにハンドラを追加してみましょう。プロパティを変更しようとするとき、つまり `Proxy` の `set` メソッドを呼び出すとき、プロパティの以前の値と新しい値をプロキシがログ出力するようにします。また、プロパティにアクセスしようとして、`Proxy` の `get` メソッドを呼び出すとき、プロパティのキーと値を含むわかりやすい文をログ出力するようにします。
 

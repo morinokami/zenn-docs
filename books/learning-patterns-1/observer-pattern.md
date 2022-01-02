@@ -10,7 +10,7 @@ title: "オブザーバパターン"
 
 ![](/images/learning-patterns/observer-pattern-1280w.jpg)
 
-**オブザーバパターン** (observer pattern) により、あるオブジェクト **Observer** を別のオブジェクト **Observable** に *Subscribe* することができます。イベントが発生すると、Observable は自身の Observer に通知をします！
+**オブザーバパターン** (observer pattern) により、あるオブジェクト **Observer** を別のオブジェクト **Observable** に *Subscribe* することができます。イベントが発生すると、Observable は自身の Observer に通知します！
 
 ---
 
@@ -45,7 +45,7 @@ class Observable {
 }
 ```
 
-素晴らしい！これで、subscribe メソッドにより Observer をリストに追加し、unsubscribe メソッドでにより Observer を削除し、notify メソッドによりすべての Subscriber に通知できるようになりました。
+いい感じです！これで、subscribe メソッドにより Observer をリストに追加し、unsubscribe メソッドにより Observer を削除し、notify メソッドによりすべての Subscriber に通知できるようになりました。
 
 この Observable を使って何か作ってみましょう。ここでは、`Button` と `Switch` という 2 つのコンポーネントからなる、非常に簡単なアプリケーションを考えます。
 
@@ -154,7 +154,7 @@ export default function App() {
 }
 ```
 
-これですべての準備が整いました。`handleClick` と `handleToggle` はデータと共に Observable の `notify` メソッドを呼び出し、その後 Observable は Subscriber (この場合 `logger` 関数と `toastify` 関数) に通知します。
+これですべての準備が整いました。`handleClick` と `handleToggle` はデータと共に Observable の `notify` メソッドを呼び出し、その後 Observable は Subscriber (この場合は `logger` 関数と `toastify` 関数) に通知します。
 
 ユーザーがいずれかのコンポーネントを操作するたびに、`logger` と `toastify` 関数の両方が `notify` メソッドに渡したデータとともに通知を受けます！
 
@@ -272,7 +272,7 @@ RxJS には、オブザーバパターンで動作する組み込みの機能や
 
 ## Pros
 
-オブザーバパターンを使うことは、**関心の分離**と単一責任の原則を実現するための素晴らしい方法です。Observer オブジェクトは Observable オブジェクトと密結合しておらず、いつでも結合 (あるいは疎結合化) することができます。Observable オブジェクトはイベントの監視に責任をもつのに対し、Observer は受け取ったデータを処理するだけとなります。
+オブザーバパターンは、**関心の分離**と単一責任の原則を実現するための素晴らしい方法です。Observer オブジェクトは Observable オブジェクトと密結合しておらず、いつでも結合 (あるいは疎結合化) することができます。Observable オブジェクトはイベントの監視に責任をもつのに対し、Observer は受け取ったデータを処理するだけとなります。
 
 ---
 
