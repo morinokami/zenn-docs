@@ -10,13 +10,13 @@ title: "複合パターン"
 
 ![](/images/learning-patterns/compound-pattern-1280w.jpg)
 
-多くのアプリケーションは、互いに関連し合うコンポーネントをもちます。それらは共有された状態を通じて互いに依存し合い、ロジックを共有します。例えば、`select`、ドロップダウン、メニューなどのコンポーネントがこれにあたります。複合コンポーネントパターンを使うと、あるタスクを実行するために連携するコンポーネントを作成することができます。
+多くのアプリケーションは、互いに関連し合うコンポーネントをもちます。それらは共有された状態を通じて互いに依存し合い、ロジックを共有します。例えば、`select`、ドロップダウン、メニューなどのコンポーネントがこれにあたります。**複合コンポーネントパターン** (compound component pattern) を使うと、あるタスクを実行するために連携するコンポーネントを作成することができます。
 
 ---
 
-## Context API
+## コンテクスト API
 
-例として、リスの画像のリストを見てみましょう。リスの画像を表示するだけでなく、ユーザーが画像を編集したり削除したりできるボタンを追加したいと思います。`FlyOut`[^1] コンポーネントを実装して、ユーザーがコンポーネントをトグルすると、リストが表示されるようにします。
+例として、リスの画像のリストを見てみましょう。ここでは、リスの画像を表示するだけでなく、ユーザーが画像を編集したり削除したりできるボタンを追加したいと思います。`FlyOut`[^1] コンポーネントを実装して、ユーザーがコンポーネントをトグルすると、メニュー項目のリストが表示されるようにします。
 
 [^1]: 訳注: ポップアップを意味します。
 
@@ -28,9 +28,9 @@ title: "複合パターン"
 * `List` をトグルする `Toggle` ボタン
 * メニュー項目のリストを格納する `List`
 
-この例では、複合コンポーネントパターンと React の [Context API](https://reactjs.org/docs/context.html) の組み合わせが最適です！
+この例には、複合コンポーネントパターンと React の [コンテクスト API](https://reactjs.org/docs/context.html) の組み合わせが適していそうです！
 
-まず、`FlyOut` コンポーネントを作成しましょう。このコンポーネントは**状態**を保持し、受け取ったすべての**子コンポーネント**に対するトグルの値をもつ `FlyOutProvider` を返します。
+まず、`FlyOut` コンポーネントを作成しましょう。このコンポーネントは**ステート**を保持し、すべての**子コンポーネント**に対してトグルの値を提供する `FlyOutProvider` を返します。
 
 ```jsx
 const FlyOutContext = createContext();
@@ -50,7 +50,7 @@ function FlyOut(props) {
 
 これで、ステートフルな `FlyOut` コンポーネントができあがり、`open` と `toggle` の値を子コンポーネントに渡すことができるようになりました！
 
-`Toggle` コンポーネントを作成しましょう。このコンポーネントは、ユーザーがクリックするとメニューをトグルするコンポーネントをレンダリングします。
+`Toggle` コンポーネントを作成しましょう。このコンポーネントは、ユーザーがクリックするとメニューの表示状態を切り替えるコンポーネントをレンダリングします。
 
 ```jsx
 function Toggle() {
@@ -64,7 +64,7 @@ function Toggle() {
 }
 ```
 
-`Toggle` が `FlyOutContext` プロバイダに実際にアクセスできるようにするには、`Toggle` を `FlyOut` の子コンポーネントとしてレンダリングする必要があります！ここで単純に子コンポーネントとしてレンダリングすることも*可能です*。しかし、`Toggle` コンポーネントを `FlyOut` コンポーネントのプロパティとするという方法もあります。
+`Toggle` が `FlyOutContext` プロバイダに実際にアクセスできるようにするには、`Toggle` を `FlyOut` の子コンポーネントとしてレンダリングする必要があります！ここで、そのように単純に子コンポーネントとしてレンダリングすることも*可能です*。しかし、`Toggle` コンポーネントを `FlyOut` コンポーネントのプロパティとするという方法もあるのです。
 
 ```jsx
 const FlyOutContext = createContext();
@@ -92,7 +92,7 @@ function Toggle() {
 FlyOut.Toggle = Toggle;
 ```
 
-こうすれば、`FlyOut` コンポーネントを他のファイルで使用したい場合は、`FlyOut` をインポートするだけで済みます。
+こうすれば、`FlyOut` コンポーネントを他のファイルで使用したい場合に、`FlyOut` をインポートするだけで済みます。
 
 ```jsx
 import React from "react";
@@ -107,7 +107,7 @@ export default function FlyoutMenu() {
 }
 ```
 
-トグルだけでは十分ではありません。リストアイテムをもつリストも必要で、これは `open` の値に基づいて開閉します。
+トグルだけでは十分ではありません。リストアイテムをもつリストも必要で、これは `open` の値に基づいてメニューを開閉します。
 
 ```jsx
 function List({ children }) {
@@ -120,7 +120,7 @@ function Item({ children }) {
 }
 ```
 
-`List` コンポーネントは、`open` の値が `true` か `false` かによって子コンポーネントをレンダリングします。`Toggle` コンポーネントでおこなったように、`List` と `Item` を `FlyOut` コンポーネントのプロパティとしましょう。
+`List` コンポーネントは、`open` の値が `true` か `false` かに応じて子コンポーネントをレンダリングします。`Toggle` コンポーネントと同様に、`List` と `Item` を `FlyOut` コンポーネントのプロパティとしましょう。
 
 ```jsx
 const FlyOutContext = createContext();
@@ -202,19 +202,17 @@ export function FlyOut(props) {
 }
 ```
 
-すべての子コンポーネントはクローンされ、`open` と `toggle` の値が渡されます。前の例のように Context API を使用する代わりに、`props` を通じてこれら 2 つの値にアクセスできるようになりました。
+すべての子コンポーネントはクローンされ、`open` と `toggle` の値が渡されます。前の例のようにコンテクスト API を使用する代わりに、`props` を通じてこれら 2 つの値にアクセスできるようになりました。
 
 ```jsx
 import React from "react";
 import Icon from "./Icon";
 
-const FlyOutContext = React.createContext();
-
 export function FlyOut(props) {
   const [open, toggle] = React.useState(false);
 
   return (
-    <div>
+    <div className={`flyout`}>
       {React.Children.map(props.children, child =>
         React.cloneElement(child, { open, toggle })
       )}
@@ -222,9 +220,7 @@ export function FlyOut(props) {
   );
 }
 
-function Toggle() {
-  const { open, toggle } = React.useContext(FlyOutContext);
-
+function Toggle({ open, toggle }) {
   return (
     <div className="flyout-btn" onClick={() => toggle(!open)}>
       <Icon />
@@ -232,8 +228,7 @@ function Toggle() {
   );
 }
 
-function List({ children }) {
-  const { open } = React.useContext(FlyOutContext);
+function List({ children, open }) {
   return open && <ul className="flyout-list">{children}</ul>;
 }
 
@@ -252,9 +247,50 @@ FlyOut.Item = Item;
 
 ## Pros
 
+複合コンポーネントは、自身の内部でステートを管理し、それを複数の子コンポーネント間で共有します。複合コンポーネントを使用する場合、私たちが内部のステートについて気にする必要はありません。
+
+また、複合コンポーネントをインポートする場合、そのコンポーネントで利用可能な子コンポーネントを明示的にインポートする必要はありません。
+
+```jsx
+import { FlyOut } from "./FlyOut";
+
+export default function FlyoutMenu() {
+  return (
+    <FlyOut>
+      <FlyOut.Toggle />
+      <FlyOut.List>
+        <FlyOut.Item>Edit</FlyOut.Item>
+        <FlyOut.Item>Delete</FlyOut.Item>
+      </FlyOut.List>
+    </FlyOut>
+  );
+}
+```
+
 ---
 
 ## Cons
+
+`React.Children.map` を使用して値を提供する場合、コンポーネントのネストに関して制限があります。親コンポーネントの*直接の子*だけが `open` と `toggle` props にアクセスできるのです。つまり、それらのコンポーネントを他のコンポーネントでラップすることはできません。
+
+```jsx
+export default function FlyoutMenu() {
+  return (
+    <FlyOut>
+      {/* This breaks */}
+      <div>
+        <FlyOut.Toggle />
+        <FlyOut.List>
+          <FlyOut.Item>Edit</FlyOut.Item>
+          <FlyOut.Item>Delete</FlyOut.Item>
+        </FlyOut.List>
+      </div>
+    </FlyOut>
+  );
+}
+```
+
+`React.cloneElement` により要素をクローンすると、**シャローマージ** (shallow merge) が実行されます。すでに存在する props は、渡された新しい props と一緒にマージされます。これは、`React.cloneElement` メソッドに渡した props と既存の props が同じ名前をもっていた場合、名前の衝突が発生するということです。props がシャローマージされるため、名前が衝突した prop の値は、渡された最新の値で上書きされます。
 
 ---
 
