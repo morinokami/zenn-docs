@@ -122,7 +122,7 @@ export default class Button extends React.Component {
 
 ### アプリケーションを再構成する必要性
 
-<!-- TODO: パスがあっているか確認 -->複数のコンポーネント間でコードを共有する一般的な方法は、[高階コンポーネント](/books/learning-patterns/hoc-pattern%252Emd)または[レンダープロップ](/books/learning-patterns/render-props-pattern%252Emd)パターンを使用することです。どちらのパターンも有効で良い方法ですが、あとからこれらのパターンを追加する場合、アプリケーションを再構成する必要があります。
+複数のコンポーネント間でコードを共有する一般的な方法は、[高階コンポーネント](/morinokami/books/learning-patterns-1/viewer/hoc-pattern)または[レンダープロップ](/morinokami/books/learning-patterns-1/viewer/render-props-pattern)パターンを使用することです。どちらのパターンも有効で良い方法ですが、あとからこれらのパターンを追加する場合、アプリケーションを再構成する必要があります。
 
 コンポーネントが大きいほど厄介となるアプリケーションの再構成に加え、深くネストされたコンポーネント間でコードを共有するために多くのラッパーコンポーネントをもつことで、_**ラッパー地獄 (wrapper hell)**_ と呼ばれる状態につながる可能性もあります。開発者ツールを開き、次のような構造を見掛けることは珍しくはありません:
 
