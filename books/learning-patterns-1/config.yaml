@@ -1,0 +1,26 @@
+title: "フロントエンドのデザインパターン"
+summary: "本書は、Lydia Hallie 氏 と Addy Osmani 氏らによる Learning Patterns (https://www.patterns.dev/) の日本語訳です。原著は大きく 3 つのセクションに分かれていますが、本書は、その最初のセクションである Design Patterns を訳したものとなります。"
+topics: [javascript, react, frontend, web]
+published: true
+price: 0
+chapters:
+  # Design Patterns
+  - forward
+  - introduction
+  - singleton-pattern
+  - proxy-pattern
+  - provider-pattern
+  - prototype-pattern
+  - presentational-container-pattern
+  - observer-pattern
+  - module-pattern
+  - mixin-pattern
+  - mediator-pattern
+  - hoc-pattern
+  - render-props-pattern
+  - hooks-pattern
+  - flyweight-pattern
+  - factory-pattern
+  - compound-pattern
+  - command-pattern
+  - classic-design-patterns

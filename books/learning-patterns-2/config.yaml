@@ -1,0 +1,19 @@
+title: "フロントエンドのレンダリングパターン"
+summary: "Learning Patterns の日本語訳"
+topics: [javascript, react, nextjs]
+published: false
+price: 0
+chapters:
+  # Rendering Patterns
+  - rendering-patterns
+  - reactjs
+  - nextjs
+  - client-side-rendering
+  - server-side-rendering
+  - static-rendering
+  - incremental-static-rendering
+  - progressive-hydration
+  - ssr
+  - react-server-components
+  - react-selective-hydration
+  - islands-architecture
