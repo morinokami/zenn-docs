@@ -10,6 +10,10 @@ title: "モジュールパターン"
 
 ![](/images/learning-patterns/module-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/module-pattern/)
+:::
+
 ## モジュールパターン
 
 アプリケーションとコードベースが大きくなるにつれて、コードを保守しやすく分割しておくことがより重要になります。モジュールパターン (module pattern) は、コードを再利用可能な小さな部品へと分割することを可能にします。

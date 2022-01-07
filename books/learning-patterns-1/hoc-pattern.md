@@ -10,6 +10,10 @@ title: "HOC パターン"
 
 ![](/images/learning-patterns/hoc-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/hoc-pattern/)
+:::
+
 ## HOC パターン
 
 アプリケーションの中で、同じロジックを複数のコンポーネントにおいて使いたいことがよくあります。このロジックには、コンポーネントに特定のスタイルを適用すること、認可を要求すること、グローバルな状態を追加することなどが含まれます。

@@ -10,6 +10,10 @@ title: "フックパターン"
 
 ![](/images/learning-patterns/hooks-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/hooks-pattern/)
+:::
+
 ## フックパターン
 
 React 16.8 では、[フック](https://reactjs.org/docs/hooks-intro.html) (hook) と呼ばれる新機能が導入されました。フックにより、ES2015 のクラスコンポーネントを使わずに、React のステートやライフサイクルメソッドを利用することができるようになります。

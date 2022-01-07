@@ -10,6 +10,10 @@ title: "ファクトリパターン"
 
 ![](/images/learning-patterns/factory-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/factory-pattern/)
+:::
+
 ## ファクトリパターン
 
 ファクトリパターン (factory pattern) では、新しいオブジェクトを作成するために**ファクトリ関数** (factory function) を使用します。関数が `new` キーワードを使わずに新しいオブジェクトを返すとき、その関数はファクトリ関数であるといえます。

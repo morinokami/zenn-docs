@@ -10,6 +10,10 @@ title: "フライウェイトパターン"
 
 ![](/images/learning-patterns/flyweight-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/flyweight-pattern/)
+:::
+
 ## フライウェイトパターン
 
 フライウェイトパターン (flyweight[^1] pattern) は、類似のオブジェクトを大量に作るときに、メモリを節約するための便利な方法です。

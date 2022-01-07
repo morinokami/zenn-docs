@@ -10,6 +10,10 @@ title: "シングルトンパターン"
 
 ![](/images/learning-patterns/singleton-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/singleton-pattern/)
+:::
+
 ## シングルトンパターン
 
 シングルトン (singleton) は、一度だけインスタンス化でき、グローバルにアクセスできるようなクラスのことです。この*単一のインスタンス*をアプリケーション全体で共有できることから、シングルトンはアプリケーションのグローバルな状態を管理するのに適しています。

@@ -10,6 +10,10 @@ title: "プロキシパターン"
 
 ![](/images/learning-patterns/proxy-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/proxy-pattern/)
+:::
+
 ## プロキシパターン
 
 プロキシ (Proxy) オブジェクトを使うと、特定のオブジェクトとのやり取りをより自由にコントロールできるようになります。プロキシオブジェクトは、たとえば値の取得やセットなど、オブジェクトの操作における挙動を決定することができます。

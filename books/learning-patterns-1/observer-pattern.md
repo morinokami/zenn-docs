@@ -10,6 +10,10 @@ title: "オブザーバパターン"
 
 ![](/images/learning-patterns/observer-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/observer-pattern/)
+:::
+
 ## オブザーバパターン
 
 **オブザーバパターン** (observer pattern) により、あるオブジェクト **Observer** を別のオブジェクト **Observable** に *Subscribe* することができます。イベントが発生すると、Observable は自身の Observer に通知します！

@@ -10,6 +10,10 @@ title: "メディエータ・ミドルウェアパターン"
 
 ![](/images/learning-patterns/mediator-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/mediator-pattern/)
+:::
+
 ## メディエータ・ミドルウェアパターン
 
 メディエータパターン (mediator pattern) は、中央にあるメディエータという存在を通してコンポーネントどうしがやり取りすることを可能にします。コンポーネントどうしが直接対話するのではなく、メディエータがリクエストを受け取り、それを転送します。JavaScript では、メディエータは単なるオブジェクトリテラルや関数であることが多いです。

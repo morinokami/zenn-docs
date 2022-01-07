@@ -10,6 +10,10 @@ title: "プロトタイプパターン"
 
 ![](/images/learning-patterns/prototype-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/prototype-pattern/)
+:::
+
 ## プロトタイプパターン
 
 プロトタイプパターン (prototype pattern) は、複数の同じ型のオブジェクトの間でプロパティを共有するために便利な方法です。プロトタイプ (prototype) は JavaScript のネイティブオブジェクトであり、プロトタイプチェーンを通じてオブジェクトからアクセスすることができます。

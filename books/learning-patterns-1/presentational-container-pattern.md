@@ -10,6 +10,10 @@ title: "コンテナ・プレゼンテーションパターン"
 
 ![](/images/learning-patterns/presentational-container-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/presentational-container-pattern/)
+:::
+
 ## コンテナ・プレゼンテーションパターン
 
 React において**関心の分離** (**separation of concerns**) を実現する方法の一つとして、**コンテナ・プレゼンテーションパターン** (Container/Presentational pattern) があります。このパターンにより、ビューをアプリケーションロジックから分離することができます。

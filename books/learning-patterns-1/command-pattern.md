@@ -10,6 +10,10 @@ title: "コマンドパターン"
 
 ![](/images/learning-patterns/command-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/command-pattern/)
+:::
+
 ## コマンドパターン
 
 **コマンドパターン** (command pattern) を用いると、あるタスクを実行するオブジェクトと、そのメソッドを呼び出すオブジェクトを*切り離す*ことができことができます。

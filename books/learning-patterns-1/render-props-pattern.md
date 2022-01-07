@@ -10,6 +10,10 @@ title: "レンダープロップパターン"
 
 ![](/images/learning-patterns/render-props-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/render-props-pattern/)
+:::
+
 ## レンダープロップパターン
 
 [高階コンポーネント](/morinokami/books/learning-patterns-1/viewer/hoc-pattern)のセクションでは、複数のコンポーネントが同じデータにアクセスする場合や、同じロジックを含む場合に、コンポーネントのロジックを再利用できると非常に便利であることを確認しました。

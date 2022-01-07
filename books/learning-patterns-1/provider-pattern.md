@@ -10,6 +10,10 @@ title: "プロバイダパターン"
 
 ![](/images/learning-patterns/provider-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/provider-pattern/)
+:::
+
 ## プロバイダパターン
 
 アプリケーション内の (すべてではないにせよ) 多くのコンポーネントからデータを利用できるようにしたい場合があります。`props` を使用してコンポーネントにデータを渡すことはできますが、アプリケーション内のほぼすべてのコンポーネントがその props の値にアクセスする必要がある場合には、これは困難となります。
