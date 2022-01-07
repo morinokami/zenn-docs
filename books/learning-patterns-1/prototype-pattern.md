@@ -10,6 +10,8 @@ title: "プロトタイプパターン"
 
 ![](/images/learning-patterns/prototype-pattern-1280w.jpg)
 
+## プロトタイプパターン
+
 プロトタイプパターン (prototype pattern) は、複数の同じ型のオブジェクトの間でプロパティを共有するために便利な方法です。プロトタイプ (prototype) は JavaScript のネイティブオブジェクトであり、プロトタイプチェーンを通じてオブジェクトからアクセスすることができます。
 
 アプリケーションの中で、同じ型のオブジェクトをたくさん作らなければならないことがよくあります。このような場合に便利なのが、ES6 クラスのインスタンスを複数作成する方法です。
@@ -170,7 +172,7 @@ console.log("Properties on pet1's prototype: ", Object.keys(pet1.__proto__));
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [Object.create - MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create)
 * [Prototype - ECMA](https://www.ecma-international.org/ecma-262/5.1/#sec-4.3.5)

@@ -10,6 +10,8 @@ title: "フライウェイトパターン"
 
 ![](/images/learning-patterns/flyweight-pattern-1280w.jpg)
 
+## フライウェイトパターン
+
 フライウェイトパターン (flyweight[^1] pattern) は、類似のオブジェクトを大量に作るときに、メモリを節約するための便利な方法です。
 
 [^1]: 訳注: この単語は、ボクシングにおけるフライ級という階級を意味します。
@@ -146,7 +148,7 @@ JavaScript では[プロトタイプ継承](https://developer.mozilla.org/en-US/
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [Flyweight](https://refactoring.guru/design-patterns/flyweight) - Refactoring Guru
 * [Flyweight Design Pattern](https://howtodoinjava.com/design-patterns/structural/flyweight-design-pattern) - How To Do In Java

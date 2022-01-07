@@ -10,6 +10,8 @@ title: "コマンドパターン"
 
 ![](/images/learning-patterns/command-pattern-1280w.jpg)
 
+## コマンドパターン
+
 **コマンドパターン** (command pattern) を用いると、あるタスクを実行するオブジェクトと、そのメソッドを呼び出すオブジェクトを*切り離す*ことができことができます。
 
 たとえば、オンラインフードデリバリーのプラットフォームがあったとします。ユーザーは注文をしたり (place)、追跡したり (track)、キャンセルしたり (cancel) することができます。
@@ -150,17 +152,17 @@ manager.execute(new CancelOrderCommand("1234"));
 
 ---
 
-### Pros
+## Pros
 
 コマンドパターンにより、ある操作を実行するオブジェクトから、メソッドを切り離すことができます。これは、特定の寿命をもつコマンドや、特定の時間にキューに入れられ実行されるようなコマンドを扱う場合に、より細かな制御を可能とします。
 
-### Cons
+## Cons
 
 コマンドパターンのユースケースは非常に限られています。また、不要なボイラープレートをアプリケーションに追加してしまうことも少なくありません。
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [Command Design Pattern](https://sourcemaking.com/design_patterns/command) - SourceMaking
 * [Command Pattern](https://refactoring.guru/design-patterns/command) - Refactoring Guru

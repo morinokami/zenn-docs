@@ -10,6 +10,8 @@ title: "シングルトンパターン"
 
 ![](/images/learning-patterns/singleton-pattern-1280w.jpg)
 
+## シングルトンパターン
+
 シングルトン (singleton) は、一度だけインスタンス化でき、グローバルにアクセスできるようなクラスのことです。この*単一のインスタンス*をアプリケーション全体で共有できることから、シングルトンはアプリケーションのグローバルな状態を管理するのに適しています。
 
 まず、ES2015 のクラスを使って、シングルトンがどのようなものかを見てみましょう。例として、以下のメソッドをもつ `Counter` クラスを作成します:
@@ -229,7 +231,7 @@ test("decrementing 1  times should be 3", () => {
 
 @[codesandbox](https://codesandbox.io/embed/sweet-cache-n55vi)
 
-#### 依存関係の隠蔽
+### 依存関係の隠蔽
 
 他のモジュール (ここでは `superCounter.js`) をインポートする際、そのモジュールがシングルトンをインポートしていることが明らかではない場合があります。他のファイル、たとえばこの場合は `index.js` などで、そのモジュールをインポートしてメソッドを呼び出すかもしれません。このようにして、誤ってシングルトンの値を変更してしまうことがあります。アプリケーション全体でシングルトンの複数のインスタンスが共有されており、それらがすべて変更されてしまうことから、予期せぬ挙動をもたらす可能性があります。
 
@@ -267,7 +269,7 @@ React では、シングルトンではなく、**Redux** や **コンテクス�
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [Do React Hooks replace Redux - Eric Elliott](https://medium.com/javascript-scene/do-react-hooks-replace-redux-210bab340672)
 * [Working with Singletons in JavaScript - Vijay Prasanna](https://alligator.io/js/js-singletons/)

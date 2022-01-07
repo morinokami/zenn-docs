@@ -10,6 +10,8 @@ title: "オブザーバパターン"
 
 ![](/images/learning-patterns/observer-pattern-1280w.jpg)
 
+## オブザーバパターン
+
 **オブザーバパターン** (observer pattern) により、あるオブジェクト **Observer** を別のオブジェクト **Observable** に *Subscribe* することができます。イベントが発生すると、Observable は自身の Observer に通知します！
 
 ---
@@ -282,7 +284,7 @@ Observer が複雑になりすぎると、すべての Subscriber に通知す�
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [RxJS](https://rxjs-dev.firebaseapp.com/)
 * [JavaScript Design Patterns: The Observer Pattern](https://www.sitepoint.com/javascript-design-patterns-observer-pattern/)

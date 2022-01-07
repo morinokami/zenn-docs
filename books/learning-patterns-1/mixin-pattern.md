@@ -10,6 +10,8 @@ title: "ミックスインパターン"
 
 ![](/images/learning-patterns/mixin-pattern-1280w.jpg)
 
+## ミックスインパターン
+
 **ミックスイン** (mixin) は、継承をおこなわずに他のオブジェクトやクラスに再利用可能な機能を追加することができるオブジェクトです。ミックスインを単独で使用することはできません。ミックスインの唯一の目的は、継承を使用せずにオブジェクトやクラスに*機能を追加する*ことだからです。
 
 たとえば、アプリケーションで複数の犬を作成する必要があるとします。しかし、ここで作成する犬は、`name` 以外のプロパティを何ももっていません。
@@ -147,7 +149,7 @@ console.log(
 
 ---
 
-### (ES6 以前の) React
+## (ES6 以前の) React
 
 ES6 クラスが導入される以前は、React のコンポーネントに機能を追加するためにミックスインがよく使われていました。React チームは、現在は[ミックスインの使用を推奨していません](https://reactjs.org/blog/2016/07/13/mixins-considered-harmful.html)。ミックスインはコンポーネントを不要に複雑にしがちで、保守や再利用を困難にするためです。React チームは代わりに[高階コンポーネントの使用を推奨していました](https://medium.com/@dan_abramov/mixins-are-dead-long-live-higher-order-components-94a0d2f9e750)が、これは現在ではフックにより置き換えられる場合が多いです。
 
@@ -157,7 +159,7 @@ ES6 クラスが導入される以前は、React のコンポーネントに機�
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [Functional Mixins](https://medium.com/javascript-scene/functional-mixins-composing-software-ffb66d5e731c) - Eric Elliott
 * [Mixins](https://javascript.info/mixins) - JavaScript Info
