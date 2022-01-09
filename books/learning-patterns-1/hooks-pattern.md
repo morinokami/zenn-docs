@@ -316,7 +316,7 @@ componentDidMount() { ... }
 useEffect(() => { ... }, [])
 
 componentWillUnmount() { ... }
-useEffect(() => { return () => { ... } })
+useEffect(() => { return () => { ... } }, [])
 
 componentDidUpdate() { ... }
 useEffect(() => { ... })
@@ -396,7 +396,7 @@ function useKeyPress(targetKey) {
 
     return () => {
       window.removeEventListener("keydown", handleDown);
-      window.addEventListener("keyup", handleUp);
+      window.removeEventListener("keyup", handleUp);
     };
   }, []);
 

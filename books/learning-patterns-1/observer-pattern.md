@@ -98,7 +98,7 @@ export default function App() {
 }
 ```
 
-現在、`logger` 関数と `toasity` 関数は Observable を認識していません。つまり、Observable はまだこれらの関数に通知することができないということです。これらの関数を Observer とするためには、Observable の `subscribe` メソッドを使って*登録*しなければなりません。
+現在、`logger` 関数と `toastify` 関数は Observable を認識していません。つまり、Observable はまだこれらの関数に通知することができないということです。これらの関数を Observer とするためには、Observable の `subscribe` メソッドを使って*登録*しなければなりません。
 
 ```jsx
 import { ToastContainer, toast } from "react-toastify";

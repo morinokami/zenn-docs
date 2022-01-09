@@ -37,13 +37,13 @@ class Book {
 新しい本をリストに追加する機能を作ってみましょう。同じ ISBN 番号の本、つまりまったく同じ種類の本であれば、 新規に `Book` のインスタンスを作成する必要はありません。その代わり、この本がすでに存在するかどうかをまず確認します。
 
 ```js
-const isbnNumbers = new Set();
+const books = new Map();
 
 const createBook = (title, author, isbn) => {
-  const book = isbnNumbers.has(isbn);
+  const existingBook = books.has(isbn);
 
-  if (book) {
-    return book;
+  if (existingBook) {
+    return books.get(isbn);
   }
 };
 ```
@@ -52,14 +52,14 @@ const createBook = (title, author, isbn) => {
 
 ```js
 const createBook = (title, author, isbn) => {
-  const book = isbnNumbers.has(isbn);
+  const existingBook = books.has(isbn);
 
-  if (book) {
-    return book;
+  if (existingBook) {
+    return books.get(isbn);
   }
 
   const book = new Book(title, author, isbn);
-  isbnNumbers.add(isbn);
+  books.set(isbn, book);
 
   return book;
 };
@@ -72,11 +72,11 @@ const createBook = (title, author, isbn) => {
 ```js
 const bookList = [];
 
-const addBook = (title, author, isbn, availibility, sales) => {
+const addBook = (title, author, isbn, availability, sales) => {
   const book = {
     ...createBook(title, author, isbn),
     sales,
-    availibility,
+    availability,
     isbn
   };
 
