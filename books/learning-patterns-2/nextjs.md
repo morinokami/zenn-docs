@@ -1,5 +1,11 @@
 ---
-title: "Overview of Next.js"
+title: "Next.js 概論"
+---
+
+---
+
+> ハイブリッド React アプリケーションのための Vercel のフレームワーク
+
 ---
 
 ![](/images/learning-patterns/nextjs-1280w.jpg)
@@ -7,3 +13,15 @@ title: "Overview of Next.js"
 :::message
 原文は[こちら](https://www.patterns.dev/posts/nextjs/)
 :::
+
+## Next.js 入門
+
+Vercel により作られた Next.js は、ハイブリッド React アプリケーションのためのフレームワークです。コンテンツを読み込むためのさまざまな手法を理解することは、なかなか難しいものです。Next.js はこれを抽象化し、できる限り簡単にしてくれます。このフレームワークは、スケーラブルでハイパフォーマンスな React のコードを構築することを可能とし、ゼロコンフィグのアプローチを志向しています。これにより、開発者は機能の実装に集中することができます。
+
+それでは、私たちの議論に関連する範囲で Next.js の機能について見ていきましょう。
+
+## 基本的な機能
+
+**プリレンダリング**
+
+
