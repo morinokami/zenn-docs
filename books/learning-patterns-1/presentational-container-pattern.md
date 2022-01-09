@@ -10,6 +10,12 @@ title: "コンテナ・プレゼンテーションパターン"
 
 ![](/images/learning-patterns/presentational-container-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/presentational-container-pattern/)
+:::
+
+## コンテナ・プレゼンテーションパターン
+
 React において**関心の分離** (**separation of concerns**) を実現する方法の一つとして、**コンテナ・プレゼンテーションパターン** (Container/Presentational pattern) があります。このパターンにより、ビューをアプリケーションロジックから分離することができます。
 
 ---
@@ -152,7 +158,7 @@ export default function useDogImages() {
 
 ---
 
-### Pros
+## Pros
 
 コンテナ・プレゼンテーションパターンを使用すると、多くの利点があります。
 
@@ -166,7 +172,7 @@ export default function useDogImages() {
 
 ---
 
-### Cons
+## Cons
 
 コンテナ・プレゼンテーションパターンを用いると、アプリケーションロジックとレンダリングロジックを簡単に分離することができます。しかし、フックを使えば、コンテナ・プレゼンテーションパターンを使わなくても、また、ステートレスな関数コンポーネントをクラスコンポーネントに書き換えなくても、同じ結果を得ることができます。なお、現在では、ステートを利用するためにクラスコンポーネントを作成する必要はないことに注意してください。
 
@@ -174,6 +180,6 @@ export default function useDogImages() {
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [Presentational and Container Components - Dan Abramov](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0)

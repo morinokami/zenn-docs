@@ -10,6 +10,12 @@ title: "オブザーバパターン"
 
 ![](/images/learning-patterns/observer-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/observer-pattern/)
+:::
+
+## オブザーバパターン
+
 **オブザーバパターン** (observer pattern) により、あるオブジェクト **Observer** を別のオブジェクト **Observable** に *Subscribe* することができます。イベントが発生すると、Observable は自身の Observer に通知します！
 
 ---
@@ -92,7 +98,7 @@ export default function App() {
 }
 ```
 
-現在、`logger` 関数と `toasity` 関数は Observable を認識していません。つまり、Observable はまだこれらの関数に通知することができないということです。これらの関数を Observer とするためには、Observable の `subscribe` メソッドを使って*登録*しなければなりません。
+現在、`logger` 関数と `toastify` 関数は Observable を認識していません。つまり、Observable はまだこれらの関数に通知することができないということです。これらの関数を Observer とするためには、Observable の `subscribe` メソッドを使って*登録*しなければなりません。
 
 ```jsx
 import { ToastContainer, toast } from "react-toastify";
@@ -282,7 +288,7 @@ Observer が複雑になりすぎると、すべての Subscriber に通知す�
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [RxJS](https://rxjs-dev.firebaseapp.com/)
 * [JavaScript Design Patterns: The Observer Pattern](https://www.sitepoint.com/javascript-design-patterns-observer-pattern/)

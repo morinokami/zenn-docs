@@ -10,6 +10,12 @@ title: "ファクトリパターン"
 
 ![](/images/learning-patterns/factory-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/factory-pattern/)
+:::
+
+## ファクトリパターン
+
 ファクトリパターン (factory pattern) では、新しいオブジェクトを作成するために**ファクトリ関数** (factory function) を使用します。関数が `new` キーワードを使わずに新しいオブジェクトを返すとき、その関数はファクトリ関数であるといえます。
 
 たとえば、アプリケーションに多くのユーザーが必要だとします。新しいユーザーは、`firstName`、`lastName`、`email` プロパティをもつように作成することができそうです。ファクトリ関数は、新しく作成されたオブジェクトに、`firstName` と `lastName` を返す `fullName` プロパティも追加します。
@@ -69,13 +75,13 @@ createObjectFromArray(["name", "John"]); // { name: "John" }
 
 ---
 
-### Pros
+## Pros
 
 ファクトリパターンは、同じプロパティを共有する小さなオブジェクトを複数作成する場合に便利です。ファクトリ関数により、現在の環境やユーザー固有の設定に依存するカスタムオブジェクトを返すことができます。
 
 ---
 
-### Cons
+## Cons
 
 JavaScript では、ファクトリパターンは `new` キーワードを使わずにオブジェクトを返す関数に過ぎません。[ES6 のアロー関数](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions#Arrow_functions)では、オブジェクトを**暗黙に返す**、小さなファクトリ関数を作ることができます。
 
@@ -109,6 +115,6 @@ const user2 = new User({
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [JavaScript Factory Functions with ES6+](https://medium.com/javascript-scene/javascript-factory-functions-with-es6-4d224591a8b1) - Eric Elliott

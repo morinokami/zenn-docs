@@ -10,6 +10,12 @@ title: "複合パターン"
 
 ![](/images/learning-patterns/compound-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/compound-pattern/)
+:::
+
+## 複合パターン
+
 多くのアプリケーションは、互いに関連し合うコンポーネントをもちます。それらは共有された状態を通じて互いに依存し合い、ロジックを共有します。たとえば、`select`、ドロップダウン、メニューなどのコンポーネントがこれにあたります。**複合コンポーネントパターン** (compound component pattern) を使うと、あるタスクを実行するために連携するコンポーネントを作成することができます。
 
 ---
@@ -294,7 +300,7 @@ export default function FlyoutMenu() {
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [Render Props - React](https://reactjs.org/docs/render-props.html)
 * [React Hooks: Compound Components - Kent C. Dodds](https://kentcdodds.com/blog/compound-components-with-react-hooks)

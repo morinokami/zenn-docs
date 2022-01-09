@@ -10,6 +10,12 @@ title: "レンダープロップパターン"
 
 ![](/images/learning-patterns/render-props-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/render-props-pattern/)
+:::
+
+## レンダープロップパターン
+
 [高階コンポーネント](/morinokami/books/learning-patterns-1/viewer/hoc-pattern)のセクションでは、複数のコンポーネントが同じデータにアクセスする場合や、同じロジックを含む場合に、コンポーネントのロジックを再利用できると非常に便利であることを確認しました。
 
 コンポーネントを再利用しやすくするもう一つの方法が、レンダープロップ (render prop) パターンです。レンダープロップは、JSX の要素を返す関数を値とするコンポーネントの prop です。コンポーネント自身は、レンダープロップ以外のものをレンダリングしません。コンポーネントは、独自のレンダリングロジックを実装する代わりに、単にレンダープロップを呼び出すだけとなります。
@@ -202,7 +208,7 @@ export default function App() {
 
 ---
 
-### レンダープロップ
+## レンダープロップ
 
 ここでレンダープロップの出番です！`Input` コンポーネントが、レンダープロップを受け取るように変更しましょう。
 
@@ -412,7 +418,7 @@ export default function Input() {
 
 ---
 
-### Pros
+## Pros
 
 レンダープロップパターンを使えば、複数のコンポーネント間でロジックやデータを共有することが簡単にできます。render や `children` prop を使用することで、コンポーネントの再利用性が高まります。HOC パターンも基本的に**再利用性**と**データの共有**という共通の問題を解決しますが、レンダープロップパターンは HOC パターンにより発生する可能性のあるいくつかの問題を解決してくれます。
 
@@ -424,7 +430,7 @@ HOC パターンで発生する可能性のある**名前の衝突**の問題は
 
 ---
 
-### Cons
+## Cons
 
 レンダープロップで解決しようとした問題の大部分は、フックによって置き換えられました。再利用性とデータ共有の仕組みをコンポーネントに追加する方法を変えたことで、多くの場合、フックはレンダープロップパターンを置き換えることができるのです。
 
@@ -432,7 +438,7 @@ HOC パターンで発生する可能性のある**名前の衝突**の問題は
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [Render Props - React](https://reactjs.org/docs/render-props.html)
 * [React, Inline Functions, and Performance - Ryan Florence](https://cdb.reacttraining.com/react-inline-functions-and-performance-bdff784f5578)

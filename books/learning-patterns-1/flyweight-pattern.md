@@ -10,6 +10,12 @@ title: "フライウェイトパターン"
 
 ![](/images/learning-patterns/flyweight-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/flyweight-pattern/)
+:::
+
+## フライウェイトパターン
+
 フライウェイトパターン (flyweight[^1] pattern) は、類似のオブジェクトを大量に作るときに、メモリを節約するための便利な方法です。
 
 [^1]: 訳注: この単語は、ボクシングにおけるフライ級という階級を意味します。
@@ -31,13 +37,13 @@ class Book {
 新しい本をリストに追加する機能を作ってみましょう。同じ ISBN 番号の本、つまりまったく同じ種類の本であれば、 新規に `Book` のインスタンスを作成する必要はありません。その代わり、この本がすでに存在するかどうかをまず確認します。
 
 ```js
-const isbnNumbers = new Set();
+const books = new Map();
 
 const createBook = (title, author, isbn) => {
-  const book = isbnNumbers.has(isbn);
+  const existingBook = books.has(isbn);
 
-  if (book) {
-    return book;
+  if (existingBook) {
+    return books.get(isbn);
   }
 };
 ```
@@ -46,14 +52,14 @@ const createBook = (title, author, isbn) => {
 
 ```js
 const createBook = (title, author, isbn) => {
-  const book = isbnNumbers.has(isbn);
+  const existingBook = books.has(isbn);
 
-  if (book) {
-    return book;
+  if (existingBook) {
+    return books.get(isbn);
   }
 
   const book = new Book(title, author, isbn);
-  isbnNumbers.add(isbn);
+  books.set(isbn, book);
 
   return book;
 };
@@ -66,11 +72,11 @@ const createBook = (title, author, isbn) => {
 ```js
 const bookList = [];
 
-const addBook = (title, author, isbn, availibility, sales) => {
+const addBook = (title, author, isbn, availability, sales) => {
   const book = {
     ...createBook(title, author, isbn),
     sales,
-    availibility,
+    availability,
     isbn
   };
 
@@ -146,7 +152,7 @@ JavaScript では[プロトタイプ継承](https://developer.mozilla.org/en-US/
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [Flyweight](https://refactoring.guru/design-patterns/flyweight) - Refactoring Guru
 * [Flyweight Design Pattern](https://howtodoinjava.com/design-patterns/structural/flyweight-design-pattern) - How To Do In Java

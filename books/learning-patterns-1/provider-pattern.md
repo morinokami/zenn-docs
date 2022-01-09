@@ -10,6 +10,12 @@ title: "プロバイダパターン"
 
 ![](/images/learning-patterns/provider-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/provider-pattern/)
+:::
+
+## プロバイダパターン
+
 アプリケーション内の (すべてではないにせよ) 多くのコンポーネントからデータを利用できるようにしたい場合があります。`props` を使用してコンポーネントにデータを渡すことはできますが、アプリケーション内のほぼすべてのコンポーネントがその props の値にアクセスする必要がある場合には、これは困難となります。
 
 コンポーネントツリーのずっと下の方に props を渡していく、*prop のバケツリレー* (prop drilling) と呼ばれる事態に陥ることがよくあります。その props に依存するコードのリファクタリングはほとんど不可能となり、あるデータがどこから来たのかを把握することも難しくなります。
@@ -258,7 +264,7 @@ function useThemeContext() {
 }
 ```
 
-コンポーネントを `ThemeContext.Provider` コンポーネントにより直接ラップする代わりに、提供された値 (provided value) とともにこのコンポーネントを返す HOC を作成することができます。こうすれば、コンテクストのロジックをレンダリングコンポーネントから分離することができ、プロバイダの再利用性が向上します。
+コンポーネントを `ThemeContext.Provider` コンポーネントにより直接ラップする代わりに、コンポーネントをラップして値を提供 (provide) する HOC を作成することができます。こうすれば、コンテクストのロジックをレンダリングコンポーネントから分離することができ、プロバイダの再利用性が向上します。
 
 ```jsx
 function ThemeProvider({children}) {
@@ -431,7 +437,7 @@ const Li = styled.li`
 
 ---
 
-### Pros
+## Pros
 
 プロバイダパターン (コンテクスト API) により、コンポーネントの各レイヤーに手動でデータを渡していくことなく、多くのコンポーネントにデータを届けることができるようになります。
 
@@ -443,7 +449,7 @@ const Li = styled.li`
 
 ---
 
-### Cons
+## Cons
 
 特定のケースでは、プロバイダパターンを使いすぎるとパフォーマンスの問題が発生することがあります。コンテクストを*消費する*すべてのコンポーネントは、ステートが変化するたびに再レンダリングするのです。
 
@@ -522,7 +528,7 @@ ReactDOM.render(<App />, document.getElementById("root"));
 
 ---
 
-### 参考文献
+## 参考文献
 
 * [Context - React](https://reactjs.org/docs/context.html)
 * [How To Use React Context Effectively - Kent C. Dodds](https://kentcdodds.com/blog/how-to-use-react-context-effectively)

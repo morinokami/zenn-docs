@@ -10,6 +10,12 @@ title: "フックパターン"
 
 ![](/images/learning-patterns/hooks-pattern-1280w.jpg)
 
+:::message
+原文は[こちら](https://www.patterns.dev/posts/hooks-pattern/)
+:::
+
+## フックパターン
+
 React 16.8 では、[フック](https://reactjs.org/docs/hooks-intro.html) (hook) と呼ばれる新機能が導入されました。フックにより、ES2015 のクラスコンポーネントを使わずに、React のステートやライフサイクルメソッドを利用することができるようになります。
 
 フックは必ずしもデザインパターンというわけではありませんが、アプリケーションの設計において非常に重要な役割を果たします。従来のデザインパターンの多くは、フックによって置き換えることができます。
@@ -211,7 +217,7 @@ App コンポーネントの構造は、次のように可視化できます:
 
 これは小さなコンポーネントですが、コンポーネント内のロジックはすでにかなり絡まり合っています。ある部分は `Counter` のロジックに特化しており、また他の部分は `Width` のロジックに特化しています。コンポーネントが大きくなるにつれて、コンポーネント内のロジックを構造化すること、コンポーネント内の関連するロジックを見つけることがより困難になっていきます。
 
-絡み合うロジックに加え、ライフサイクルメソッドの中でロジックが**重複しています**。`componentDidMount` と `componentWillUnmount` の両方で、ウィンドウの `resize` イベント用いてアプリケーションの動作をカスタマイズしています。
+絡み合うロジックに加え、ライフサイクルメソッドの中でロジックが**重複しています**。`componentDidMount` と `componentWillUnmount` の両方で、ウィンドウの `resize` イベントを用いてアプリケーションの動作をカスタマイズしています。
 
 ---
 
@@ -310,7 +316,7 @@ componentDidMount() { ... }
 useEffect(() => { ... }, [])
 
 componentWillUnmount() { ... }
-useEffect(() => { return () => { ... } })
+useEffect(() => { return () => { ... } }, [])
 
 componentDidUpdate() { ... }
 useEffect(() => { ... })
@@ -390,7 +396,7 @@ function useKeyPress(targetKey) {
 
     return () => {
       window.removeEventListener("keydown", handleDown);
-      window.addEventListener("keyup", handleUp);
+      window.removeEventListener("keyup", handleUp);
     };
   }, []);
 
