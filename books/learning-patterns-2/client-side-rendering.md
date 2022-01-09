@@ -10,7 +10,11 @@ title: "クライアントサイドレンダリング"
 
 ![](/images/learning-patterns/client-side-rendering-1280w.jpg)
 
-# クライアントサイドレンダリング
+:::message
+原文は[こちら](https://www.patterns.dev/posts/client-side-rendering/)
+:::
+
+## クライアントサイドレンダリング
 
 クライアントサイドレンダリング (Client-Side Rendering、CSR) において、サーバーがレンダリングするのは、ページの骨格となる HTML コンテナのみです。ページ上にコンテンツを表示するために必要なロジック、データの取得、テンプレート化、ルーティングは、ブラウザあるいはクライアント上で実行される JavaScript コードによって処理されます。CSR は、シングルページアプリケーション (single-page application) を構築するための手法として普及し、Web サイトをインストール方式のアプリケーションに近づけることに貢献しました。
 

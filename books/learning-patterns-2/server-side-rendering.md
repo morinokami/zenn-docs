@@ -10,7 +10,11 @@ title: "サーバーサイドレンダリング"
 
 ![](/images/learning-patterns/server-side-rendering-1280w.jpg)
 
-# サーバーサイドレンダリング
+:::message
+原文は[こちら](https://www.patterns.dev/posts/server-side-rendering/)
+:::
+
+## サーバーサイドレンダリング
 
 サーバーサイドレンダリング (SSR) は、Web コンテンツのレンダリング手法として最も歴史のあるものの一つです。SSR では、ユーザーのリクエストに応じて、レンダリングするページコンテンツの完全な HTML を生成します。コンテンツには、データストアや外部 API から取得したデータが含まれることもあります。
 
