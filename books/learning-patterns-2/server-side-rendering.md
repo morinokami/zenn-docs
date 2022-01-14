@@ -90,4 +90,58 @@ setInterval(tick, 1000);
 
 ### 特定の操作においてページ全体の再読み込みが必要となる
 
-クライアント上ですべてのコードが実行されるわけではないため、各操作においてサーバーとのラウンドトリップが何度も必要となり、ページの再読み込みが発生します。このため、ユーザーは操作の合間に長い時間待つ必要があり、
+クライアント上ですべてのコードが実行されるわけではないため、各操作においてサーバーとのラウンドトリップが何度も必要となり、ページの再読み込みが発生します。このため、ユーザーは操作の合間に長い時間待つ必要があり、応答時間が増加する可能性があります。このように、シングルページアプリケーションを SSR で実現することは不可能です。
+
+こうした欠点に対処するため、モダンなフレームワークやライブラリでは、同じアプリケーションをサーバーとクライアントの両方でレンダリングできるようになっています。のちの章では、その詳細について説明していきます。ここではまず、Next.js を使ったシンプルな SSR について見てみましょう。
+
+## Next.js による SSR
+
+Next.js フレームワークも SSR をサポートしており、リクエストごとにサーバー上でページをプリレンダリングすることができます。これは次のように、`getServerSideProps()` という非同期関数をページからエクスポートすることで実現できます。
+
+```js
+export async function getServerSideProps(context) {
+  return {
+    props: {}, // will be passed to the page component as props
+  }
+}
+```
+
+context オブジェクトには、HTTP リクエストオブジェクトとレスポンスオブジェクト、ルーティングパラメータ、クエリストリング、ロケールなどのキーが含まれています。
+
+<!-- The following implementation shows the use of getServerSideProps() for rendering data on a page formatted using React. The full implementation can be found here. -->
+
+## サーバー向け React
+
+React can be rendered isomorphically, which means that it can function both on the browser as well as other platforms like the server. Thus, UI elements may be rendered on the server using React.
+
+React can also be used with universal code which will allow the same code to run in multiple environments. This is made possible by using Node.js on the server or what is known as a Node server. Thus, universal JavaScript may be used to fetch data on the server and then render it using isomorphic React.
+
+これを可能にする React の関数を見てみましょう。
+
+```js
+ReactDOMServer.renderToString(element)
+```
+
+この関数は、React の要素に対応する HTML 文字列を返します。この HTML をクライアントにレンダリングすることでページの読み込みを高速化することができます。
+
+[`renderToString()`](https://reactjs.org/docs/react-dom-server.html#rendertostring) 関数は、[`ReactDOM.hydrate()`](https://reactjs.org/docs/react-dom.html#hydrate) とあわせて使用することができます。これにより、レンダリングされた HTML はそのままでクライアントに保持され、イベントハンドラのみがロード後にアタッチされるようになります。
+
+これを実装するためには、各ページごとに、クライアントとサーバーの両方で `.js` ファイルを使用します。サーバー上の `.js` ファイルが HTML コンテンツをレンダリングし、クライアント上の `.js` ファイルがそれをハイドレートします。
+
+レンダリング対象の HTML を含む `App` という React 要素があり、ユニバーサルな `app.js` ファイルで定義されているとします。サーバーサイドとクライアントサイドの両方の React が、`App` 要素を認識できます。
+
+サーバー上の `ipage.js` ファイルは、以下のようなコードをもちます:
+
+```jsx
+app.get('/', (req, res) => {
+  const app = ReactDOMServer.renderToString(<App />);
+})
+```
+
+定数 `App` が、レンダリング対象の HTML を生成するために使用できるようになりました。クライアント側の `ipage.js` は、`App` 要素がハイドレートされるよう以下のコードを実行します。
+
+```jsx
+ReactDOM.hydrate(<App />, document.getElementById('root'));
+```
+
+React を使った SSR の完全な例については、[こちら](https://www.digitalocean.com/community/tutorials/react-server-side-rendering)で確認することができます。
