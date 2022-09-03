@@ -206,7 +206,7 @@ export { counter };
 
 @[codesandbox](https://codesandbox.io/embed/competent-moon-rvzrr)
 
-オブジェクトは参照渡しであるため、`redButton.js` も `blueButton.js` も同じ `counter` オブジェクトへの参照をインポートしていることになります。これらのファイルのどちらかで `count` の値を変更すると、`counter` の値が変更されますが、その結果へはいずれのファイルからでもアクセスすることができます。
+オブジェクトは参照渡しであるため、`redButton.js` も `blueButton.js` も同じ `counter` オブジェクトへの参照をインポートしていることになります。これらのファイルのどちらかで `count` の値を変更すると `counter` の値が変更され、その結果へはいずれのファイルからでもアクセスすることができます。
 
 ### テスト
 
