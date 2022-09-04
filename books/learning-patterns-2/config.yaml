@@ -5,7 +5,7 @@ published: false
 price: 0
 chapters:
   # Rendering Patterns
-  - rendering-patterns
+  - rendering-introduction
   - reactjs
   - nextjs
   - client-side-rendering
