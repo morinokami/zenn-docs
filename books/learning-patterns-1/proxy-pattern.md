@@ -53,7 +53,10 @@ const personProxy = new Proxy(person, {});
 
 最終的には以下のような挙動となります:
 
-[動画による説明](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056520/patterns.dev/jspat-51_xvbob9.mp4)
+![](/images/learning-patterns/proxy-pattern-1.mp4.gif)
+:::message
+もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056520/patterns.dev/jspat-51_xvbob9.mp4)
+:::
 
 `person` オブジェクトと直接やり取りする代わりに、`personProxy` とやり取りするのです。
 
