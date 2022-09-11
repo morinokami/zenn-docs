@@ -29,7 +29,10 @@ React において**関心の分離** (**separation of concerns**) を実現す�
 
 ---
 
-[動画による説明](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-40_af2vga.mp4)
+![](/images/learning-patterns/presentational-container-pattern-1.mp4.gif)
+:::message
+もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-40_af2vga.mp4)
+:::
 
 犬の画像の取得は**アプリケーションロジック**に対応し、画像の表示は**ビュー**にのみ対応します。
 
@@ -89,7 +92,10 @@ export default class DogImagesContainer extends React.Component {
 
 この 2 つのコンポーネントを組み合わせることで、アプリケーションロジックの処理とビューを分離することが可能になります。
 
-[動画による説明](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056519/patterns.dev/jspat-45_budnfb.mp4)
+![](/images/learning-patterns/presentational-container-pattern-2.mp4.gif)
+:::message
+もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056519/patterns.dev/jspat-45_budnfb.mp4)
+:::
 
 ---
 
@@ -152,7 +158,10 @@ export default function useDogImages() {
 
 `useDogImages` フックを使うことによっても、アプリケーションのロジックをビューから切り離すことができています。`useDogImages` フックから返されたデータは、`DogImages` コンポーネント内で変更されることなく、単に表示のために使用されています。
 
-[動画による説明](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-46_evhhpd.mp4)
+![](/images/learning-patterns/presentational-container-pattern-3.mp4.gif)
+:::message
+もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-46_evhhpd.mp4)
+:::
 
 フックを使うと、コンテナ・プレゼンテーションパターンと同じように、コンポーネント内でロジックとビューを簡単に分離することができます。フックにより、プレゼンテーションコンポーネントをラップするために必要であった、コンテナコンポーネントという余分なレイヤーを省くことができるのです。
 
