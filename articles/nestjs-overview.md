@@ -8,11 +8,12 @@ published: true # 公開設定（falseにすると下書き）
 
 # はじめに
 
-仕事で使用することになった [NestJS](https://nestjs.com/) について、公式の [NestJS Fundamentals Course](https://courses.nestjs.com/) や[ドキュメント](https://docs.nestjs.com/)などで勉強を進めているのですが、新しい概念を消化しきれなくなってきました。そこで、まず全体の俯瞰図をしっかりと頭に入れるために、公式ドキュメントの [Overview](https://docs.nestjs.com/first-steps) に出てくる範囲の概念を図解して整理し、また各々の役割やプロジェクト内のどこにどのように設定していくかについてまとめることにしました (逆に、大枠とは関係ない部分については大胆に省きました)。
+仕事で使用することになった [NestJS](https://nestjs.com/) について、公式の [NestJS Fundamentals Course](https://courses.nestjs.com/) や[ドキュメント](https://docs.nestjs.com/)などで勉強を進めているのですが、新しい概念が次々と現れるため消化しきれなくなってきました。そこで、まず全体の俯瞰図をしっかりと頭に入れるために、公式ドキュメントの [Overview](https://docs.nestjs.com/first-steps) に出てくる範囲の概念を図解して整理し、また各々の役割やプロジェクト内のどこにどのように設定していくかについてまとめることにしました (逆に、大枠とは関係ない部分については大胆に省きました)。
 
 対象読者としては、簡単な CRUD アプリケーションなどを NestJS によって作成したことがあり、基礎的な概念や構成要素について何となくは把握したものの、どうもスッキリとは理解できていない気がする、というような方を想定しています。
 
 この記事が自分のような NestJS 入門者のお役に立てれば幸いです。なお、以下で示した各概念をすべて実装している[サンプル](https://github.com/morinokami/nestjs-app)を用意しましたので、この文章やドキュメントを読みながら、`yarn start:dev` を実行し、手元で色々と実験してみるなど、 何らかのかたちで手を動かしつつ理解することをオススメします。
+
 
 # 基礎的な概念の図解
 
@@ -58,13 +59,14 @@ published: true # 公開設定（falseにすると下書き）
 
 つまり、どのレベルで各機能を使いたいかに応じて、コード内での使用方法も変化するということです。
 
-クライアントと Module から成るアプリケーションの間で展開されるリクエスト・レスポンスのサイクルにおいて、Middleware や Pipe などの概念がどのような順序で作用するかを頭に入れ、各々に適用時のスコープ、レベルがあるということを理解することが、大枠を把握する上で重要です。
+「クライアント」と「複数の Modules から成るアプリケーション」の間で展開されるリクエスト・レスポンスのサイクルにおいて、Middleware や Guard などの概念がどのような順序で作用するかを頭に入れ、各々に適用時のスコープ、レベルがあるということを理解することが、大枠を把握する上で重要です。
 
-続いて以下では、各概念の役割や典型的なコードレベルでの形式、また Controller、Provider、Module 以外については各スコープでの登録方法について要約的に記述していきます。
+続いて以下では、各概念の役割やコードレベルでの典型的な形式、また Controller、Provider、Module 以外については各スコープでの登録方法について要約的に記述していきます。
+
 
 # 各概念の役割と、実装方法に関するまとめ
 
-## Controller
+## Controllers
 
 Controller は
 
@@ -84,17 +86,17 @@ $ nest g controller <name>
 Controller の基本的な構造は次のようになります (公式ドキュメントからの引用となります):
 
 ```ts
-import { Controller, Get, Post, Body } from "@nestjs/common";
-import { CreateCatDto } from "./dto/create-cat.dto";
-import { CatsService } from "./cats.service";
-import { Cat } from "./interfaces/cat.interface";
+import { Controller, Get, Post, Body } from '@nestjs/common';
+import { CreateCatDto } from './dto/create-cat.dto';
+import { CatsService } from './cats.service';
+import { Cat } from './interfaces/cat.interface';
 
-@Controller("cats") // @Controller() デコレータの適用と Route の指定
+@Controller('cats') // @Controller() デコレータの適用と Route の指定
 export class CatsController {
   constructor(private catsService: CatsService) {} // 利用する Service が inject される
 
   @Post() // HTTP メソッドの指定
-  async create(@Body() createCatDto: CreateCatDto) {　// リクエストの Body を取得
+  async create(@Body() createCatDto: CreateCatDto) { // リクエストの Body を取得
     this.catsService.create(createCatDto); // 受け取った値を Service に渡す
   }
 
@@ -108,9 +110,9 @@ export class CatsController {
 Controller を使用するためには、Module へと登録します:
 
 ```ts
-import { Module } from "@nestjs/common";
-import { CatsController } from "./cats.controller";
-import { CatsService } from "./cats.service";
+import { Module } from '@nestjs/common';
+import { CatsController } from './cats.controller';
+import { CatsService } from './cats.service';
 
 @Module({
   controllers: [CatsController], // Controller の登録
@@ -119,12 +121,12 @@ import { CatsService } from "./cats.service";
 export class CatsModule {}
 ```
 
-## Provider
+## Providers
 
 Provider は
 
 - 形式的には、`@Injectable()` デコレータを適用したクラスのこと
-- 依存する対象 (Dependency) を注入 (inject) する
+- 依存対象 (Dependency) として注入 (inject) される
 - Controller から、複雑なタスクを依頼される
 
 以下では、代表的な Provider である Service について記述します。
@@ -140,8 +142,8 @@ $ nest g service <name>
 Service の基本的な構造は次のようになります:
 
 ```ts
-import { Injectable } from "@nestjs/common";
-import { Cat } from "./interfaces/cat.interface";
+import { Injectable } from '@nestjs/common';
+import { Cat } from './interfaces/cat.interface';
 
 @Injectable() // @Injectable() デコレータの適用
 export class CatsService {
@@ -161,9 +163,9 @@ export class CatsService {
 Service を使用するためには、Module へと登録します:
 
 ```ts
-import { Module } from "@nestjs/common";
-import { CatsController } from "./cats.controller";
-import { CatsService } from "./cats.service";
+import { Module } from '@nestjs/common';
+import { CatsController } from './cats.controller';
+import { CatsService } from './cats.service';
 
 @Module({
   controllers: [CatsController],
@@ -172,7 +174,7 @@ import { CatsService } from "./cats.service";
 export class CatsModule {}
 ```
 
-## Module
+## Modules
 
 Module は
 
@@ -181,11 +183,11 @@ Module は
   - `providers`: Nest injector によりインスタンス化される Provider で、Module 内でシェアされる
   - `controllers`: Module で定義される Controller
   - `imports`: Module で使用する Provider をエクスポートしている他の Module
-  - `exports`: Module からエクスポートされる Provider
+  - `exports`: Module からエクスポートされる Provider で、Module の public interface といえる
 - Nest アプリケーションは、少なくとも一つの Module (これを Root module という) を必要とし、これと他のインポートされた Module の連鎖である application graph によって構成される
 - 特定の役割に応じて一つの Module が構成されるべきである
 - `@Global()` デコレータを適用した Module は、グローバルに利用可能となる
-- 動的に使用する Provider を切り替えることも可能
+- 使用する Provider を動的に切り替えることも可能 ([Dynamic modules](https://docs.nestjs.com/modules#dynamic-modules))
 
 Module を作成する際は、
 
@@ -198,9 +200,9 @@ $ nest g module <name>
 Module の基本的な構造は次のようになります:
 
 ```ts
-import { Module } from "@nestjs/common";
-import { CatsController } from "./cats.controller";
-import { CatsService } from "./cats.service";
+import { Module } from '@nestjs/common';
+import { CatsController } from './cats.controller';
+import { CatsService } from './cats.service';
 
 @Module({
   controllers: [CatsController], // Controller の登録
@@ -213,8 +215,8 @@ export class CatsModule {}
 Root module がこの Module を利用する場合は、次のようになります:
 
 ```ts
-import { Module } from "@nestjs/common";
-import { CatsModule } from "./cats/cats.module";
+import { Module } from '@nestjs/common';
+import { CatsModule } from './cats/cats.module';
 
 @Module({
   imports: [CatsModule],
@@ -247,13 +249,13 @@ $ nest g middleware common/middleware/<name>
 Middleware をクラスとして定義した場合の基本的な構造は次のようになります:
 
 ```ts
-import { Injectable, NestMiddleware } from "@nestjs/common";
-import { Request, Response, NextFunction } from "express";
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
 
 @Injectable() // @Injectable() デコレータの適用
 export class LoggerMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    console.log("Request..."); // Middleware の処理
+    console.log('Request...'); // Middleware の処理
     next(); // 次の関数へとコントロールを引き渡す
   }
 }
@@ -262,7 +264,7 @@ export class LoggerMiddleware implements NestMiddleware {
 また、Middleware を関数として定義した場合は次のようになります:
 
 ```ts
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 
 export function logger(req: Request, res: Response, next: NextFunction) {
   console.log(`Request...`);
@@ -270,14 +272,15 @@ export function logger(req: Request, res: Response, next: NextFunction) {
 }
 ```
 
-このように、Middleware の定義の仕方には二種類ありますが、公式ドキュメントには、シンプルな関数型 Middleware をなるべく使うよう書かれています。
+このように Middleware の定義の仕方には二種類ありますが、[公式ドキュメント](https://docs.nestjs.com/middleware#functional-middleware)にはシンプルな関数型 Middleware をなるべく使うよう書かれています。
 
 Middleware を使用するためには、Module において `NestModule` インターフェースを実装し、 `configure()` メソッドを定義します:
 
 ```ts
-import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
-import { LoggerMiddleware } from "./common/middleware/logger.middleware";
-import { CatsModule } from "./cats/cats.module";
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { CatsModule } from './cats/cats.module';
+import { CatsController } from './cats/cats.controller';
 
 @Module({
   imports: [CatsModule],
@@ -286,7 +289,7 @@ export class AppModule implements NestModule { // NestModule インターフェ�
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(LoggerMiddleware) // Middleware の適用
-      .forRoutes("cats"); // 適用対象の Route を指定
+      .forRoutes(CatsController); // 適用対象の Route を指定
   }
 }
 ```
@@ -302,10 +305,11 @@ app.use(LoggerMiddleware);
 
 Exception filter は、
 
+- 形式的には、`@Catch()` デコレータを適用し、`ExceptionFilter` インターフェース を実装したクラスのこと
+- ハンドルされていない例外を処理する
 - `HttpException` をハンドルする組み込みの Global exception filter の制御フローと、それがクライアントへと送り返すレスポンスをコントロールする
   - デフォルトでは、この Global exception filter が例外を検出し HTTP レスポンスへと変換する
-- 形式的には、`@Catch()` デコレータを適用し、`ExceptionFilter` インターフェース を実装したクラスのこと
-- ドキュメントには例として例外をキャッチしレスポンスにタイムスタンプなどの情報を追加する Filter が紹介されている
+- ドキュメントには例として、例外をキャッチしレスポンスにタイムスタンプなどの情報を追加する Filter が紹介されている
 
 Exception filter を作成する際は、
 
@@ -323,24 +327,25 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
-} from "@nestjs/common";
-import { Request, Response } from "express";
+} from '@nestjs/common';
+import { Request, Response } from 'express';
 
 @Catch(HttpException) // @Catch() デコレータの適用、HttpException をハンドルすることを宣言
-export class HttpExceptionFilter<T extends HttpException>
-  implements ExceptionFilter { // ExceptionFilter インターフェースの実装
-  catch(exception: T, host: ArgumentsHost) {
+export class HttpExceptionFilter implements ExceptionFilter { // ExceptionFilter インターフェースの実装
+  catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
 
     // レスポンスを加工
-    response.status(status).json({
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-    });
+    response
+      .status(status)
+      .json({
+        statusCode: status,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      });
   }
 }
 ```
@@ -369,7 +374,7 @@ const app = await NestFactory.create(AppModule);
 app.useGlobalFilters(HttpExceptionFilter);
 ```
 
-なお、Filter のインスタンスを `@UseFilters` へと与えることも可能ですが (`@UseFilters(new HttpExceptionFilter())` のように)、メモリ使用の効率性の観点から、公式ドキュメントではインスタンスよりもクラスを使用することが推奨されています。
+なお、Filter のインスタンスを `@UseFilters` へと与えることも可能ですが (`@UseFilters(new HttpExceptionFilter())` のように)、メモリ使用の効率性の観点から、[公式ドキュメント](https://docs.nestjs.com/exception-filters#binding-filters)ではインスタンスよりもクラスを使用することが推奨されています。
 
 ## Pipes
 
@@ -379,13 +384,16 @@ Pipe は、
 - 大きく二つのユースケースがある:
   - 変換: インプットされたデータを変換する (たとえば文字列から整数へ)
   - バリデーション: インプットされたデータに問題がなければ次の処理へと引き継ぎ、問題があれば例外を送出する
-- 六つの組み込みの Pipe が存在する:
+- 九つの組み込みの Pipe が存在する:
   - `ValidationPipe`
   - `ParseIntPipe`
+  - `ParseFloatPipe`
   - `ParseBoolPipe`
   - `ParseArrayPipe`
   - `ParseUUIDPipe`
+  - `ParseEnumPipe`
   - `DefaultValuePipe`
+  - `ParseFilePipe`
 - ドキュメントには例として、[Joi](https://github.com/hapijs/joi) によるスキーマを使用するバリデーションや、[class-validator](https://github.com/typestack/class-validator) によるデコレータを使用するバリデーションなどが紹介されている
 
 Pipe を作成する際は、
@@ -404,14 +412,14 @@ import {
   Injectable,
   ArgumentMetadata,
   BadRequestException,
-} from "@nestjs/common";
+} from '@nestjs/common';
 
 @Injectable() // @Injectable() デコレータの適用
 export class ParseIntPipe implements PipeTransform<string, number> { // PipeTransform インターフェースの実装
   transform(value: string, metadata: ArgumentMetadata): number {
     const val = parseInt(value, 10); // データの変換
     if (isNaN(val)) {
-      throw new BadRequestException("Validation failed");
+      throw new BadRequestException('Validation failed'); // Pipe を適用できないケースは例外を送出
     }
     return val;
   }
@@ -465,15 +473,15 @@ $ nest g guard common/guards/<name>
 Guard の基本的な構造は次のようになります:
 
 ```ts
-import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
-import { Request } from "express";
-import { Observable } from "rxjs";
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Request } from 'express';
+import { Observable } from 'rxjs';
 
-const API_KEY = "secret";
+const API_KEY = 'secret';
 
 // ヘッダーの Authorization の値を検証する単純な関数
 function validateRequest(request: Request): boolean {
-  return request.header("Authorization") === API_KEY;
+  return request.header('Authorization') === API_KEY;
 }
 
 @Injectable() // @Injectable() デコレータの適用
@@ -540,21 +548,21 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-} from "@nestjs/common";
-import { Observable } from "rxjs";
-import { tap } from "rxjs/operators";
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 @Injectable() // @Injectable() デコレータの適用
 export class LoggingInterceptor implements NestInterceptor { // NestInterceptor  インターフェースの実装
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    console.log("Before...");
+    console.log('Before...');
 
     const now = Date.now();
-    return next.handle().pipe(
-      tap(
-        () => console.log(`After... ${Date.now() - now}ms`) // レスポンスが返るまでの経過時間を表示
-      )
-    );
+    return next
+      .handle()
+      .pipe(
+        tap(() => console.log(`After... ${Date.now() - now}ms`)), // レスポンスが返るまでの経過時間を表示
+      );
   }
 }
 ```
@@ -576,15 +584,16 @@ async create(@Body() createCatDto: CreateCatDto) {
 export class CatsController {}
 ```
 
-一方、グローバルに Guard を登録するためには、`useGlobalGuards()` メソッドを使用します:
+一方、グローバルに Interceptor を登録するためには、`useGlobalInterceptors()` メソッドを使用します:
 
 ```ts
 const app = await NestFactory.create(AppModule);
 app.useGlobalInterceptors(LoggingInterceptor);
 ```
 
+
 # まとめ
 
-入門時に様々な概念が登場し、各概念の役割や使い方に関して多少混乱したため、それらについて図解しまとめました。まずは、Module や Controller、Provider など、レスポンスを返すための基本的な仕組みやコードをまとめるための構造について理解することが大切です。そして、クライアントとサーバとの間でのリクエスト・レスポンスサイクルを制御するための仕組みである残りの概念について、その役割、適用される順序・スコープ、コード内での組み込み方などを頭に入れていくと頭が整理されるはずです。
+入門時に様々な概念が登場し、各概念の役割や使い方に関して多少混乱したため、それらについて図解しまとめました。まずは、Module や Controller、Provider など、レスポンスを返すための基本的な仕組みやコードをまとめるための構造について理解することが大切です。そして、クライアントとサーバとの間でのリクエスト・レスポンスサイクルを制御するための仕組みである残りの概念について、その役割、適用される順序・スコープ、コード内での組み込み方などを頭に入れていくと腑に落ちるはずです。
 
-なお、個人的に最も複雑であると感じたのは、Middleware と Interceptor です。これらは適用範囲が広いため役割がはっきりとしなかったり、また Express や RxJS など、別のレイヤーの概念が顔を出してくるためです。これらを使用する際は、設計時にしっかりと役割などについて取り決めたほうが良さそうだと感じました (これらに関しては、Express そのものだったり、Interceptor という同名かつ同じようなことができる概念があるらしい Spring Framework などを触ったことがある人は、それほど迷わないのだろうか)。
+なお、個人的に最も理解しづらいと感じたのは、Middleware と Interceptor です。これらは適用範囲が広いため役割がはっきりとしなかったり、また Express や RxJS など、別のレイヤーの概念が顔を出してくるためです。これらを使用する際は、設計時にしっかりと役割などについて取り決めたほうが良さそうだと感じました (これらに関しては、Express そのものだったり、Interceptor という同名かつ同じようなことができる概念があるらしい Spring Framework などを触ったことがある人は、それほど迷わないのだろうか)。
