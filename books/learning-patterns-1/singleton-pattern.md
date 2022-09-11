@@ -78,7 +78,10 @@ console.log(counter1.getInstance() === counter2.getInstance()); // false
 
 `new` メソッドが 2 回呼ばれ、`counter1` と `counter2` に異なるインスタンスがセットされます。`counter1` と `counter2` の `getInstance` メソッドが返す値は、異なるインスタンスへの参照となります。両者は厳密に等価 (strictly equal) ではありません！
 
-[動画による説明](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056519/patterns.dev/jspat-52_zkwyk1.mp4)
+![](/images/learning-patterns/singleton-pattern-1.mp4.gif)
+:::message
+もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056519/patterns.dev/jspat-52_zkwyk1.mp4)
+:::
 
 `Counter` クラスのインスタンスが **1 つ**だけ作成されるようにしていきましょう。
 
@@ -166,7 +169,10 @@ export default singletonCounter;
 
 `blueButton.js` と `redButton.js` は、どちらも `counter.js` から**同じインスタンス**をインポートします。このインスタンスは、どちらのファイルにおいても `Counter` としてインポートされています。
 
-[動画による説明](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056519/patterns.dev/jspat-56_wylvcf.mp4)
+![](/images/learning-patterns/singleton-pattern-2.mp4.gif)
+:::message
+もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056519/patterns.dev/jspat-56_wylvcf.mp4)
+:::
 
 `redButton.js` と `blueButton.js` のいずれかで `increment` メソッドを呼び出すと、両方のファイルで `Counter` インスタンスの `counter` プロパティの値が更新されます。赤いボタンと青いボタンのどちらをクリックするかは関係ありません。同じ値がすべてのインスタンスで共有されているのです。このため、異なるファイルでメソッドを呼び出しても、カウンターは 1 ずつ増加します。
 
