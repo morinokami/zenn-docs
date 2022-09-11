@@ -22,7 +22,10 @@ title: "プロバイダパターン"
 
 たとえば、あるデータを含む `App` コンポーネントがあるとします。そしてコンポーネントツリーのずっと下の方に、`ListItem`、`Header`、`Text` コンポーネントがあり、これらはすべてこのデータを必要とします。これらのコンポーネントにデータを届けるには、何層ものコンポーネントを経由してデータを受け渡していかなければなりません。
 
-[動画による説明](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-48_jxmuyy.mp4)
+![](/images/learning-patterns/provider-pattern-1.mp4.gif)
+:::message
+もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-48_jxmuyy.mp4)
+:::
 
 これをコードにより表現すると、以下のようになります:
 
@@ -121,7 +124,10 @@ function Header() {
 
 `data` の値を使用しないコンポーネントは、`data` について気にする必要がまったくなくなりました。props の値を使用しないコンポーネントを何階層も経由して props を受け渡していく必要がなくなったため、リファクタリングがとても楽になります。
 
-[動画による説明](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056519/patterns.dev/jspat-49_ksvtl8.mp4)
+![](/images/learning-patterns/provider-pattern-2.mp4.gif)
+:::message
+もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056519/patterns.dev/jspat-49_ksvtl8.mp4)
+:::
 
 ---
 
