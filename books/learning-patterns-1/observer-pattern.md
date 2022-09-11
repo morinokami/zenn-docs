@@ -70,7 +70,10 @@ export default function App() {
 
 本質的には、私たちがやりたいことは以下のようになります:
 
-[動画による説明](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-41_nxsnbd.mp4)
+![](/images/learning-patterns/observer-pattern-1.mp4.gif)
+:::message
+もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-41_nxsnbd.mp4)
+:::
 
 ユーザーが `handleClick` 関数または `handleToggle` 関数を呼び出すたびに、これらの関数は Observable の `notify` メソッドを呼び出します。`notify` メソッドは、`handleClick` 関数または `handleToggle` 関数によって渡されたデータをすべての Subscriber に通知します。
 
