@@ -106,4 +106,142 @@ https://twitter.com/rauchg/status/1550494847559036928
 
 # 具体例から学ぶ
 
-以下、Vercel が提供する [Examples](https://github.com/vercel/examples/tree/main/build-output-api) から抜粋するかたちで、Vercel の各機能が Build Output API によってどのように表現されるのかについて概要を記述します。Build Output API の全機能を網羅することは当然できませんので、細部まで含めて理解したい場合は[公式のドキュメント](https://vercel.com/docs/build-output-api/v3)を参照してください。
+以下、Vercel が提供する [Examples](https://github.com/vercel/examples/tree/main/build-output-api) から抜粋するかたちで、Vercel の各機能が Build Output API によってどのように表現されるのかについて、その概要を記述します。Build Output API の全機能を網羅することは当然できませんので、細部まで含めてきちんと理解したい場合は[公式のドキュメント](https://vercel.com/docs/build-output-api/v3)を参照してください。
+
+## 基本構造
+
+まず、どのような場合においても共通する構造は以下のようになります:
+
+```
+.vercel
+└── output
+    ├── config.json
+    ├── [vercel primitive]
+    └── ...
+```
+
+`.vercel/output` はビルド結果を包み込むディレクトリです。この直下に、ビルド結果全体に関わる設定ファイルである `config.json` を配置します。そして、`config.json` 並ぶかたちで、必要となる Vercel の機能 (ここではドキュメントに沿って Vercel Primitive と呼んでいます) に対応するディレクトリを一つ以上配置します。
+
+`config.json` の内容は (TypeScript により表わすと) 以下のようになります:
+
+```ts:config.json
+type Config = {
+  version: 3;
+  routes?: Route[];
+  images?: ImagesConfig;
+  wildcard?: WildcardConfig;
+  overrides?: OverrideConfig;
+  cache?: string[];
+};
+```
+
+`version` のみ必須ですが、ここは `3` で固定となります。その他の値について簡単に説明すると、
+
+* `routes`: ルーティングに関する設定
+* `images`: 画像最適化に関する設定
+* `wildcard`: 
+* `overrides`: `static` ディレクトリに置かれた静的ファイルの `Content-Type` などを上書きするための設定
+* `cache`: Vercel 上でビルドもおこなう際にキャッシュ対象を指定するための設定 (ビルドを Vercel 外でおこなう場合は不適)
+
+`Route`、`ImagesConfig`、`WildcardConfig`、`OverrideConfig` の詳細な定義については、公式のドキュメントを参照してください。
+
+TODO: Primitives について
+
+## Static Files
+
+`.vercel/output/static` にファイルを配置することで、[Vercel Edge Network](https://vercel.com/docs/concepts/edge-network/overview)、すなわち Vercel の CDN から静的ファイルを配信することができます。静的ファイルの配信のための設定は `.vercel/output/config.json` からおこなうことができますが、ただデータをパブリックに公開するだけであれば、特別な設定なしに `static` ディレクトリにファイルを配置するだけです。
+
+Vercel が用意している、静的ファイル配信の例 [`examples/build-output-api/static-files`](https://github.com/vercel/examples/tree/main/build-output-api/static-files) を確認してみましょう。まず、プロジェクトの構造は以下のようになっています:
+
+```
+.vercel
+└── output
+    ├── config.json
+    └── static
+        ├── another.html
+        ├── data.json
+        └── index.html
+```
+
+上で説明した基本構造に加えて `.vercel/output/static` というディレクトリがあり、その中に静的ファイルが配置されています (各ファイルの中身はここでは重要ではないため、触れません)。また、`.vercel/output/config.json` は以下のようになっています:
+
+```json:config.json
+{
+  "version": 3
+}
+```
+
+必須項目の `version` のみが指定されています。この `.vercel` ディレクトリは Build Output API の仕様に従っているため、静的ファイルを配信するだけのサービスとしてこのまま Vercel にデプロイすることができます。以下は `vercel` コマンドによりこのプロジェクトをデプロイした場合の例となります:
+
+```sh
+$ gh repo clone vercel/examples
+$ cd examples/build-output-api/static-files
+$ vercel deploy --prebuilt
+Vercel CLI 28.2.5
+? Set up and deploy “~/examples/build-output-api/static-files”? [Y/n] y
+? Which scope do you want to deploy to? foo
+? Link to existing project? [y/N] n
+? What’s your project’s name? static-files
+? In which directory is your code located? ./
+Local settings detected in vercel.json:
+No framework detected. Default Project Settings:
+- Build Command: `npm run vercel-build` or `npm run build`
+- Development Command: None
+- Install Command: `yarn install`, `pnpm install`, or `npm install`
+- Output Directory: `public` if it exists, or `.`
+? Want to modify these settings? [y/N] n
+🔗  Linked to foo/static-files (created .vercel and added it to .gitignore)
+🔍  Inspect: https://vercel.com/foo/static-files/GKXnZL3W6C3Z1XgsocZiKKwQjwrw [858ms]
+✅  Production: https://static-files-zeta.vercel.app [12s]
+📝  Deployed to production. Run `vercel --prod` to overwrite later (https://vercel.link/2F).
+💡  To change the domain or build command, go to https://vercel.com/foo/static-files/settings
+```
+
+動作確認用については、Vercel が用意したデモが https://build-output-api-static-files.vercel.sh にデプロイされていますので、そちらを確認してみてください。
+
+* `/`
+* `/another.html`
+* `/data.json`
+
+というパスにより、`static` ディレクトリ内のファイルにアクセスできるはずです。
+
+また、画像は静的ファイルであることが多いと思いますが、画像の最適化もここに記述したことの延長にあります。詳しくは[こちら](https://vercel.com/blog/build-your-own-web-framework#automatic-image-optimization)などを参照してください。
+
+## Serverless Functions
+
+次に、前半で使用した例を再度用いて、Serverless Function を Build Output API に基づき定義する方法について見ていきます。ここでのポイントは、`.vercel/output/functions` に関数やそのパスを定義すること、そして各関数ごとに `.vc-config.json` を用意することです。以下は、[examples/build-output-api/serverless-functions](https://github.com/vercel/examples/tree/main/build-output-api/serverless-functions) にある Serverless Function の定義です:
+
+```
+.vercel
+└── output
+    ├── config.json
+    └── functions
+        └── index.func
+            ├── index.js
+            ├── node_modules
+            └── .vc-config.json
+```
+
+```json:.vc-config.json
+{
+  "runtime": "nodejs14.x",
+  "handler": "index.js",
+  "launcherType": "Nodejs",
+  "shouldAddHelpers": true
+}
+```
+
+`.vercel/output/functions` が Serverless Function を定義するディレクトリとなり、その下に置かれる `<name>.func` というディレクトリが関数の実体となります。`functions` から `<name>` までが関数のパスとなります。たとえば、上の例では `functions/index.func` となっているため、この関数を呼び出すパスは `/` あるいは `/index` となります。`functions` 以下にディレクトリを挟むこともできます。たとえば、`functions/api/foo.func` という構造になっていれば、この関数のパスは `/api/foo` となります。
+
+`<name>.func/.vc-config.json` が `<name>` 関数の設定ファイルとなります。ここで設定されている各値の意味は次の通りです:
+
+* runtime: [関数のランタイム](https://vercel.com/docs/runtimes)を指定する
+* handler: 関数のハンドラを指定する
+* launcherType: 使用する launcher を指定する。現状は `Nodejs` のみサポートされている
+* shouldAddHelpers: [request や response オブジェクトのヘルパーメソッド](https://vercel.com/docs/runtimes#official-runtimes/node-js/node-js-request-and-response-objects/node-js-helpers)を有効化するかどうかを指定する
+
+つまり、ここでは Node.js のランタイムで動くハンドラを index.js として実装したことを記述しているわけです。このように Build Output API に沿って関数を配置することで、`.vercel` は Serverless Function として認識されるため、前出の `vercel deplot --prebuilt` コマンドによりVercel にデプロイすることができるわけです。この関数の動作確認は https://build-output-api-serverless-functions.vercel.sh からおこなうことができます。
+
+なお、関数を [Edge Functions](https://vercel.com/docs/concepts/functions/edge-functions) としてデプロイしたい場合は、`.vc-config.json` の `runtime` に `edge` を指定し、また `handler` の代わりに `entrypoint` という値を設定する必要があります。`launcherType` と `shouldAddHelpers` は設定できません。さらに、ネイティブの Node.js API が使用できないなど、[Edge Runtime](https://edge-runtime.vercel.sh/packages/runtime) には[様々な制限](https://vercel.com/docs/concepts/functions/edge-functions#limitations)もあるため、その点に注意してください。
+
+
