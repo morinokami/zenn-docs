@@ -21,7 +21,7 @@ published: false
 
 Build Output API は、あるコードの集まりが Vercel 上で動作するために必要となるディレクトリ構造と設定方法を定めた仕様です。たとえば、あるフレームワークのビルド結果が Build Output API に従っていれば、そのビルドを Vercel へとデプロイして実行することができるというわけです。よって、[Nuxt](https://nuxtjs.org/) や [SvelteKit](https://kit.svelte.dev/) などのフレームワークが Vercel 上で動作するためには、それらフレームワークのビルドツールが Build Output API に従ってビルド結果を出力すればいいということになります。また、ディレクトリの内容が特定のフレームワークの出力である必要はなく、手動で Build Output API に沿ってディレクトリの内容を構成することで、Vercel へとデプロイすることも可能です。
 
-一つ例を見てみましょう^[この例は https://github.com/vercel/examples/tree/main/build-output-api/serverless-functions を一部簡略化したものです。]。次は、Build Output API にしたがって作成された、Vercel へとデプロイ可能な Serverless Function のディレクトリ構造と設定ファイルの例です:
+一つ例を見てみましょう^[この例は https://github.com/vercel/examples/tree/main/build-output-api/serverless-functions を一部簡略化したものです。]。以下は、Build Output API にしたがって作成された、Vercel へとデプロイ可能な Serverless Function のディレクトリ構造と設定ファイルの例となります:
 
 ```
 .vercel
@@ -50,7 +50,7 @@ Build Output API は、あるコードの集まりが Vercel 上で動作する�
 * `index.func` の内部に `.vc-config.json` という関数の設定ファイルが存在し、ランタイムなどが定義されている
 * `index.func` の内部に関数の実体である `index.js` というファイルが存在する
 
-などのことです。これらの要件を備えた `.vercel` ディレクトリは、`vercel deploy --prebuilt` コマンドによって Vercel へと直接デプロイすることができます。そして、デプロイされた関数へは、`/index` または `/` というパスからアクセスすることができます。
+などです。こうした要件を備えた `.vercel` ディレクトリは、`vercel deploy --prebuilt` コマンドによって Vercel へと直接デプロイすることができます。そして、デプロイされた関数へは、`/index` または `/` というパスからアクセスすることができます。
 
 このように、あるビルドの出力 (Build Output) が Vercel 上で動作するために満たすべき規約を定めたものが、Build Output API です。コンパイラが特定の CPU アーキテクチャに向けたバイナリを出力すれば、そのバイナリはそのアーキテクチャ上で動作することや、一定の形式のもとでコンテナを作成すれば、その形式をサポートするコンテナランタイム上でそのコンテナは動作することと似ていますね。
 
@@ -76,17 +76,19 @@ https://twitter.com/rauchg/status/1550494847559036928
 
 ## Vercel のインフラ機能を任意のフレームワークへと組み込む
 
-これは上で述べたことから既に明らかであると思います。フロントエンドフレームワーク開発者が、自身のフレームワークを Vercel 対応するために特別なハックを必要としないよう、標準的な仕様を定めたものが Build Output API であるといえます。特に、有名なフレームワークに対しては、それらが Vercel をサポートすることが自身のメリットともなるためか、Vercel みずから[積極的な支援](https://vercel.com/blog/build-output-api#supporting-all-frontend-frameworks)をおこなっているようです。
+これは上で述べたことから既に明らかであると思います。フロントエンドフレームワーク開発者が、自身のフレームワークを Vercel に対応させるために特別なハックを必要としないよう、標準的な仕様を定めたものが Build Output API であるといえます。特に、有名なフレームワークに対しては、それらが Vercel をサポートすることが自身のメリットともなるためか、Vercel みずから[積極的な支援](https://vercel.com/blog/build-output-api#supporting-all-frontend-frameworks)をおこなっているようです。
 
 ## ローカルでビルド結果を検査する
 
+TODO: まだ
+
 ## ビルドとデプロイを分離する
 
-企業のポリシーによっては、ソースコードを外部に共有することができない場合があります。Build Output API により、Vercel 上でのビルドを経由せず、直接ビルド結果をアップロードすることができるようになったため、「ソースコードの共有がネックとなって Vercel を利用することができない」というケースがなくなります。また、CI などでビルドしている場合、Vercel 上でも再度ビルドすることは単純にリソースの無駄遣いでもあるため、そうした無駄を省くことができるともいえるでしょう。
+企業のポリシーによっては、ソースコードを外部に共有することができない場合があります。Build Output API により、Vercel 上でのビルドを経由せず、直接ビルド結果をアップロードすることができるようになったため、「ソースコードの共有がネックとなり Vercel を利用することができない」というケースがなくなります。また、CI などでビルドしている場合、Vercel 上でも再度ビルドすることは単純にリソースの無駄遣いでもあるため、そうした無駄を省くことができるともいえるでしょう。
 
 ## その他
 
-ここまで、主にフレームワーク開発者や 以上に加えて個人的な見解を述べると、まず
+以上に加えて個人的な見解を述べると、まず単純に
 
 **Vercel というプラットフォームに対する理解を深めることができる**
 
@@ -96,17 +98,17 @@ https://twitter.com/rauchg/status/1550494847559036928
 * 管理画面を触る
 * プロジェクトをデプロイする
 
-など様々な経路を通じて Vercel というプラットフォームのイメージを形成するわけですが、ディレクトリ構造と設定ファイルという、開発者が慣れ親しんだ形式によって Vercel というプラットフォームを操作することにより、より立体的な理解が深まると考えています。たとえるならば、AWS を Terraform を通じて操作することで、AWS のマネジメントコンソールをでは得られないhoge
+など様々な経路を通じて Vercel というプラットフォームのイメージを形成するわけですが、ディレクトリ構造と設定ファイルという、開発者が慣れ親しんだ形式によって Vercel というプラットフォームを操作することにより、より立体的な理解が可能になると考えています。たとえるならば、AWS を Terraform を通じて操作することで、AWS のマネジメントコンソールを操作するだけでは得られない理解へと至り、
 
 また、
 
 **Vercel というプラットフォームをどのように抽象化するかという設計について学ぶことができる**
 
-という点はより重要だと思われます。私見ですが、Vercel という組織は、開発者の要求をバランスよく取り込み、Simplicity に基づき過不足なく練り上げられた API を作成することに最も長けた企業の一つであると日々感じており、彼らがそのインフラをどのようなメンタルモデルで抽象化し、実装しているかを観察することで、最適な抽象化についての知見を得ることができると考えています。
+という点はより重要だと思われます。私見ですが、Vercel という組織は、開発者の要求をバランスよく取り込み、かつ Simplicity に基づき過不足なく練り上げられた API を作成することに最も長けた企業の一つであると日々感じており、彼らがそのインフラをどのようなメンタルモデルで抽象化し、また実装しているかを観察することで、最適な抽象化についての知見を得ることができると考えています。
 
 # 具体例から学ぶ
 
-以下、Vercel が提供する [Examples](https://github.com/vercel/examples/tree/main/build-output-api) から抜粋するかたちで、Vercel の各機能が Build Output API によってどのように表現されるのかについて、その概要を記述します。Build Output API の全機能を網羅することは当然できませんので、細部まで含めてきちんと理解したい場合は[公式のドキュメント](https://vercel.com/docs/build-output-api/v3)を参照してください。
+以下、Vercel が提供する [Examples](https://github.com/vercel/examples/tree/main/build-output-api) から抜粋するかたちで、Vercel の各機能が Build Output API によってどのように表現されるのかについて、その概要を記述します。Build Output API の全機能を網羅することは当然できませんので、細部まで含めてきちんと理解したい場合は[公式のドキュメント](https://vercel.com/docs/build-output-api/v3)などを参照してください。
 
 ## 基本構造
 
@@ -120,7 +122,7 @@ https://twitter.com/rauchg/status/1550494847559036928
     └── ...
 ```
 
-`.vercel/output` はビルド結果を包み込むディレクトリです。この直下に、ビルド結果全体に関わる設定ファイルである `config.json` を配置します。そして、`config.json` 並ぶかたちで、必要となる Vercel の機能 (ここではドキュメントに沿って Vercel Primitive と呼んでいます) に対応するディレクトリを一つ以上配置します。
+`.vercel/output` はビルド結果を包み込むディレクトリです。この直下に、ビルド結果全体に関わる設定ファイルである `config.json` を配置します。そして、`config.json` と並ぶかたちで、必要となる Vercel の機能 (ここではドキュメントに沿って Vercel Primitive と呼んでいます) に対応するディレクトリを配置します。
 
 `config.json` の内容は (TypeScript により表わすと) 以下のようになります:
 
@@ -135,21 +137,21 @@ type Config = {
 };
 ```
 
-`version` のみ必須ですが、ここは `3` で固定となります。その他の値について簡単に説明すると、
+[`version`](https://vercel.com/docs/build-output-api/v3#build-output-configuration/supported-properties/version) のみ必須ですが、ここは `3` で固定となります。その他の値について簡単に説明すると、
 
 * `routes`: ルーティングに関する設定
 * `images`: 画像最適化に関する設定
-* `wildcard`: 
+* `wildcard`: TODO: まだ
 * `overrides`: `static` ディレクトリに置かれた静的ファイルの `Content-Type` などを上書きするための設定
 * `cache`: Vercel 上でビルドもおこなう際にキャッシュ対象を指定するための設定 (ビルドを Vercel 外でおこなう場合は不適)
 
-`Route`、`ImagesConfig`、`WildcardConfig`、`OverrideConfig` の詳細な定義については、公式のドキュメントを参照してください。
+これらのうち一部についてはあとで説明しますが、`Route`、`ImagesConfig`、`WildcardConfig`、`OverrideConfig` の詳細な定義については、公式のドキュメントを参照してください。
 
 TODO: Primitives について
 
 ## Static Files
 
-`.vercel/output/static` にファイルを配置することで、[Vercel Edge Network](https://vercel.com/docs/concepts/edge-network/overview)、すなわち Vercel の CDN から静的ファイルを配信することができます。静的ファイルの配信のための設定は `.vercel/output/config.json` からおこなうことができますが、ただデータをパブリックに公開するだけであれば、特別な設定なしに `static` ディレクトリにファイルを配置するだけです。
+Build Output API では、`.vercel/output/static` にファイルを配置することで、[Vercel Edge Network](https://vercel.com/docs/concepts/edge-network/overview)、すなわち Vercel の CDN から静的ファイルを配信することができます。静的ファイルの配信のための設定は `.vercel/output/config.json` からおこなうことができますが、ただデータをパブリックに公開するだけであれば、特別な設定なしに `static` ディレクトリにファイルを配置するだけで可能です。
 
 Vercel が用意している、静的ファイル配信の例 [`examples/build-output-api/static-files`](https://github.com/vercel/examples/tree/main/build-output-api/static-files) を確認してみましょう。まず、プロジェクトの構造は以下のようになっています:
 
@@ -197,15 +199,15 @@ No framework detected. Default Project Settings:
 💡  To change the domain or build command, go to https://vercel.com/foo/static-files/settings
 ```
 
-動作確認用については、Vercel が用意したデモが https://build-output-api-static-files.vercel.sh にデプロイされていますので、そちらを確認してみてください。
+動作確認については、Vercel が用意したデモが https://build-output-api-static-files.vercel.sh にデプロイされていますので、そちらを確認してみてください。
 
-* `/`
-* `/another.html`
-* `/data.json`
+* [`/`](https://build-output-api-static-files.vercel.sh/)
+* [`/another.html`](https://build-output-api-static-files.vercel.sh/another.html)
+* [`/data.json`](https://build-output-api-static-files.vercel.sh/data.json)
 
 というパスにより、`static` ディレクトリ内のファイルにアクセスできるはずです。
 
-また、画像は静的ファイルであることが多いと思いますが、画像の最適化もここに記述したことの延長にあります。詳しくは[こちら](https://vercel.com/blog/build-your-own-web-framework#automatic-image-optimization)などを参照してください。
+また、画像は静的ファイルであることが多いと思いますが、画像の最適化もここに記述したことの延長にあります。詳しくは https://github.com/vercel/examples/tree/main/build-output-api/image-optimization などを参照してください。
 
 ## Serverless Functions
 
@@ -240,8 +242,164 @@ No framework detected. Default Project Settings:
 * launcherType: 使用する launcher を指定する。現状は `Nodejs` のみサポートされている
 * shouldAddHelpers: [request や response オブジェクトのヘルパーメソッド](https://vercel.com/docs/runtimes#official-runtimes/node-js/node-js-request-and-response-objects/node-js-helpers)を有効化するかどうかを指定する
 
-つまり、ここでは Node.js のランタイムで動くハンドラを index.js として実装したことを記述しているわけです。このように Build Output API に沿って関数を配置することで、`.vercel` は Serverless Function として認識されるため、前出の `vercel deplot --prebuilt` コマンドによりVercel にデプロイすることができるわけです。この関数の動作確認は https://build-output-api-serverless-functions.vercel.sh からおこなうことができます。
+つまり、ここでは Node.js のランタイムで動くハンドラを `index.js` として実装したことを記述しているわけです。このように Build Output API に沿って関数を配置することで、`.vercel` ディレクトリは Serverless Function として認識されるため、前出の `vercel deplot --prebuilt` コマンドによりVercel にデプロイすることができるわけです。この関数の動作確認は https://build-output-api-serverless-functions.vercel.sh からおこなうことができます。
 
-なお、関数を [Edge Functions](https://vercel.com/docs/concepts/functions/edge-functions) としてデプロイしたい場合は、`.vc-config.json` の `runtime` に `edge` を指定し、また `handler` の代わりに `entrypoint` という値を設定する必要があります。`launcherType` と `shouldAddHelpers` は設定できません。さらに、ネイティブの Node.js API が使用できないなど、[Edge Runtime](https://edge-runtime.vercel.sh/packages/runtime) には[様々な制限](https://vercel.com/docs/concepts/functions/edge-functions#limitations)もあるため、その点に注意してください。
+なお、関数を [Edge Functions](https://vercel.com/docs/concepts/functions/edge-functions) としてデプロイしたい場合は、`.vc-config.json` の `runtime` に `edge` を指定し、また `handler` の代わりに `entrypoint` という値を設定する必要があります。`launcherType` と `shouldAddHelpers` は設定できません。さらに、ネイティブの Node.js API が使用できないなど、[Edge Runtime](https://edge-runtime.vercel.sh/packages/runtime) には[様々な制限](https://vercel.com/docs/concepts/functions/edge-functions#limitations)もあるため、その点には注意してください。
 
+## Incremental Static Regeneration (ISR)
 
+続いて、少し複雑になりますが、ISR を Build Output API により表現する例を見ていきましょう。ISR を実現する仕組みは Build Output API のドキュメントにおいては [Prerender](https://vercel.com/docs/build-output-api/v3#vercel-primitives/prerender-functions) と表現されており、これは上の Serverless Function の延長として実現することができます。ブログの一覧と詳細を表示する中で ISR を使用するアプリケーション [examples/build-output-api/prerender-functions](https://github.com/vercel/examples/tree/main/build-output-api/prerender-functions) のディレクトリ構造は次のようになっています:
+
+```
+.vercel
+└── output
+    ├── config.json
+    ├── functions
+    │   └── blog
+    │       ├── post.func
+    │       │   ├── index.js
+    │       │   └── .vc-config.json
+    │       ├── post.prerender-config.json
+    │       └── post.prerender-fallback.html
+    └── static
+        ├── blog
+        │   ├── one.html
+        │   └── two.html
+        └── index.html
+```
+
+また、`.vercel/output/functions/blog/post.func/.vc-config.json` の内容は以下となります:
+
+```json:.vercel/output/functions/blog/post.func/.vc-config.json
+{
+  "runtime": "nodejs14.x",
+  "handler": "index.js",
+  "launcherType": "Nodejs",
+  "shouldAddHelpers": true
+}
+```
+
+ここまでの知識に基づき、上の事実から推測できることは以下となります:
+
+* `.vercel/output/static` の内容から、`/` (あるいは `/index`)、`/blog/one.html`、`/blog/two.html` を通じて `static` 以下のファイルにアクセスできる
+* `/blog/post` にアクセスすると、`index.js` が実行される
+
+ところが、前者は想定通り振る舞いません。その理由は、`.vercel/output/config.json` においてルーティング関連の設定がおこなわれているためです。`config.json` の内容を見てみましょう:
+
+```json:.vercel/output/config.json
+{
+  "version": 3,
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/blog/(?<slug>[^/]*)", "dest": "/blog/post?slug=$slug" }
+  ],
+  "overrides": {
+    "blog/one.html": {
+      "path": "blog/one"
+    },
+    "blog/two.html": {
+      "path": "blog/two"
+    }
+  }
+}
+```
+
+`version` についてはこれまでと同様ですが、ここでは [`routes`](https://vercel.com/docs/build-output-api/v3#build-output-configuration/supported-properties/routes) と [`overrides`](https://vercel.com/docs/build-output-api/v3#build-output-configuration/supported-properties/overrides) が追加されています。
+
+わかりやすいのは `overrides` です。たとえばここでは `blog/one.html` の `path` の値が `blog/one` と設定されていますが、これは「`blog/one.html` へとアクセスするためのパスを `blog/one` というパスによりオーバーライドする」という意味になります。つまり、`blog/one.html` を取得するためには `blog/one` へとアクセスする必要がある、ということです。`blog/two.html` についても同様です。
+
+`routes` にはルーティングに関するルールを記述することができ、ここでは 2 つのオブジェクトが定義されています。まず、後半の `{ "src": "/blog/(?<slug>[^/]*)", "dest": "/blog/post?slug=$slug" }` は、`src` にマッチするパスを `dest` へのアクセスとみなし、同時に `slug` をクエリパラメータとして渡すということになります。つまり、たとえば `blog/three` へとアクセスした場合は、`/blog/post?slug=three` が実行されることになります^[なお、この `slug` の値をハンドラ側で受け取る際、`req.query` ではなく、`req.headers['x-now-route-matches']` によって受け取る必要があるようです。この点については挙動としてやや不自然であり、今後変化するかもしれません。]。また、`{ "handle": "filesystem" }` は、リクエストにおける URL パスがファイルシステム上のパスに一致した場合は、それを優先するという設定になります。これを指定しないと、たとえば `blog/one` へとアクセスした際に `blog/post` が実行されてしまいますが、ここではそれは望む動作ではなく、`static` のファイルを返すために必要な設定となっています。
+
+以上の説明により、`config.json` の設定の意味が明らかとなりました。結局、このファイルにより以下のような挙動が実現することになります:
+
+* `/blog/one` と `/blog/two` にアクセスすると、それぞれ `blog/one.html` と `blog/two.html` が返される
+* `/blog/<slug>` にアクセスすると、`/blog/post?slug=<slug>` が実行される
+
+これで ISR の設定について説明する準備が整いました。まず、`post.func/index.js` の内容を見てみましょう:
+
+```js:.vercel/output/functions/blog/post.func/index.js
+const { parse } = require('querystring')
+
+// Here is our imaginary CMS "data source". In this case it's just inlined in the
+// Serverless Function code, but in a real-world scenario this function would
+// probably invoke a request to a database or real CMS to retrieve this information.
+const posts = [
+  { slug: 'three', contents: 'Three ⚽⚽⚽️' },
+  { slug: 'four', contents: 'Four ⚾⚾⚾⚾️' },
+  { slug: 'five', contents: 'Five 🏀🏀🏀🏀🏀' },
+]
+
+module.exports = (req, res) => {
+  const matches = parse(req.headers['x-now-route-matches'])
+  const { slug } = matches
+  const post = posts.find((post) => post.slug === slug)
+
+  const body = []
+  res.setHeader('Content-Type', 'text/html; charset=utf-8')
+
+  if (post) {
+    body.push(`<h1>${slug}</h1><p>${post.contents}</p>`)
+  } else {
+    res.statusCode = 404
+    body.push(
+      `<strong>404:</strong> Sorry! No blog post exists with this name…`
+    )
+  }
+
+  body.push(`<em>This page was rendered at: ${new Date()}</em>`)
+
+  res.end(body.join('<br /><br />'))
+}
+```
+
+内容はそれほど難しくはないでしょう。`posts` を仮想的な CMS のデータソースとみなすと、`slug` が `three`、`four`、`five` の場合は `h1` を含むコンテンツを返し、その他の場合は 404 を返すというのが大意となります。ここで、これらのケースがそれぞれ ISR の挙動に基づく場合、どのように動作するべきかについて考えてみると、以下のようになります:
+
+* 初回リクエストについては SSR をおこなう、ここで生成したページはキャッシュされる
+* キャッシュを invalidate する時間を t と仮定すると、初回リクエストから t 以内にアクセスがあった場合は、キャッシュされたページを返す
+* t 経過後にアクセスがあった場合も同様にキャッシュを返すが、そのページは stale となる
+* stale となったページに関して、バックグラウンドで同ページの再生成がおこなわれる
+* 再生成が完了したあとにアクセスがあれば、以前のキャッシュが invalidate された上で新しいページが返され、キャッシュが更新される
+
+こうした挙動を設定するためのファイルが、まだ説明していなかった `post.prerender-config.json` です。このファイルの内容を見てみましょう:
+
+```json:.vercel/output/functions/blog/post.prerender-config.json
+{
+  "expiration": 5,
+  "group": 1,
+  "bypassToken": "2ec9172003a647b296f324848dd3d407",
+  "allowQuery": ["slug"],
+  "fallback": {
+    "type": "FileFsRef",
+    "mode": 33188,
+    "fsPath": "post.prerender-fallback.html"
+  }
+}
+```
+
+色々な値が設定されていますが、ここで重要なのは `expiration` です。ここにはキャッシュを invalidate するための時間を秒単位で設定することができます。この設定により、`post` 関数は上記した ISR の挙動において t=5s としたときの挙動となります。
+
+また、`fallback` を設定することにより、上記の挙動に対して、キャッシュがなかった場合に代わりにファイルを返すという挙動を追加することができます^[ここではオブジェクトが指定されていますが、ドキュメントではここの型は `String` と書かれており、一貫していないため注意が必要です。]。つまり、キャッシュが存在していない間は `post.prerender-fallback.html` が返されるようになります。なお、Fallback 用の静的ファイルは `<name>.prerender-fallback.<ext>` という形式で命名する必要があるため注意しましょう。
+
+以上により、このプロジェクトは全体として、
+
+* `/blog/one` と `/blog/two` にアクセスすると、それぞれ `blog/one.html` と `blog/two.html` が返される
+* `/blog/<slug>` にアクセスすると、`/blog/post?slug=<slug>` が実行され、キャッシュ生成前は `post.prerender-fallback.html` を返される、キャッシュ生成後は ISR の挙動に従う
+
+のように動作することがわかります。こうした挙動は https://build-output-api-prerender-functions.vercel.sh からも確認できるため、ぜひ試してみてください。
+
+## 応用編
+
+こうした基礎的な設定により実現できる機能に加えて、
+
+* [Build your own web framework](https://vercel.com/blog/build-your-own-web-framework)
+* [Building a modern web framework with Vercel's Build Output API](https://youtu.be/j6qweJF_TIc)
+
+では [Hydration 込みの Static Generation](https://vercel.com/blog/build-your-own-web-framework#static-rendering) や [Edge Server-Rendering](https://vercel.com/blog/build-your-own-web-framework#edge-server-rendering) など、さらなる応用的な事例が紹介されています。これらの記事や動画を通じて、フレームワーク作成のようなより高度な用途において Build Output API をどう活用するか、イメージできるようになるはずです。
+
+また、実際に他のフレームワークがどのように Build Output API に対応したビルドを生成しているかを確認することも楽しいでしょう。[vercel/vercel](https://github.com/vercel/vercel) の [examples](https://github.com/vercel/vercel/tree/main/examples) には Vercel をサポートするフレームワークがサンプルコードとともに列挙されていますので、これらを手元にクローンした上で、`vercel build` を実行してみると良いでしょう。
+
+# まとめ
+
+この記事では、Vercel の新しい機能である Build Output API について、その内容と意義について説明し、また例を通じて実際にどのような形式を満たせば Vercel 上で動作するようになるかについて見てきました。
+
+Build Output API は基本的にフレームワーク開発者が念頭に置かれている機能であるため、単なるフレームワークの利用者側にとっては「明日から実務で使えてすぐに役に立つ」というわけにはいきません。ただ、フロントエンドフレームワーク/ライブラリが再び群雄割拠し始めた 2022 年現在において、Vercel がどういった未来を構想しているのかを垣間見られる (妄想できる) ことや、また Vercel というプラットフォームが別の角度から抽象化される様を観察し、かつそれを標準化された仕様により操作できることは、単純に楽しい経験であると感じたため、記事としてここに公開しました。
