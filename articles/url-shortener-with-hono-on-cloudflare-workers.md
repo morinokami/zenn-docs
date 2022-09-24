@@ -2,8 +2,8 @@
 title: "Hono + Cloudflare Workers で URL shortener を作る"
 emoji: "🪄"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["typescript", "cloudflare", "cloudflareworkers", "hono"]
-published: false
+topics: ["typescript", "hono", "cloudflare", "cloudflareworkers"]
+published: true
 ---
 
 # はじめに
@@ -12,11 +12,15 @@ published: false
 
 https://dub.sh
 
-裏側は Vercel の [Edge Functions](https://vercel.com/docs/concepts/functions/edge-functions) + [Upstash Redis](https://upstash.com/) という組み合わせらしいのですが、サイトを訪れた際の第一印象が心地よかったため、自分も手を動かして URL shortener の簡易版を作りたくなってしまいました。ただ、まったく同じ構成で作成しても面白くないため、自分があまり触ったことがない技術を使うという縛りを設け、Edge 環境として [Cloudflare Workers](https://workers.cloudflare.com) を、データストアとして Workers からアクセス可能なキーバリューストアである [KV](https://www.cloudflare.com/products/workers-kv/) を、そしてルーティングを手軽におこなうために [Hono](https://honojs.dev/) を使用して実装しました。以下では、その実装の概要をチュートリアル的に説明していきます。
+裏側は Vercel の [Edge Functions](https://vercel.com/docs/concepts/functions/edge-functions) + [Upstash Redis](https://upstash.com/) という組み合わせらしいのですが、サイトを訪れた際の第一印象が心地よかったため、なんとなく自分も手を動かして URL shortener の簡易版を作りたくなってしまいました。ただ、まったく同じ構成で作成しても面白くないため、自分があまり触ったことがない技術を使うという縛りを設け、Edge 環境として [Cloudflare Workers](https://workers.cloudflare.com) を、データストアとして Workers からアクセス可能なキーバリューストアである [KV](https://www.cloudflare.com/products/workers-kv/) を、そしてルーティングを手軽におこなうために [Hono](https://honojs.dev/) を使用して実装しました。以下では、その実装の概要をチュートリアル的に説明していきます。
+
+なお、作成したプロジェクトの URL は以下となります:
+
+https://github.com/morinokami/shtn
 
 # Cloudflare Workers について
 
-Cloudflare Workers は、CDN Edge 上で動作するサーバレスの JavaScript 実行環境です。Cloudflare Workers についてはインターネット上に多くの情報が既に存在するため詳しく述べることは割愛します。当たり前のことですが、公式のドキュメントが情報の質と量ともにもっとも充実していますので、詳しく知りたい場合、まずはそちらを参照することをおすすめします:
+Cloudflare Workers は、CDN Edge 上で動作するサーバレスの JavaScript 実行環境です。Cloudflare Workers についてはインターネット上に多くの情報が既に存在するため詳しく述べることは割愛します。当たり前のことですが、公式のドキュメントが情報の質・量ともにもっとも充実していますので、詳しく知りたい場合、まずはそちらを参照することをおすすめします:
 
 https://developers.cloudflare.com/workers/
 
@@ -74,7 +78,7 @@ Attempting to login via OAuth...
 Opening a link in your default browser: https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=...
 ```
 
-Wrangler に諸々の権限を与えるかどうかをブラウザ上で確認されるため、問題なければ Allow を選択してください。無事ログインが完了していれば、`wrangler whoami` コマンドにより、ログインしたアカウントの情報が表示されますので、そちらも確認しておきましょう。
+Wrangler に諸々の権限を与えるかどうかをブラウザ上で確認されるため、問題なければ Allow を選択してください。無事ログインが完了していれば、`wrangler whoami` コマンドによりログインしたアカウントの情報が表示されますので、そちらも確認しておきましょう。
 
 # URL Shortener の実装
 
@@ -84,6 +88,33 @@ Wrangler に諸々の権限を与えるかどうかをブラウザ上で確認�
 
 ```sh
 $ wrangler init shtn
+ ⛅️ wrangler 2.1.6 
+-------------------
+Using npm as package manager.
+✨ Created shtn/wrangler.toml
+Would you like to use git to manage this Worker? (y/n)
+✨ Initialized git repository at shtn
+No package.json found. Would you like to create one? (y/n)
+✨ Created shtn/package.json
+Would you like to use TypeScript? (y/n)
+✨ Created shtn/tsconfig.json
+Would you like to create a Worker at shtn/src/index.ts?
+  None
+❯ Fetch handler
+  Scheduled handler
+✨ Created shtn/src/index.ts
+npm WARN deprecated rollup-plugin-inject@3.0.2: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-inject.
+
+added 103 packages, and audited 104 packages in 3s
+
+11 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+✨ Installed @cloudflare/workers-types and typescript into devDependencies
+
+To start developing your Worker, run `cd shtn && npm start`
+To publish your Worker to the Internet, run `npm run deploy`
 ```
 
 以下のコマンドにより、サーバが問題なく起動するどうか確認します:
@@ -169,7 +200,9 @@ const nanoid = customAlphabet(
 )
 ```
 
-`customAlphabet` により、英数字 62 文字 から 7 桁の文字列を生成する関数を作成しています。最後に、`/api/links` へと POST した際の挙動を定義します^[なお、この実装では「キーの衝突」や「URL の重複」など、短縮 URL 生成において一般に生じる問題への対策はおこなっていません。あくまで簡易版としての実装のため、その点はご了承ください。]:
+ここでは `customAlphabet` により、英数字 62 文字 から 7 桁の文字列を生成する関数を作成しています。
+
+最後に、`/api/links` へと POST した際の挙動を定義します^[なお、この実装では「キーの衝突」や「URL の重複」など、短縮 URL 生成において一般に生じる問題への対策はおこなっていません。あくまで簡易版としての実装のため、その点はご了承ください。]:
 
 ```typescript
 function shorten(url: string) {
@@ -191,7 +224,7 @@ app.post('/api/links', async (c) => {
 
 リクエストの Body を JSON としてパースし、`url` が存在しなければ 400 を返すという簡単なバリデーションをおこないます。そして、与えられた URL に対応する短縮文字列を `shorten` 関数により生成し、それをクライアントへと返します。`shorten` の内部では、`store` への書き込みもおこなっています。
 
-以上により、与えられた URL に対して短縮文字列を返すような API を作成することができました。ローカルで動作確認すると、次のようなレスポンスが変えるはずです:
+以上により、与えられた URL に対して短縮文字列を返すような API を作成することができました。ローカルで動作確認すると、次のようなレスポンスが返るはずです:
 
 ```sh
 $ curl --request POST \
@@ -201,11 +234,11 @@ $ curl --request POST \
 {"key":"j8T0DOc","url":"https://example.com"}
 ```
 
-実際のサービスでは、この API の結果を受け取ったプログラムは、たとえば `https://shtn.io/j8T0DOc` のようなかたちで、`key` の値を用いて短縮 URL をユーザーに表示するはずです。そしてこの短縮 URL へとアクセスしたユーザーは、もとの URL へとリダイレクトされるはずです。よって次に、このリダイレクトをおこなうプログラムが使用するであろう、短縮文字列をもとの URL へと戻すための API の作成に取り掛かります。
+実際のサービスでは、この API の結果を受け取ったプログラムは、たとえば `https://shtn.io/j8T0DOc` のようなかたちで、`key` の値を用いて短縮 URL をユーザーに表示するはずです。そしてその短縮 URL へとアクセスしたユーザーは、もとの URL へとリダイレクトされるはずです。よって次に、そのリダイレクトをおこなうプログラムが使用するであろう、短縮文字列をもとの URL へと戻すための API の作成に取り掛かります。
 
 ### `GET /api/links/:key`
 
-上で取得した `key` をもとに対応する URL を取得するためのエンドポイントを定義しましょう。内容は以下のようになります:
+上で取得した `key` に対応する URL を取得するためのエンドポイントを定義しましょう。内容は以下のようになります:
 
 ```typescript
 function getUrl(key: string) {
@@ -237,7 +270,7 @@ $ curl --request GET \
 
 ## KV を使用した実装
 
-まず、KV を使用するために KV namespace を作成します。namespace は、Production 用と開発時などの Preview 用に 2 つ作成します。ここでは `SHORT_URLS` という名前で作成していきます^[なお、以下で namespace の ID をそのまま記述していますが、これが問題のないことなのかどうか、自分はよくわかっていません。旧バージョンの Wrangler のコントリビュータであった [ashleygwilliams](https://github.com/ashleygwilliams) 氏が everything in a wrangler.toml is committable to publicly accessible version control と[述べている](https://github.com/cloudflare/wrangler/issues/209#issuecomment-541654484)こと、そして自分はクレジットカードを Cloudflare に紐づけていないことから、ここではそのまま公開していますが、これが本当に問題がないことかどうかはドキュメントを読んだ限りでは判断できませんでした。]:
+まず、KV を使用するために KV namespace を作成します。namespace は、Production 用と開発時などの Preview 用に 2 つ作成します。ここでは `SHORT_URLS` という名前で作成していきます^[ここで namespace の ID をそのまま公開していますが、これが問題のないことなのかどうか、自分はよくわかっていないため注意してください。旧バージョンの Wrangler のコントリビュータであった [ashleygwilliams](https://github.com/ashleygwilliams) 氏が everything in a wrangler.toml is committable to publicly accessible version control と[述べている](https://github.com/cloudflare/wrangler/issues/209#issuecomment-541654484)こと、そして自分はクレジットカードを Cloudflare に紐づけていないことから、ここではそのまま公開していますが、これが本当に問題がないことかどうかはドキュメントを読んだ限りでは判断できませんでした。]:
 
 ```sh
 $ wrangler kv:namespace create SHORT_URLS   
@@ -266,7 +299,7 @@ kv_namespaces = [
 ]
 ```
 
-これで KV を使用する準備は整いました。しかし、KV は環境変数としてプログラムから使用されるため、TypeScript からアクセスし型の恩恵を受けるためにはもうひと手間必要です。次のように環境変数へとバインドされる型を定義し、Hono の初期化時にその情報を伝えてあげましょう:
+これで KV を使用する準備は整いました。しかし、プログラムからは環境変数を通じて KV へとアクセスするため、TypeScript を使用して型の恩恵を受けたい場合にはもうひと手間必要です。次のように環境変数へとバインドされる型を定義し、Hono の初期化時にその情報を伝えてあげましょう:
 
 ```typescript
 interface Env {
@@ -298,19 +331,19 @@ app.post('/api/links', async (c) => {
 })
 ```
 
-まず、`shorten` 内で `store[key]` として保存していたコードは、
+まず、`shorten` 内で `store[key] =` として URL を保存していたコードは、
 
 ```typescript
 await kv.put(key, JSON.stringify({ url, createdAt }))
 ```
 
-と、`KVNamespace` の `put` メソッドを使用して保存するように変更しています。`put` メソッドは、第一引数にキー、第二引数に値を受け取ります。`shorten` の第一引数には、
+と、`KVNamespace` の `put` メソッドを使用して保存するように変更しています。`put` メソッドは、第一引数にキー、第二引数に値を受け取ります。また `shorten` の第一引数には、
 
 ```typescript
 const { key } = await shorten(c.env.SHORT_URLS, url)
 ```
 
-と、`c.env` から `SHORT_URLS` を取得してそれを渡します。必要な変更はこれだけです。
+と、`c.env` から取得した `SHORT_URLS` を渡すようにします。必要な変更はこれだけです。
 
 さらに、短縮文字列から URL を復元する API については以下のように変更します:
 
@@ -336,7 +369,7 @@ app.get('/api/links/:key', async (c) => {
 
 こちらに関しても、KV を直接操作する関数 `getUrl` に `SHORT_URLS` を渡している点と、`getUrl` 内部において `KVNamespace` の `get` メソッドを使用している点だけが変更点となります。
 
-これらの変更により、これまで変数内に保存していたオブジェクトが KV によりグローバルに保存されるようになりました。ローカルで多少動作確認してから Cloudflare の[ダッシュボード](https://dash.cloudflare.com/) にアクセスし、Workers > KV から Preview 用の namespace を見てみると、値が保存されていることが確認できるはずです。
+これらの変更により、これまで変数内に保存していたオブジェクトが KV によりグローバルに保存されるようになりました。ローカルで多少動作確認してから Cloudflare の[ダッシュボード](https://dash.cloudflare.com/) にアクセスし、Workers > KV から Preview 用の namespace を見てみると、キーと値が保存されていることが確認できるはずです。
 
 ## 公開
 
@@ -360,4 +393,4 @@ Published shtn (0.21 sec)
 
 # まとめ
 
-ここでは Hono を使って Cloudflare Workers 上に 短縮 URL 生成 API を作成しました。Hono は、ざっとドキュメントを確認した程度ですぐ試せるほどわかりやすく API が設計されていること、ドキュメントや Examples も小さくきれいにまとまっており全体像をつかみやすいこと、たとえば `c.req.param` の引数の指定でも補完が効くなどきちんと TypeScript に対応していること、などが印象に残りました。ここで紹介したような基本的な機能の実装においてはハマることはほぼなく、総じて印象が良かったです。また、Cloudflare Workers や KV についてもほぼ初めて使いましたが、Wrangler の使い心地の良さや、デプロイが爆速であること、インターネット上の情報もそこそこ充実していること、など、基本的に気持ちよく作業することができました。
+ここでは Hono を使って Cloudflare Workers 上に 短縮 URL 生成 API を作成しました。Hono は、ざっとドキュメントを確認するだけですぐ試せるほどわかりやすく API が設計されていること、ドキュメントや Examples も小さくきれいにまとまっており全体像をつかみやすいこと、たとえば `c.req.param` の引数の指定でも補完が効くなどきちんと TypeScript に対応していること、などが印象に残りました。ここで紹介したような基本的な機能の実装においてはハマることはほぼなく、総じて印象が良かったです。また、Cloudflare Workers や KV についてもほぼ初めて使いましたが、Wrangler の使い心地の良さや、デプロイが爆速であること、インターネット上の情報もそこそこ充実していること、などを感じ、基本的に気持ちよく作業することができました。
