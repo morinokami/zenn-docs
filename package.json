@@ -3,10 +3,7 @@
   "description": "https://zenn.dev/morinokami",
   "author": "Shinya Fujino <shf0811@gmail.com>",
   "license": "MIT",
-  "scripts": {
-    "preview": "zenn preview"
-  },
   "dependencies": {
-    "zenn-cli": "^0.1.122"
+    "zenn-cli": "^0.1.128"
   }
 }
