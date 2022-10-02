@@ -53,7 +53,7 @@ const personProxy = new Proxy(person, {});
 
 最終的には以下のような挙動となります:
 
-![](/images/learning-patterns/proxy-pattern-1.mp4.gif)
+![](https://github.com/morinokami/zenn-docs/raw/master/public/images/proxy-pattern-1.mp4.gif)
 :::message
 もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056520/patterns.dev/jspat-51_xvbob9.mp4)
 :::
