@@ -22,10 +22,109 @@ SSR に関する議論から、サーバーでのリクエスト処理時間が�
 
 静的レンダリングでは、ユーザーがアクセスする各ルートに対応する静的な HTML ファイルが事前に生成されます。これらの静的な HTML ファイルは、クライアントの要求に応じて適宜サーバーや CDN から取得されます。
 
-![](https://github.com/morinokami/zenn-docs/raw/master/images/learning-patterns/static-rendering-1.mov.gif)
+![](https://github.com/morinokami/zenn-docs/raw/master/public/images/static-rendering-1.mov.gif)
 
 静的ファイルはキャッシュすることができるため、高いレジリエンシーを提供します。HTML レスポンスを事前に生成しておくため、サーバーでの処理時間はごくわずかとなり、その結果、**TTFB** は高速化し、パフォーマンスが向上します。理想的なシナリオにおいては、クライアントサイドの JS は最小限となり、静的なページはクライアントがレスポンスを受け取るとすぐにインタラクティブになるはずです。このようにして、SSG により **FCP**/**TTI** の高速化を図ることができます。
 
 ![](/images/learning-patterns/static-rendering-1.png)
 
 ## SSG の基本構造
+
+静的レンダリングは、その名が示すとおり、(たとえばユーザーごとのリコメンデーションのような) ログイン済みユーザーに応じてカスタマイズする必要のない、静的なコンテンツに最も適しています。したがって、「会社概要」や「お問い合わせ」、ウェブサイトのブログページ、あるいは e コマースアプリの商品ページなどの静的なページが、静的レンダリングに最適な候補となります。Next.js、Gatsby、そして VuePress などのフレームワークは static generation サポートしています。まず、データを使用せず静的にコンテンツをレンダリングする [Next.js のシンプルな例](https://vercel.com/blog/nextjs-server-side-rendering-vs-static-generation#about-us-page-static-generation-without-data)を見てましょう。
+
+```jsx:pages/about.js
+export default function About() {
+ return <div>
+   <h1>About Us</h1>
+   {/* ... */}
+ </div>
+}
+```
+
+(`next build` により) サイトがビルドされる際、このページは `/about` というルートからアクセス可能な `about.html` という HTML ファイルへとプリレンダリングされます。
+
+## SSG とデータ
+
+「会社概要」や「お問い合わせ」ページなどの静的ページは、データストアからデータを取得せず、そのままレンダリングすることができます。しかし、ブログページや商品ページのようなコンテンツは、データストアから取得したデータを特定のテンプレートへとマージした上で、ビルド時に HTML へとレンダリングする必要があります。
+
+生成される HTML ページの数は、ブログ記事や商品の数に依存します。また、これらのページへとアクセスするために、データを分類・フォーマットしたリストを含む HTML ページである、一覧ページも必要となります。こうしたシナリオは、Next.js の静的レンダリングを使用することで対応することができます。利用可能なデータに基づいて、一覧ページや個別の詳細ページを生成することができるのです。以下でその方法を見てみましょう。
+
+### 一覧ページ
+
+一覧ページの生成は、ページに表示されるコンテンツが外部データに依存するケースです。このデータは、ビルド時にデータベースから取得され、ページを構築するために使用されます。Next.js でこれをおこなうには、ページコンポーネント内で `getStaticProps()` 関数をエクスポートします。この関数は、データを取得するためにビルドサーバー上でビルド時に呼び出されます。そしてデータをページの `props` へと渡すことで、ページコンポーネントをプリレンダリングすることができます。以下は、[この記事](https://vercel.com/blog/nextjs-server-side-rendering-vs-static-generation#all-products-page-static-generation-with-data)において共有されている、商品一覧ページを生成するためのコードです。
+
+```jsx
+// この関数はビルド時にビルドサーバー上で実行されます
+export async function getStaticProps() {
+ return {
+   props: {
+     products: await getProductsFromDatabase()
+   }
+ }
+}
+
+// ページコンポーネントはビルド時に getStaticProps から products を受け取ります
+export default function Products({ products }) {
+ return (
+   <>
+     <h1>Products</h1>
+     <ul>
+       {products.map((product) => (
+         <li key={product.id}>{product.name}</li>
+       ))}
+     </ul>
+   </>
+ )
+}
+```
+
+この関数はクライアントサイドの JS バンドルには含まれないため、データベースからデータを直接取得するために使用することも可能です。
+
+### 個別の詳細ページ
+
+上の例において、商品一覧ページに表示される各商品に対して個別の詳細ページを作成することができます。これらのページは、一覧ページ上の対応する商品をクリックするか、別のルートを通して直接アクセスすることができます。
+
+ID が 101、102、103 などのようになっている商品があるとします。また、これらの商品の情報は、 `/products/101` 、 `/products/102` 、 `/products/103` などのルートからアクセス可能にする必要があるとします。Next.js でビルド時にこれを実現するためには、`getStaticPaths()` 関数を[動的ルート](https://nextjs.org/docs/routing/dynamic-routes)と組み合わせて使用します。
+
+このためには、各商品共通のページコンポーネントとなる `products/[id].js` を作成し、その中で `getStaticPaths()` 関数をエクスポートします。この関数は、ビルド時に個別の商品ページをプリレンダリングするために使用可能な、すべての商品 ID を返します。available here 以下の Next.js のスケルトンは、それをおこなうコードの構造を示しています。
+
+```jsx:pages/products/[id].js
+// getStaticPaths() では、ビルド時にプリレンダリングしたい
+// 商品ページ (/products/[id]) の ID のリストを返す必要があります。
+// データベースからすべての商品を取得することも可能です。
+export async function getStaticPaths() {
+ const products = await getProductsFromDatabase()
+
+ const paths = products.map((product) => ({
+   params: { id: product.id }
+ }))
+
+ // fallback: false は、正しい ID を持たないページは 404 となることを意味します。
+ return { paths, fallback: false }
+}
+
+// params には、生成された各ページの ID が入ります。
+export async function getStaticProps({ params }) {
+ return {
+   props: {
+     product: await getProductFromDatabase(params.id)
+   }
+ }
+}
+
+export default function Product({ product }) {
+ // 商品をレンダリングします。
+}
+```
+
+商品ページの詳細は、特定の商品 ID に対して `getStaticProps` 関数を通じてビルド時に取得できます。ここで `fallback: false` が指定されていることに注意してください。これは、特定のルートや商品 ID に対応するページが存在しない場合に、404 エラーページが表示されることを意味します。
+
+このように、SSG によって様々なタイプのページをプリレンダリングすることができます。
+
+## SSG に関する主要検討事項
+
+以上のように、SSG はクライアントとサーバーにおいて必要となる処理を削減するため、ウェブサイトのパフォーマンスを大幅に向上させます。また、コンテンツはすでに生成済みであり、追加の努力なしでウェブクローラーによってレンダリングされるため、SEO にも優れています。このように、パフォーマンスと SEO の観点から SSG は優れたレンダリングパターンではありますが、特定のアプリケーションが SSG に適しているかどうかを評価する際には、以下の要因を考慮する必要があります。
+
+1. **大量の HTML ファイル**: ユーザーがアクセス可能なすべてのルートに対して、個別の HTML ファイルを生成しておく必要があります。たとえばブログに SSG を使用する場合、データストアに存在するすべてのブログ記事に対して HTML ファイルが生成されます。その後、ブログ記事のいずれかが編集されると、静的 HTML ファイルにその更新を反映させるために再ビルドが必要となります。大量の HTML ファイルを管理することが難しいケースも存在します。
+2. **ホスティングの依存性**: SSG サイトを超高速で応答させるためには、HTML ファイルを格納・配信するためのホスティングプラットフォームも優れている必要があります。最適化された SSG ウェブサイトを、エッジキャッシュを活用するために複数の CDN に直接ホストすることで、最高のパフォーマンスを実現できるでしょう。
+3. **動的コンテンツ**: SSG サイトでは、コンテンツの変更のたびにビルドと再デプロイが必要となります。コンテンツが変更されたにも関わらずまだサイトがビルド・デプロイされていない場合、表示されるコンテンツは古いものになってしまいます。このため、SSG は高度に動的なコンテンツには向いていません。

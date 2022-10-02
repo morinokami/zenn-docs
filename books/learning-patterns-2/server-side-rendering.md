@@ -18,7 +18,7 @@ title: "サーバーサイドレンダリング"
 
 サーバーサイドレンダリング (Server-Side Rendering、SSR) は、Web コンテンツのレンダリング手法として最も歴史のあるものの一つです。SSR では、ユーザーのリクエストに応じて、レンダリングするページコンテンツの完全な HTML を生成します。コンテンツには、データストアや外部 API から取得したデータが含まれることもあります。
 
-![](https://github.com/morinokami/zenn-docs/raw/master/images/learning-patterns/server-side-rendering-1.mov.gif)
+![](https://github.com/morinokami/zenn-docs/raw/master/public/images/server-side-rendering-1.mov.gif)
 
 データソースへの接続とそこからのデータ取得は、サーバー上で処理されます。コンテンツをフォーマットするために必要な HTML もサーバーで生成されます。よって、SSR を使えば、データの取得とテンプレート化のための追加的なラウンドトリップを回避することができます。そのため、レンダリングをおこなうコードはクライアントには不要であり、これに対応する JavaScript をクライアントに送る必要もありません。
 
