@@ -70,7 +70,7 @@ export default function App() {
 
 本質的には、私たちがやりたいことは以下のようになります:
 
-![](/images/learning-patterns/observer-pattern-1.mp4.gif)
+![](https://github.com/morinokami/zenn-docs/raw/master/public/images/observer-pattern-1.mp4.gif)
 :::message
 もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-41_nxsnbd.mp4)
 :::

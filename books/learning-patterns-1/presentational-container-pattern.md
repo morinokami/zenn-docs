@@ -29,7 +29,7 @@ React において**関心の分離** (**separation of concerns**) を実現す�
 
 ---
 
-![](/images/learning-patterns/presentational-container-pattern-1.mp4.gif)
+![](https://github.com/morinokami/zenn-docs/raw/master/public/images/presentational-container-pattern-1.mp4.gif)
 :::message
 もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-40_af2vga.mp4)
 :::
@@ -92,7 +92,7 @@ export default class DogImagesContainer extends React.Component {
 
 この 2 つのコンポーネントを組み合わせることで、アプリケーションロジックの処理とビューを分離することが可能になります。
 
-![](/images/learning-patterns/presentational-container-pattern-2.mp4.gif)
+![](https://github.com/morinokami/zenn-docs/raw/master/public/images/presentational-container-pattern-2.mp4.gif)
 :::message
 もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056519/patterns.dev/jspat-45_budnfb.mp4)
 :::
@@ -158,7 +158,7 @@ export default function useDogImages() {
 
 `useDogImages` フックを使うことによっても、アプリケーションのロジックをビューから切り離すことができています。`useDogImages` フックから返されたデータは、`DogImages` コンポーネント内で変更されることなく、単に表示のために使用されています。
 
-![](/images/learning-patterns/presentational-container-pattern-3.mp4.gif)
+![](https://github.com/morinokami/zenn-docs/raw/master/public/images/presentational-container-pattern-3.mp4.gif)
 :::message
 もとの動画は[こちら](https://res.cloudinary.com/ddxwdqwkr/video/upload/v1609056518/patterns.dev/jspat-46_evhhpd.mp4)
 :::
