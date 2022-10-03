@@ -63,7 +63,7 @@ export async function getStaticProps() {
  }
 }
 
-// ページコンポーネントはビルド時に getStaticProps から products を受け取ります
+// このコンポーネントはビルド時に getStaticProps から products を受け取ります
 export default function Products({ products }) {
  return (
    <>
