@@ -199,7 +199,7 @@ Astro では一般に、再利用可能なコンポーネントは `src/componen
 ```tsx:src/components/MyFirstIsland.tsx
 export function MyFirstIsland() {
   return (
-    <div>Rendered by react</div>
+    <div>Hello from React</div>
   );
 }
 ```
@@ -207,6 +207,31 @@ export function MyFirstIsland() {
 ## 作成したコンポーネントを使用する
 
 それでは、上で作成したコンポーネントを使用してみましょう。
+
+Islands を浮かべるための海に対応するのが `.astro` という拡張子をもつ Astro コンポーネントです。Astro コンポーネントは以下の構造をもちます:
+
+```astro
+---
+// コンポーネントスクリプト (JavaScript)
+---
+<!-- コンポーネントテンプレート (HTML + JS Expressions) -->
+```
+
+`---` は「コードフェンス」と呼ばれ、このフェンスで囲まれた部分がコンポーネントスクリプトです。このコンポーネントスクリプトには、下部のコンポーネントテンプレートをレンダリングするために必要な JavaScript を記述します。そして下部のコンポーネントテンプレートでは、コンポーネントが出力する HTML を組み立てるための JSX ライクな構文を記述します。
+
+よって、上で作成したコンポーネントを使用するためには、
+
+1. コンポーネントスクリプトにおいて対象コンポーネントをインポートし、
+2. コンポーネントテンプレートにおいて対象コンポーネントを使用する
+
+という 2 ステップを辿ればいいわけです。以下がそのコードです:
+
+```astro
+---
+import { MyFirstIsland } from '../components/MyFirstIsland';
+---
+<MyFirstIsland />
+```
 
 # Astro におけるレンダリングパターンと Prerender API
 
