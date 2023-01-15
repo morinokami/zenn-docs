@@ -34,7 +34,7 @@ https://jasonformat.com/islands-architecture/
 なお、Astro 以外の Islands Architecture に基づくフレームワークには、たとえば以下のようなものがあります:
 
 * Marko
-* Iles
+* îles
 * is-land
 * Fresh
 
@@ -197,11 +197,22 @@ $ pnpm astro add react
 Astro では一般に、再利用可能なコンポーネントは `src/components` ディレクトリ以下に配置します。今回は React の複雑な機能は特に用いず、以下のような単純なコンポーネントをまずは作成してみます:
 
 ```tsx:src/components/MyFirstIsland.tsx
+import { useState } from "react";
+
 export function MyFirstIsland() {
+  const [count, setCount] = useState(0);
+
+  function handleClick() {
+    setCount(count + 1);
+  }
+
   return (
-    <div>Hello from React</div>
+    <button onClick={handleClick}>
+      Clicked {count} times
+    </button>
   );
 }
+
 ```
 
 ## 作成したコンポーネントを使用する
@@ -224,16 +235,54 @@ Islands を浮かべるための海に対応するのが `.astro` という拡�
 1. コンポーネントスクリプトにおいて対象コンポーネントをインポートし、
 2. コンポーネントテンプレートにおいて対象コンポーネントを使用する
 
-という 2 ステップを辿ればいいわけです。以下がそのコードです:
+という 2 ステップを辿ればいいわけです。以下がそのコードとなります:
 
-```astro
+```tsx:src/pages/index.astro
 ---
 import { MyFirstIsland } from '../components/MyFirstIsland';
 ---
 <MyFirstIsland />
 ```
 
-# Astro におけるレンダリングパターンと Prerender API
+Astro では、`src/pages` 以下にある `.astro` ファイルはページとみなされます。上のファイルは `pages` の直下に `index.astro` という名前で置かれているため、`/` に対応するページとなります。
+
+`pnpm run dev` により開発サーバを起動し `http://localhost:3000` をブラウザで開くと、
+
+> Clicked 0 times
+
+というボタンが表示されるはずです。
+
+## コンポーネントをハイドレーションする
+
+さて、実は上のコンポーネントはハイドレーションされていません。言い換えると、`http://localhost:3000` にアクセスして表示されたボタンにはイベントハンドラーがアタッチされておらず、ボタンをクリックしても数字は変化しないのです。Astro ではこのようにして、クライアントサイドでの不要な JavaScript の実行を抑制しているわけです。
+
+コンポーネントをハイドレーションするためには、`client:*` ディレクティブを使用します。この `client:*` ディレクティブにより、あるコンポーネントをハイドレーションするかどうか、またそれに必要なコードを送信するタイミングをどうするか、を Astro に対して指示することができます。
+
+たとえば、`client:load` を使用すると、コンポーネントの実行に必要なコードはページロード時に送信されます:
+
+```tsx:src/pages/index.astro
+---
+import { MyFirstIsland } from '../components/MyFirstIsland';
+---
+<MyFirstIsland client:load />
+```
+
+これをブラウザで開くと、見た目上の変化はありませんが、開発者ツールから
+
+* 以前は `<button>Clicked 0 times</button>` という HTML が埋め込まれていた箇所に、`<style>` や `<script>`、`<astro-island>` などの要素が埋め込まれていること
+* 通信されるファイル数が増えていること
+
+などが確認できるはずです。こうした追加のコストを払うことで、コンポーネントを Island として独立して動作させることができます。
+
+なお、`client:load` 以外のディレクティブとしては、ユーザーの viewport にコンポーネントが入ったタイミングでコードのローディングを開始する `client:visible` や、メディアクエリによってローディングのタイミングを指定する `client:media` など、様々なものが用意されています。詳しくは Astro のドキュメントを参照してください:
+
+https://docs.astro.build/en/reference/directives-reference/#client-directives
+
+## Islands
+
+ここまでに書いた内容で、Astro における Islands Architecture
+
+# 補論: Astro におけるレンダリングパターンと Prerender API、そして Astro v2 の話
 
 # おわりに
 
