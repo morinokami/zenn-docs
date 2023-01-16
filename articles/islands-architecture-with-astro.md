@@ -96,7 +96,7 @@ $ pnpm create astro@latest
 ╰─────╯
 ```
 
-今回は pnpm を用いていますが、npm の場合は `npm create astro@latest` を、yarn の場合は `yarn create astro` を実行してください。プロジェクトの名前や、パッケージをその場でインストールするかどうか、Git リポジトリを作成するかどうかなど、いくつかの質問をされますが、今回はすべてデフォルトのままにしてあります。
+ここでは pnpm を用いていますが、npm の場合は `npm create astro@latest` を、yarn の場合は `yarn create astro` を実行してください。プロジェクトの名前や、パッケージをその場でインストールするかどうか、Git リポジトリを作成するかどうかなど、いくつかの質問をされますが、今回はすべてデフォルトのままにしてあります。
 
 なお、このコマンドを使用すると Astro のマスコットキャラクターである Houston^[なお、Houston のロゴカラーをベースとして作成された [Astro 公式の VS Code テーマ](https://marketplace.visualstudio.com/items?itemName=astro-build.houston)も存在します。] が出迎えてくれます。かわいいですね。
 
@@ -122,7 +122,7 @@ $ pnpm run dev
 
 ## プロジェクトに React 用のインテグレーションを追加する
 
-次に、プロジェクトに UI ライブラリ用のインテグレーションを追加します。今回は Astro がサポートしている UI ライブラリの中から React を選択します。他のライブラリを使用する場合でも、同じような流れとなるはずです。
+次に、プロジェクトに UI ライブラリ用のインテグレーションを追加します。今回は Astro がサポートしている UI ライブラリの中から React を選択します。他のライブラリを使用する場合でも同じような流れとなるはずです。
 
 インテグレーションを追加するためには、
 
@@ -186,7 +186,7 @@ $ pnpm astro add react
    success  Successfully updated TypeScript settings
 ```
 
-コマンドを実行すると、これからどのような変更がおこなわれるかが説明され、それを実行して構わないかどうかを確認するプロンプトが表示される、という流れが複数回繰り返されます。今回はすべて yes を選択しました。
+コマンドを実行すると、これからどのような変更がおこなわれるかが具体的に説明され、それを実行して構わないかどうかを確認するプロンプトが表示される、という流れが複数回繰り返されます。今回はすべて yes を選択しました。
 
 以上により、Astro プロジェクトにおいて React を使用するための準備が整いました。
 
@@ -219,7 +219,7 @@ export function MyFirstIsland() {
 
 それでは、上で作成したコンポーネントを使用してみましょう。
 
-Islands を浮かべるための海に対応するのが `.astro` という拡張子をもつ Astro コンポーネントです。Astro コンポーネントは以下の構造をもちます:
+Islands を浮かべるための海に対応するのが、`.astro` という拡張子をもつ Astro コンポーネントです。Astro コンポーネントは以下の構造をもちます:
 
 ```astro
 ---
@@ -228,7 +228,7 @@ Islands を浮かべるための海に対応するのが `.astro` という拡�
 <!-- コンポーネントテンプレート (HTML + JS Expressions) -->
 ```
 
-`---` は「コードフェンス」と呼ばれ、このフェンスで囲まれた部分がコンポーネントスクリプトです。このコンポーネントスクリプトには、下部のコンポーネントテンプレートをレンダリングするために必要な JavaScript を記述します。そして下部のコンポーネントテンプレートでは、コンポーネントが出力する HTML を組み立てるための JSX ライクな構文を記述します。
+`---` は「コードフェンス」と呼ばれ、このフェンスで囲まれた部分がコンポーネントスクリプトです。このコンポーネントスクリプトには、下部のコンポーネントテンプレートをレンダリングするために必要な JavaScript を記述します。そして下部のコンポーネントテンプレートには、コンポーネントが出力する HTML を組み立てるための JSX ライクな構文を記述します。
 
 よって、上で作成したコンポーネントを使用するためには、
 
@@ -246,19 +246,24 @@ import { MyFirstIsland } from '../components/MyFirstIsland';
 
 Astro では、`src/pages` 以下にある `.astro` ファイルはページとみなされます。上のファイルは `pages` の直下に `index.astro` という名前で置かれているため、`/` に対応するページとなります。
 
-`pnpm run dev` により開発サーバを起動し `http://localhost:3000` をブラウザで開くと、
+この時点で `pnpm run dev` により開発サーバを起動し `http://localhost:3000` をブラウザで開くと、
 
 > Clicked 0 times
 
 というボタンが表示されるはずです。
 
-## コンポーネントをハイドレーションする
+## コンポーネントをハイドレートする
 
-さて、実は上のコンポーネントはハイドレーションされていません。言い換えると、`http://localhost:3000` にアクセスして表示されたボタンにはイベントハンドラーがアタッチされておらず、ボタンをクリックしても数字は変化しないのです。Astro ではこのようにして、クライアントサイドでの不要な JavaScript の実行を抑制しているわけです。
+さて、実は上のコンポーネントはハイドレートされていません。言い換えると、`http://localhost:3000` にアクセスして表示されたボタンにはイベントハンドラーがアタッチされておらず、ボタンをクリックしても数字は変化しません。コンポーネントが出力した HTML だけが含まれるのです。Astro ではこのようにして、クライアントサイドでの不要な JavaScript の実行をデフォルトで抑制しているわけです。
 
-コンポーネントをハイドレーションするためには、`client:*` ディレクティブを使用します。この `client:*` ディレクティブにより、あるコンポーネントをハイドレーションするかどうか、またそれに必要なコードを送信するタイミングをどうするか、を Astro に対して指示することができます。
+コンポーネントをハイドレートするためには、`client:*` ディレクティブを使用します。この `client:*` ディレクティブにより、
 
-たとえば、`client:load` を使用すると、コンポーネントの実行に必要なコードはページロード時に送信されます:
+* あるコンポーネントをハイドレートするかどうか
+* そのために必要なコードを送信するタイミングをどうするか
+
+を Astro に対して指示することができます。
+
+たとえば `client:load` ディレクティブを使用すると、コンポーネントの実行に必要なコードがページロード時に送信されるようにます:
 
 ```tsx:src/pages/index.astro
 ---
@@ -272,17 +277,107 @@ import { MyFirstIsland } from '../components/MyFirstIsland';
 * 以前は `<button>Clicked 0 times</button>` という HTML が埋め込まれていた箇所に、`<style>` や `<script>`、`<astro-island>` などの要素が埋め込まれていること
 * 通信されるファイル数が増えていること
 
-などが確認できるはずです。こうした追加のコストを払うことで、コンポーネントを Island として独立して動作させることができます。
+などが確認できるはずです。こうした追加のコストを払うことで、コンポーネントを Island として独立して動作させることができます。この段階で、このコンポーネントは期待通りクリックに応じて表示するラベルが変化するようになっています。
 
-なお、`client:load` 以外のディレクティブとしては、ユーザーの viewport にコンポーネントが入ったタイミングでコードのローディングを開始する `client:visible` や、メディアクエリによってローディングのタイミングを指定する `client:media` など、様々なものが用意されています。詳しくは Astro のドキュメントを参照してください:
+なお、`client:load` 以外にも、ユーザーの viewport にコンポーネントが入ったタイミングでコードのローディングを開始する `client:visible` や、メディアクエリによってローディングのタイミングを指定する `client:media` など、様々なディレクティブが用意されています。詳しくは Astro のドキュメントを参照してください:
 
 https://docs.astro.build/en/reference/directives-reference/#client-directives
 
 ## Islands
 
-ここまでに書いた内容で、Astro における Islands Architecture
+以上に書いた内容で、Astro において Islands を動作させる基本はカバーできました。ユーザーとして Islands Architecture を導入すること自体は、拍子抜けするほど簡単であると思ってもらえたのではないでしょうか。ここではオマケとして、もう一段階複雑なページをデモとして残しておきます。
 
-# 補論: Astro におけるレンダリングパターンと Prerender API、そして Astro v2 の話
+まず、Island が 1 つでは少し寂しい気がするため、新たに React コンポーネントを追加してみます (インタラクティビティはありませんが...):
+
+```tsx:src/components/MySecondIsland.tsx
+export function MySecondIsland() {
+  return (
+    <div>Lorem Ipsum</div>
+  );
+}
+```
+
+さらに、静的 HTML の海に浮かぶ Islands らしさを表現するため、`index.astro` をよりページらしくしてみます:
+
+```tsx:src/pages/index.astro
+---
+import { MyFirstIsland } from '../components/MyFirstIsland';
+import { MySecondIsland } from '../components/MySecondIsland';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Astro Islands</title>
+  </head>
+  <body>
+    <div class="diagram">
+      <div class="header app">
+        <MyFirstIsland client:load />
+      </div>
+      <div class="sidebar">Sidebar (static HTML)</div>
+      <div class="main">Static content like text, images, etc.</div>
+      <div class="lorem app">
+        <MySecondIsland client:visible />
+      </div>
+      <div class="footer">Footer (static HTML)</div>
+    </div>
+  </body>
+</html>
+
+<style>
+  .diagram {
+    display: grid;
+    grid-template-areas:
+      'header header header'
+      'sidebar main main'
+      'sidebar lorem lorem'
+      'footer footer footer';
+    grid-gap: 0.75rem;
+    padding: 0.75rem;
+    overflow-x: auto;
+  }
+  /* 以下略 */
+</style>
+
+```
+
+コンポーネントテンプレートがかなり複雑になりましたが、よく見れば単なる HTML です。このように、コンポーネントテンプレートには、
+
+* HTML
+* JSX ライクな構文 (e.g. `<h1>Hello {name}!</h1>`)
+* CSS
+
+を記述することができます。ここで重要なことは、
+
+* 通常の HTML の中に `MyFirstIsland` や `MySecondIsland` が埋め込まれている
+* 前者には `client:load` ディレクティブが付加されている (ページロード時にハイドレートされる)
+* 後者には `client:visible` ディレクティブが付加されている (viewport に入ったタイミングでハイドレートされる)
+
+ということです。上のようにコードを記述することで、「通常の HTML と CSS によりページの骨格を表現し、インタラクティブなコンポーネントをスポット的に Islands として埋め込む」という Astro の特徴が理解できるのではないかと思います^[なお、ここでは触れませんでしたが、`head` など繰り返し使用するパターンは、Astro では通常レイアウトと呼ばれるコンポーネントにより抽象化します。また、ここで記述したスタイルは、このコンポーネント単体にスコープが閉じています。]。
+
+上のページを実行したデモが以下となります。ディレクティブで指示したタイミングで `MySecondIsland` がロードされていることも確認できます:
+
+![islands](/images/islands-architecture-with-astro/islands.gif)
+
+上のコードは[こちら](https://github.com/morinokami/astro-islands)に置いてありますので、中身をより詳しく確認したい方はご覧ください。
+
+# 補論: Astro におけるレンダリングパターン、そして Prerender API と Astro v2 の話
+
+ここで補論として最後に、Astro におけるレンダリングパターンについて、Astro の将来像とも絡めながら簡単に触れます。
+
+冒頭で述べたように、Astro はデフォルトでは Static Generation、すなわち静的サイトの生成をおこないます。これまで見てきた例についても、`astro build` コマンドによりビルドすれば静的 HTML が出力され、これをホスティングプラットフォームへとそのままデプロイすることあ可能です。
+
+一方、Astro ではサーバーサイドレンダリング (SSR) もサポートされています。詳しくは述べませんが、Astro の設定ファイルである astro.config.mjs に `output: 'server'` という記述を追加し、Netlify や Cloudflare Pages などの実行環境用のアダプターを追加することで、サイトを SSR することが可能です。
+
+ここまでが現在の話ですが、Astro は近々 v2 がリリースされる予定です。v2 では様々な変更点があるのですが、その中心の 1 つが Prerender API と呼ばれるものです。これは、Static Generation と SSR をページごとに切り替えられるようにするための機能です。具体的には、
+
+* SSR をデフォルトとするが、
+* 特定のページにおいて事前レンダリング (prerender) をオプトインする (具体的には、ページ内で `export const prerender = true;` と記述する)
+
+という内容であり、これによりさらに複雑なサイト構成についても対応できるようになることが期待されます。
 
 # おわりに
 
