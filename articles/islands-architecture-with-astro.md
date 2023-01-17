@@ -8,15 +8,19 @@ published: false
 
 # はじめに
 
-この記事では、フロントエンドのレンダリングパターンの 1 つである Islands Architecture に関する概念的な説明をおこった上で、[Astro](https://astro.build/) において Islands Architecture をどのように実現するかについてチュートリアル的に解説します。Astro は [2022 年の 8 月に v1 がリリースされた](https://astro.build/blog/astro-1/)ばかりであり、ユーザーもまだそれほど多くはないと思われるため、なるべく前提知識がない方でも理解できるように各ステップの説明を細かく噛み砕いておこなうつもりです。
+この記事では、フロントエンドのレンダリングパターンの 1 つである Islands Architecture の概要と、[Astro](https://astro.build/) における Islands Architecture の実現方法についてチュートリアル的に解説します。Astro は [2022 年の 8 月に v1 がリリースされた](https://astro.build/blog/astro-1/)ばかりの UI フレームワークであり、ユーザーもまだそれほど多くはないと思われるため、なるべく前提知識がない方でも理解できるように各ステップの説明を細かく噛み砕いておこなうつもりです。
 
 # Astro と Islands Architecture
 
-Astro は、その哲学の一つとして Server-first を掲げています。その心は、SPA ではなく MPA、すなわちデプロイ時に Static Generation をおこない、デフォルトで JavaScript を消去する、という戦略となります。その結果、ユーザーが受け取るファイルは HTML や CSS などのみとなり、ファイルロード時間や TTI の短縮を達成することができます。コンテンツを重視するという立場を明確にすることで、一種の先祖返りとも言える MPA へと帰着することになったわけですが、こうしたスタンスや実際の動作速度、またその DX などによりユーザーを着実に増やし続けています。
+Astro は、その哲学の一つとして [Server-first](https://docs.astro.build/en/concepts/why-astro/#server-first) を掲げています。その心は、SPA ではなく MPA、すなわちデプロイ時に Static Generation をおこない、デフォルトで JavaScript を消去する、という戦略となります。その結果、ユーザーが受け取るファイルは HTML や CSS などのみとなり、ファイルロード時間や [TTI](https://web.dev/tti/) の短縮を達成することができます。コンテンツを重視するという立場を明確にすることで、一種の先祖返りとも言える MPA へと帰着することになったわけですが、こうしたスタンスや実際の動作速度、またその DX などにより、Astro はユーザーを着実に増やし続けています^[[State of JS 2022](https://2022.stateofjs.com/) では[開発者の Retention や Interest で首位となり](https://2022.stateofjs.com/en-US/libraries/rendering-frameworks/)、また [2022 JavaScript Rising Stars](https://risingstars.js.org/2022/en) において Most Popular Projects Overall の部門で 7 位につけています。]。
 
-さて、このように書くと、Astro では Static Generation しかできず、インタラクティブなコンポーネントの使用や動的なページレンダリングはできないのか、という疑問が生じるはずです。そして答えはもちろん No となります。Astro では SSR がサポートされており、したがって動的にページ内容を書き換えることは可能です。また同様に、Astro では React や Vue、Svelte など、好みのライブラリを使用してコンポーネントを作成し、ページ内にインタラクティブなパーツとして配置することができます。そして、こうした「インタラクティブな UI を静的なページに埋め込む」という発想こそ、この記事のテーマである Islands Architecture の核心となります。
+さて、このように書くと、Astro では Static Generation しかできず、インタラクティブなコンポーネントの使用や動的なページレンダリングはできないのか、という疑問が生じるはずです。そして答えはもちろん No となります。Astro では SSR がサポートされており、したがって動的にページ内容を書き換えることは可能です。また同様に、Astro では [React](https://reactjs.org/) や [Vue](https://vuejs.org/)、[Svelte](https://svelte.dev/) など、好みのライブラリを使用してコンポーネントを作成し、ページ内にインタラクティブなパーツとして配置することができます。そして、こうした
 
-Islands Architecture は、Etsy 社のフロントエンドアーキテクトである Katie Sylor-Miller によって着想され、Preact の作者である Jason Miller の以下の記事によって具体化され認知されるようになりました:
+> インタラクティブな UI を静的なページに埋め込む
+
+という発想こそ、この記事のテーマである Islands Architecture の核心となります。
+
+Islands Architecture は、Etsy 社のフロントエンドアーキテクトである [Katie Sylor-Miller](https://twitter.com/ksylor) によって着想され、[Preact](https://preactjs.com/) の作者である [Jason Miller](https://twitter.com/_developit) の以下の記事によって具体化され認知されるようになりました:
 
 https://jasonformat.com/islands-architecture/
 
@@ -27,16 +31,26 @@ https://jasonformat.com/islands-architecture/
 * placeholders/slots には、動的なパーツに対応する HTML が含まれる
 * クライアント上でこれらの動的な領域をハイドレートする
 
-という特徴をもつレンダリングパターンです。ここで述べた placeholders/slots こそ islands であり、Islands Architecture とは、大海原に点在する島のように静的 HTML 内に動的な UI パーツを配置するという、ページの構成メカニズムを指します。
+という特徴をもつレンダリングパターンです。
 
-また、
+ここで述べた placeholders/slots にハイドレートされるコンポーネントこそ Islands であり、Islands Architecture とは、大海原に点在する島のように静的 HTML 内に動的な UI パーツを配置するという、ページの構成方法を指します。次の画像は、上の記事内で Islands Architecture をビジュアルに説明するために用意されたもので、全体が単一のページ、白背景の部分が静的な UI、背景が着色されている部分が Islands をそれぞれ表わしており、Islands Architecture のイメージをわかりやすく示しています。
+
+![Islands Architecture](/images/islands-architecture-with-astro/islands-architecture.png)
+
+Astro は、上で述べた概念的なアーキテクチャを具体化し、さらに次のような特徴を加えました:
+
+* Islands にはユーザーが好む UI ライブラリを選択できる
+* UI ライブラリは複数種類を同時に使用できる
+* Islands のロード、ハイドレーションのタイミングをユーザーがコントロールできる
+
+TODO: ほげ
 
 なお、Astro 以外の Islands Architecture に基づくフレームワークには、たとえば以下のようなものがあります:
 
-* Marko
-* îles
-* is-land
-* Fresh
+* [Marko](https://markojs.com/): [SolidJS](https://www.solidjs.com/) の作者 [Ryan Carniato](https://twitter.com/RyanCarniato) をコアチームメンバーとする UI フレームワーク
+* [îles](https://iles.pages.dev/): [Máximo Mussini](https://twitter.com/MaximoMussini) による、Vue をベースとした静的サイトジェネレーター^[なお、自分は以前、Vite のコアメンバーである [patak](https://twitter.com/patak_dev) と Discord の DM で会話したことがあるのですが、そこで彼が推していたのがこの îles でした。彼のサイトである https://patak.dev/ を îles で書き直す予定だとその時は話していましたが、現状は [Vitepress](https://github.com/vuejs/vitepress) により作成されているようです。]
+* [is-land](https://is-land.11ty.dev/): [Eleventy](https://www.11ty.dev/) の [Zach Leatherman](https://github.com/zachleat) により開発されているフレームワーク
+* [Fresh](https://fresh.deno.dev/): [Deno](https://deno.land/) 製の Web フレームワーク、Preact により Islands を追加可能^[同様に余談ですが、少し前に自分は Fresh で [Hacker News クローン](https://fresh-hacker-news.deno.dev/)を作成し、Fresh の公式サイトの [Showcase](https://fresh.deno.dev/showcase) にて現在も掲載してもらっています。もちろん[ソースコード](https://github.com/morinokami/fresh-hacker)も公開していますので、興味がある方はこちらもご確認ください。]
 
 その他にも Islands Architecture に対応した数多くのフレームワークがあるため、気になった方は https://github.com/lxsmnsyc/awesome-islands などから興味のあるものを試してみてください。
 
@@ -98,7 +112,7 @@ $ pnpm create astro@latest
 
 ここでは pnpm を用いていますが、npm の場合は `npm create astro@latest` を、yarn の場合は `yarn create astro` を実行してください。プロジェクトの名前や、パッケージをその場でインストールするかどうか、Git リポジトリを作成するかどうかなど、いくつかの質問をされますが、今回はすべてデフォルトのままにしてあります。
 
-なお、このコマンドを使用すると Astro のマスコットキャラクターである Houston^[なお、Houston のロゴカラーをベースとして作成された [Astro 公式の VS Code テーマ](https://marketplace.visualstudio.com/items?itemName=astro-build.houston)も存在します。] が出迎えてくれます。かわいいですね。
+なお、このコマンドを使用すると Astro のマスコットキャラクターである Houston^[Houston のロゴカラーをベースとして作成された [Astro 公式の VS Code テーマ](https://marketplace.visualstudio.com/items?itemName=astro-build.houston)も存在します。] が出迎えてくれます。かわいいですね。
 
 無事にプロジェクトのセットアップが完了したら、以下のコマンドを実行して Astro の開発サーバーを起動してみましょう:
 
@@ -366,18 +380,28 @@ import { MySecondIsland } from '../components/MySecondIsland';
 
 # 補論: Astro におけるレンダリングパターン、そして Prerender API と Astro v2 の話
 
-ここで補論として最後に、Astro におけるレンダリングパターンについて、Astro の将来像とも絡めながら簡単に触れます。
+最後に補論として、Astro におけるレンダリングパターンについて、Astro の将来像とも絡めながら簡単に触れます。
 
-冒頭で述べたように、Astro はデフォルトでは Static Generation、すなわち静的サイトの生成をおこないます。これまで見てきた例についても、`astro build` コマンドによりビルドすれば静的 HTML が出力され、これをホスティングプラットフォームへとそのままデプロイすることあ可能です。
+冒頭で述べたように、Astro はデフォルトでは Static Generation、すなわち静的サイトの生成をおこないます。これまで見てきた例についても、`astro build` コマンドによりビルドすれば静的ファイルが出力されるため、これをホスティングプラットフォームへとそのままデプロイすることが可能です。
 
 一方、Astro ではサーバーサイドレンダリング (SSR) もサポートされています。詳しくは述べませんが、Astro の設定ファイルである astro.config.mjs に `output: 'server'` という記述を追加し、Netlify や Cloudflare Pages などの実行環境用のアダプターを追加することで、サイトを SSR することが可能です。
 
-ここまでが現在の話ですが、Astro は近々 v2 がリリースされる予定です。v2 では様々な変更点があるのですが、その中心の 1 つが Prerender API と呼ばれるものです。これは、Static Generation と SSR をページごとに切り替えられるようにするための機能です。具体的には、
+ここまでが現在の話ですが、実は Astro は近々 v2 がリリースされる予定です。v2 では様々な変更点があり、その中心の 1 つが Prerender API と呼ばれるものです。これは、Static Generation と SSR をページごとに切り替えられるようにするための機能です。具体的には、
 
 * SSR をデフォルトとするが、
-* 特定のページにおいて事前レンダリング (prerender) をオプトインする (具体的には、ページ内で `export const prerender = true;` と記述する)
+* 特定のページにおいて事前レンダリング (prerender) をオプトイン可能とする (具体的には、ページ内で `export const prerender = true;` と記述すると、そのページはビルド時に事前レンダリングされる)
 
-という内容であり、これによりさらに複雑なサイト構成についても対応できるようになることが期待されます。
+という内容となります。Prerender API により、さらに複雑なサイト構成についても対応できるようになることが期待されます。
+
+以上をまとめると、Astro では近々リリース予定の v2 において、
+
+* Static Genertion
+* Server-side Rendering
+* Prerender API (両者のハイブリッド版)
+
+という 3 つのページレベルのレンダリングパターンがサポートされ、これらと組み合わせるかたちで Islands の埋め込みなどを考えることになるはずです。コンテンツの重視という一貫した立場から Static Generation というわかりやすいパターンをデフォルトとしてきた Astro において、Prerender API により複雑性を増す方向に舵を切ることがどのような結果となるかについて、注目していきたいと思います。
+
+なお、この他にも、Zod を利用して [Contentlayer](https://www.contentlayer.dev/) のように型安全にコンテンツを利用できるようにする Content Collections の追加など、v2 では様々な機能強化がおこなわれる予定です。まだ公式の発表はないのですが、たとえば GitHub 上の [Releases](https://github.com/withastro/astro/releases) などから v2 の変更を beta 版として垣間見ることができますので、興味のある方はご覧ください。
 
 # おわりに
 
