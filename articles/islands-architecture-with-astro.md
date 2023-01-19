@@ -53,6 +53,8 @@ https://zenn.dev/yamakenji24/articles/b035c4ffb86cbf
 
 などで詳述されているようです。また最後の点については、この記事でも基礎を解説していきます。
 
+上に書いたような特徴により、Astro における Islands Architecture には、ページの大部分が静的となることによる表示高速化や SEO・コンテンツ最適化などを達成すると同時に、コンポーネント中心の開発による DX も備えるというメリットがあるといえます。一方で、ゲームや SNS のような高度にインタラクティビティを要求するアプリケーション寄りのプロジェクトには、それほど適してはいないでしょう。
+
 なお、Astro 以外の Islands Architecture に基づくフレームワークには、たとえば以下のようなものがあります:
 
 * [Marko](https://markojs.com/): [SolidJS](https://www.solidjs.com/) の作者 [Ryan Carniato](https://twitter.com/RyanCarniato) をコアチームメンバーとする UI フレームワーク
