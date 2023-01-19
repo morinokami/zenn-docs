@@ -8,11 +8,11 @@ published: false
 
 # はじめに
 
-この記事では、フロントエンドのレンダリングパターンの 1 つである Islands Architecture の概要と、[Astro](https://astro.build/) における Islands Architecture の実現方法についてチュートリアル的に解説します。Astro は [2022 年の 8 月に v1 がリリースされた](https://astro.build/blog/astro-1/)ばかりの UI フレームワークであり、ユーザーもまだそれほど多くはないと思われるため、なるべく前提知識がない方でも理解できるように各ステップの説明を細かく噛み砕いておこなうつもりです。
+この記事では、フロントエンドのレンダリングパターンの 1 つである Islands Architecture について概略した上で、[Astro](https://astro.build/) における Islands Architecture の実現方法をチュートリアル的に解説します。Astro は [2022 年の 8 月に v1 がリリースされた](https://astro.build/blog/astro-1/)ばかりの UI フレームワークであり、ユーザーもまだそれほど多くはないと思われるため、なるべく前提知識がない方でも理解できるように各ステップの説明を細かく噛み砕いておこなうつもりです。
 
 # Astro と Islands Architecture
 
-Astro は、モダンな DX (Developer Experience) のもとで高いパフォーマンスを実現するウェブサイトを開発することを目指した UI フレームワークです。特に、ブログやドキュメンテーションサイト、マーケティングサイトなど、コンテンツが豊富なサイトをターゲットの中心に据えて設計されている点がユニークです。
+Astro は、高いパフォーマンスを実現するウェブサイトをモダンな DX (Developer Experience) のもとで開発することを目指した UI フレームワークです。特に、ブログやドキュメンテーションサイト、マーケティングサイトなど、コンテンツが豊富なサイトをターゲットの中心に据えて設計されている点がユニークです。
 
 Astro は、[その哲学](https://docs.astro.build/en/concepts/why-astro/)の一つとして [Server-first](https://docs.astro.build/en/concepts/why-astro/#server-first) を掲げています。その心は、SPA ではなく MPA、すなわちデプロイ時に Static Generation をおこない、デフォルトで JavaScript を消去する、という戦略となります。その結果、ユーザーが受け取るファイルは HTML や CSS などのみとなり、ファイルロード時間や [TTI](https://web.dev/tti/) の短縮を達成することができます。コンテンツを重視するという立場を明確にすることで、一種の先祖返りのように MPA へと帰着することになったわけですが、こうしたわかりやすいスタンスや実際の動作速度、またその DX などにより、Astro はそのユーザーの数を着実に増やし続けています^[[State of JS 2022](https://2022.stateofjs.com/) では[開発者の Retention や Interest で首位となり](https://2022.stateofjs.com/en-US/libraries/rendering-frameworks/)、また [2022 JavaScript Rising Stars](https://risingstars.js.org/2022/en) において Most Popular Projects Overall の部門で 7 位につけています。]。
 
@@ -32,12 +32,14 @@ https://jasonformat.com/islands-architecture/
 * ページ内の動的な領域に placeholders/slots を配置しておく
 * placeholders/slots には、動的なパーツに対応する HTML が含まれる
 * クライアント上でこれらの動的な領域をハイドレートする
+* 各 placeholders/slots は、互いに独立している (影響し合うことはない)
 
-という特徴をもつレンダリングパターンです。
+などの特徴をもつレンダリングパターンです。
 
-ここで述べた placeholders/slots にハイドレートされるコンポーネントこそ Islands であり、Islands Architecture とは、大海原に点在する島のように静的 HTML 内に動的な UI パーツを配置するという、ページ構成に関する設計方法を指します。次の画像は、上の記事内で Islands Architecture をビジュアルに説明するために用意されたもので、全体が単一のページ、白背景の部分が静的な UI、背景が着色されている部分がインタラクティブな Islands をそれぞれ表わしており、Islands Architecture のイメージをわかりやすく示しています。
+ここで述べた placeholders/slots にハイドレートされるコンポーネントこそ Islands であり、Islands Architecture とは、大海原に点在する島のように静的 HTML 内に動的な UI パーツを配置するという、ページ構成に関する設計方法を指します。次の画像は、上の記事内で Islands Architecture をビジュアルに説明するために提示されているもので、全体が単一のページ、白背景の部分が静的な UI、背景が着色されている部分がインタラクティブな Islands をそれぞれ表わしており、Islands Architecture のイメージをわかりやすく示しています。
 
 ![Islands Architecture](/images/islands-architecture-with-astro/islands-architecture.png)
+*https://jasonformat.com/islands-architecture/ より引用*
 
 Astro は、上で述べた概念的なアーキテクチャを具体化し、さらに次のような特徴を加えました:
 
@@ -58,7 +60,7 @@ https://zenn.dev/yamakenji24/articles/b035c4ffb86cbf
 * [is-land](https://is-land.11ty.dev/): [Eleventy](https://www.11ty.dev/) の [Zach Leatherman](https://github.com/zachleat) により開発されているフレームワーク
 * [Fresh](https://fresh.deno.dev/): [Deno](https://deno.land/) 製の Web フレームワーク、Preact により Islands を追加可能^[少し前に自分は Fresh で [Hacker News クローン](https://fresh-hacker-news.deno.dev/)を作成し、Fresh の公式サイトの [Showcase](https://fresh.deno.dev/showcase) にて現在も掲載してもらっています。もちろん[ソースコード](https://github.com/morinokami/fresh-hacker)も公開していますので、興味がある方はこちらもご確認ください。]
 
-その他にも Islands Architecture に対応した数多くのフレームワークがあるため、気になった方は
+これらの他にも Islands Architecture に対応した数多くのフレームワークがあります。気になった方は
 
 https://github.com/lxsmnsyc/awesome-islands
 
@@ -66,12 +68,12 @@ https://github.com/lxsmnsyc/awesome-islands
 
 # Astro における Islands の導入
 
-続いて、Astro で React などの UI ライブラリを Islands として使用するための方法について述べていきます。
+続いて、Astro で React などの UI ライブラリを Islands として使用するための方法について具体的に述べていきます。
 
 Astro には、いわゆるプラグインのように、プロジェクトに手軽に機能を追加するための仕組みとして[インテグレーション (Integration)](https://docs.astro.build/en/guides/integrations-guide/) というものがあります。インテグレーションは、大まかに
 
 * React や Vue などの UI ライブラリを Astro において使用するためのもの
-* Netlify や Vercel、Cloudflare Pages などのホスティングサービスとの連携をおこなうためのもの (これらはアダプター (Adapter) と呼ばれます)
+* Netlify や Vercel、Cloudflare Pages などのホスティングサービスとの連携をおこなうためのもの (これらはアダプター (Adapter) とも呼ばれます)
 * Tailwind CSS の有効化、サイトマップの自動生成、Image コンポーネントの使用、などその他のカテゴリ
 
 という 3 種類に分類することができます。この記事では UI ライブラリを Islands として動かしたいため、一番上のカテゴリが重要です。
@@ -140,9 +142,9 @@ $ pnpm run dev
 
 ```
 
-ブラウザで http://localhost:3000/ を開くと、以下のページが表示されます:
+ブラウザで http://localhost:3000/ を開くと、以下の Welcome ページが表示されます:
 
-![](/images/islands-architecture-with-astro/welcome.png)
+![Welcome to Astro](/images/islands-architecture-with-astro/welcome.png)
 
 この時点でのプロジェクトの構成は以下のようになります (Astro に関連する主要なファイル・ディレクトリのみ抜粋):
 
@@ -275,7 +277,7 @@ Islands を浮かべるための海に対応するのが、`.astro` という拡
 <!-- コンポーネントテンプレート (HTML + JS Expressions) -->
 ```
 
-`---` は「コードフェンス」と呼ばれ、このフェンスで囲まれた部分がコンポーネントスクリプトです。このコンポーネントスクリプトには、下部のコンポーネントテンプレートをレンダリングするために必要な JavaScript を記述します。そして下部のコンポーネントテンプレートには、コンポーネントが出力する HTML を組み立てるための JSX ライクな構文を記述します。
+`---` はコードフェンスと呼ばれ、このフェンスで囲まれた部分がコンポーネントスクリプトです。このコンポーネントスクリプトには、下部のコンポーネントテンプレートをレンダリングするために必要な JavaScript、たとえばコンポーネントのインポートやデータの取得処理などを記述します。そして下部のコンポーネントテンプレートには、コンポーネントが出力する HTML を組み立てるための JSX ライクな構文を記述します。
 
 よって、上で作成したコンポーネントを使用するためには、
 
@@ -293,7 +295,7 @@ import { MyFirstIsland } from '../components/MyFirstIsland';
 
 Astro は File-based routing に対応しており、`src/pages` 以下にある `.astro` ファイルはページとみなされます。上のファイルは `pages` の直下に `index.astro` という名前で置かれているため、`/` に対応するページとなります。
 
-この時点で `pnpm run dev` により開発サーバを起動し `http://localhost:3000` をブラウザで開くと、
+再度 `pnpm run dev` により開発サーバを起動し `http://localhost:3000` をブラウザで開くと、
 
 > Clicked 0 times
 
@@ -310,7 +312,7 @@ Astro ではこのようにして、コンポーネントが出力する HTML �
 コンポーネントをハイドレートするためには、[`client:*` ディレクティブ](https://docs.astro.build/en/reference/directives-reference/#client-directives)を使用します。このディレクティブにより、
 
 * あるコンポーネントをハイドレートするかどうか
-* そのために必要なコードを送信するタイミングをどうするか
+* そのために必要なコードを送信するタイミング
 
 を Astro に対して指示することができます。
 
@@ -410,7 +412,7 @@ import { MySecondIsland } from '../components/MySecondIsland';
 * 後者には `client:visible` ディレクティブが付加されている (viewport に入ったタイミングでハイドレートされる)
 * `<style>` タグによりコンポーネントのスタイルが定義されている (このスタイルはこのコンポーネントにスコープされる)
 
-ということです。上のコードによって、「通常の HTML と CSS によりページの骨格を表現し、インタラクティブなコンポーネントをスポット的に Islands として埋め込む」という Astro の特徴が理解できるのではないかと思います^[なお、ここでは触れませんでしたが、`head` などプロジェクト内で繰り返し使用するパターンは、Astro では通常[レイアウト](https://deploy-preview-2386--astro-docs-2.netlify.app/en/core-concepts/layouts/)と呼ばれるコンポーネントにより抽象化します。]。
+ということです。上のコードによって、「通常の HTML と CSS によりページの骨格を表現し、インタラクティブなコンポーネントをスポット的に Islands として埋め込む」という Astro の特徴が理解できるのではないかと思います^[なお、ここでは触れませんでしたが、`head` などプロジェクト内で繰り返し使用するパターンは、Astro では通常[レイアウト](https://deploy-preview-2386--astro-docs-2.netlify.app/en/core-concepts/layouts/)と呼ばれるコンポーネントにより抽象化します。また、上の例では独立した React Island が 2 つ並んでいますが、各 Island ごとに React を実行するための同じコードがダウンロードされるわけではなく、[送信されるのは一度だけ](https://deploy-preview-2386--astro-docs-2.netlify.app/en/core-concepts/framework-components/#hydrating-interactive-components)となります。]。
 
 上のページを実行したデモが以下となります。ディレクティブで指示したタイミングで `MySecondIsland` がロードされていることも確認できます:
 
@@ -431,19 +433,13 @@ https://twitter.com/astrodotbuild/status/1615401112672284672
 ここまでが現在の話ですが、実は Astro は近々 v2 がリリースされる予定です (上のツイートによれば 2023 年 1 月 24 日の予定のようです)。v2 では様々な変更点があり、その中心の 1 つが [Prerender API](https://github.com/withastro/astro/pull/5297) と呼ばれるものです。これは、Static Generation と SSR をページごとに切り替えられるようにするための機能です。具体的には、
 
 * SSR をデフォルトとするが、
-* 特定のページにおいて事前レンダリング (prerender) をオプトイン可能とする (具体的には、ページ内で `export const prerender = true;` と記述すると、そのページはビルド時に事前レンダリングされる)
+* 特定のページにおいて事前レンダリング (prerender) をオプトイン可能とする (ページ内で `export const prerender = true;` と記述すると、そのページはビルド時に事前レンダリングされる)
 
 という内容となります。Prerender API により、さらに複雑なサイト構成についても対応できるようになることが期待されます。
 
-以上をまとめると、Astro では近々リリース予定の v2 において、
+以上をまとめると、Astro では近々リリース予定の v2 において、Static Generation と Server-side Rendering を両極とするグラデーションの中でレンダリング戦略を考えられるようになり、それと合わせて Islands の埋め込みなどについても決定していくようになるはずです。「コンテンツの重視」という明確な立場から Static Generation というわかりやすいパターンをデフォルトとしてきた Astro において、Prerender API により複雑性を増す方向に舵を切ることがどのような結果となるか、注目していきたいと思います。
 
-* Static Genertion
-* Server-side Rendering
-* Prerender API (両者のハイブリッド版)
-
-という 3 つのページレベルのレンダリングパターンがサポートされ、これらと組み合わせるかたちで Islands の埋め込みなどを考えることになるはずです。「コンテンツの重視」という明確な立場から Static Generation というわかりやすいパターンをデフォルトとしてきた Astro において、Prerender API により複雑性を増す方向に舵を切ることがどのような結果となるか、注目していきたいと思います。
-
-なお、この他にも、[Zod](https://github.com/colinhacks/zod) を利用して [Contentlayer](https://www.contentlayer.dev/) のように型安全にコンテンツを利用できるようにする [Content Collections](https://github.com/withastro/astro/pull/5291) の追加など、v2 では様々な機能強化がおこなわれる予定です。たとえば GitHub 上の [Releases](https://github.com/withastro/astro/releases) などから v2 の変更内容を beta 版として垣間見ることができますので、興味のある方はご覧ください。
+なお、この他にも、[Zod](https://github.com/colinhacks/zod) を利用して [Contentlayer](https://www.contentlayer.dev/) のように型安全にコンテンツを利用できるようにする [Content Collections](https://github.com/withastro/astro/pull/5291) の追加など、v2 では様々な機能強化がおこなわれる予定です。たとえば GitHub 上の [Releases](https://github.com/withastro/astro/releases) の中の beta 版 や [RFC](https://github.com/withastro/rfcs) などから v2 の変更内容を垣間見ることができますので、興味のある方はご覧ください。
 
 # おわりに
 
