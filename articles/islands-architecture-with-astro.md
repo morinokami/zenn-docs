@@ -8,7 +8,7 @@ published: true
 
 # はじめに
 
-この記事では、フロントエンドのレンダリングパターンの 1 つである Islands Architecture について概略した上で、[Astro](https://astro.build/) における Islands Architecture の実現方法をチュートリアル的に解説します。Astro は [2022 年の 8 月に v1 がリリースされた](https://astro.build/blog/astro-1/)ばかりの UI フレームワークであり、ユーザーもまだそれほど多くはないと思われるため、なるべく前提知識がない方でも理解できるように各ステップの説明を細かく噛み砕いておこなうつもりです。
+この記事では、フロントエンドのレンダリングパターンの 1 つである Islands Architecture について概略した上で、[Astro](https://astro.build/) における Islands Architecture の実現方法をチュートリアル的に解説します。Astro は [2022 年の 8 月に v1 がリリースされた](https://astro.build/blog/astro-1/)ばかりの UI フレームワークであり、ユーザーもまだそれほど多くはないと思われるため、なるべく前提知識がない方でも理解できるように各ステップの説明を細かく噛み砕いておこなうつもりです。また最後に補論として、Astro v2 について本論と絡めて簡単に紹介します。
 
 # Astro と Islands Architecture
 
