@@ -2,8 +2,8 @@
 title: "Astro で Islands Architecture を始めよう"
 emoji: "🏝️"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["astro", "islands", "architecture"]
-published: false
+topics: ["astro", "react", "architecture"]
+published: true
 ---
 
 # はじめに
