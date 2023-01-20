@@ -36,7 +36,13 @@ https://jasonformat.com/islands-architecture/
 
 などの特徴をもつレンダリングパターンです。
 
-ここで述べた placeholders/slots にハイドレートされるコンポーネントこそ Islands であり、Islands Architecture とは、大海原に点在する島のように静的 HTML 内に動的な UI パーツを配置するという、ページ構成に関する設計方法を指します。次の画像は、上の記事内で Islands Architecture をビジュアルに説明するために提示されているもので、全体が単一のページ、白背景の部分が静的な UI、背景が着色されている部分がインタラクティブな Islands をそれぞれ表わしており、Islands Architecture のイメージをわかりやすく示しています。
+ここで述べた placeholders/slots にハイドレートされるコンポーネントこそ Islands であり、Islands Architecture とは、大海原に点在する島のように静的 HTML 内に動的な UI パーツを配置するという、ページ構成に関する設計方法を指します。次の画像は、上の記事内で Islands Architecture をビジュアルに説明するために提示されているもので、
+
+* 全体が単一のページ
+* 白背景の部分が静的な UI
+* 背景が着色されている部分がインタラクティブな Islands
+
+をそれぞれ表わしており、Islands Architecture のイメージをわかりやすく示しています。
 
 ![Islands Architecture](/images/islands-architecture-with-astro/islands-architecture.png)
 *https://jasonformat.com/islands-architecture/ より引用*
@@ -58,7 +64,7 @@ https://zenn.dev/yamakenji24/articles/b035c4ffb86cbf
 なお、Astro 以外の Islands Architecture に基づくフレームワークには、たとえば以下のようなものがあります:
 
 * [Marko](https://markojs.com/): [SolidJS](https://www.solidjs.com/) の作者 [Ryan Carniato](https://twitter.com/RyanCarniato) をコアチームメンバーとする UI フレームワーク
-* [îles](https://iles.pages.dev/): [Máximo Mussini](https://twitter.com/MaximoMussini) による、Vue をベースとした静的サイトジェネレーター^[なお、自分は以前、Vite のコアメンバーである [patak](https://twitter.com/patak_dev) と Discord の DM で会話したことがあるのですが、そこで彼が推していたのがこの îles でした。彼のサイトである https://patak.dev/ を îles で書き直す予定だとその時は話していましたが、現状は [Vitepress](https://github.com/vuejs/vitepress) により作成されているようです。]
+* [îles](https://iles.pages.dev/): [Máximo Mussini](https://twitter.com/MaximoMussini) による、Vue をベースとした静的サイトジェネレーター^[なお、自分は以前、Vite のコアメンバーである [patak](https://twitter.com/patak_dev) と Discord の DM で会話したことがあるのですが、そこで彼が推していたのがこの îles でした。彼の個人サイトである https://patak.dev/ を îles で書き直す予定だとその時は話していましたが、現状は [Vitepress](https://github.com/vuejs/vitepress) により作成されているようです。]
 * [is-land](https://is-land.11ty.dev/): [Eleventy](https://www.11ty.dev/) の [Zach Leatherman](https://github.com/zachleat) により開発されているフレームワーク
 * [Fresh](https://fresh.deno.dev/): [Deno](https://deno.land/) 製の Web フレームワーク、Preact により Islands を追加可能^[少し前に自分は Fresh で [Hacker News クローン](https://fresh-hacker-news.deno.dev/)を作成し、Fresh の公式サイトの [Showcase](https://fresh.deno.dev/showcase) にて現在も掲載してもらっています。もちろん[ソースコード](https://github.com/morinokami/fresh-hacker)も公開していますので、興味がある方はこちらもご確認ください。]
 
@@ -430,7 +436,7 @@ https://twitter.com/astrodotbuild/status/1615401112672284672
 
 冒頭で述べたように、Astro はデフォルトでは Static Generation、すなわち静的サイトの生成をおこないます。これまで見てきた例についても、`astro build` コマンドによりビルドすれば静的ファイルが出力されるため、これをホスティングプラットフォームへとそのままデプロイすることが可能です。
 
-一方、Astro ではサーバーサイドレンダリング (SSR) も[サポートされています](https://docs.astro.build/en/guides/server-side-rendering/)。詳しくは述べませんが、Astro の設定ファイルである astro.config.mjs に `output: 'server'` という記述を追加し、Netlify や Cloudflare Pages などの実行環境用のアダプターを追加することで、サイトを SSR することが可能です。
+一方、Astro ではサーバーサイドレンダリング (SSR) も[サポートされています](https://docs.astro.build/en/guides/server-side-rendering/)。詳しくは述べませんが、Astro の設定ファイルである astro.config.mjs に `output: 'server'` という記述を追加し、[Netlify](https://docs.astro.build/en/guides/deploy/netlify/) や [Cloudflare Pages](https://docs.astro.build/en/guides/deploy/cloudflare/) などの実行環境用のアダプターを追加することで、サイトを SSR することが可能です。
 
 ここまでが現在の話ですが、実は Astro は近々 v2 がリリースされる予定です (上のツイートによれば 2023 年 1 月 24 日の予定のようです)。v2 では様々な変更点があり、その中心の 1 つが [Prerender API](https://github.com/withastro/astro/pull/5297) と呼ばれるものです。これは、Static Generation と SSR をページごとに切り替えられるようにするための機能です。具体的には、
 
@@ -447,7 +453,7 @@ https://twitter.com/astrodotbuild/status/1615401112672284672
 
 この記事では、Islands Architecture について概略し、その上で Astro において Islands Architecture を実現するための各ステップについて詳述しました。
 
-また、補論として Astro の将来について、近々リリース予定の v2 について触れながらページのレンダリング戦略を中心に簡単に紹介しました。
+また、補論として Astro の将来について、近々リリース予定の v2 についても触れながらページのレンダリング戦略を中心に簡単に紹介しました。
 
 この記事により Astro へと興味をもつ方が少しでも増えてくれれば幸いです^[余談ですが、自分は Astro ドキュメントの改善やローカライズにも積極的に参加しています。Astro コミュニティは自分の観測範囲ではとても親切でユニークな方が多く、心理的な抵抗も少ないと思いますので、興味のある方はぜひご参加ください。]。
 
