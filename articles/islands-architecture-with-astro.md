@@ -445,7 +445,7 @@ https://twitter.com/astrodotbuild/status/1615401112672284672
 
 という内容となります。Prerender API により、さらに複雑なサイト構成についても対応できるようになることが期待されます。
 
-以上をまとめると、Astro では近々リリース予定の v2 において、Static Generation と Server-side Rendering を両極とするグラデーションの中でレンダリング戦略を考えられるようになり、それと合わせて Islands の埋め込みなどについても決定していくようになるはずです。「コンテンツの重視」という明確な立場から Static Generation というわかりやすいパターンをデフォルトとしてきた Astro において、Prerender API により複雑性を増す方向に舵を切ることがどのような結果となるか、注目していきたいと思います。
+以上をまとめると、Astro では近々リリース予定の v2 において、Static Generation と Server-side Rendering を両極とするグラデーションの中でレンダリング戦略を考えられるようになり、それと合わせて Islands の埋め込みなどについても決定していくようになるはずです。「コンテンツの重視」という明確な立場から Static Generation というわかりやすいパターンをデフォルトとしてきた Astro において、Prerender API によってさらに複雑性を増す方向に舵を切ることがどのような結果となるか、注目していきたいと思います。
 
 なお、この他にも、[Zod](https://github.com/colinhacks/zod) を利用して [Contentlayer](https://www.contentlayer.dev/) のように型安全にコンテンツを利用できるようにする [Content Collections](https://github.com/withastro/astro/pull/5291) の追加など、v2 では様々な機能強化がおこなわれる予定です。たとえば GitHub 上の [Releases](https://github.com/withastro/astro/releases) の中の beta 版 や [RFC](https://github.com/withastro/rfcs) などから v2 の変更内容を垣間見ることができますので、興味のある方はご覧ください。
 
