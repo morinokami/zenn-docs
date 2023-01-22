@@ -438,7 +438,7 @@ https://twitter.com/astrodotbuild/status/1615401112672284672
 
 一方、Astro ではサーバーサイドレンダリング (SSR) も[サポートされています](https://docs.astro.build/en/guides/server-side-rendering/)。詳しくは述べませんが、Astro の設定ファイルである astro.config.mjs に `output: 'server'` という記述を追加し、[Netlify](https://docs.astro.build/en/guides/deploy/netlify/) や [Cloudflare Pages](https://docs.astro.build/en/guides/deploy/cloudflare/) などの実行環境用のアダプターを追加することで、サイトを SSR することが可能です。
 
-ここまでが現在の話ですが、実は Astro は近々 v2 がリリースされる予定です (上のツイートによれば 2023 年 1 月 24 日の予定のようです)。v2 では様々な変更点があり、その中心の 1 つが [Prerender API](https://github.com/withastro/astro/pull/5297) と呼ばれるものです。これは、Static Generation と SSR をページごとに切り替えられるようにするための機能です。具体的には、
+ここまでが現在の話ですが、実は Astro は近々 v2 がリリースされる予定です (上のツイートによれば 2023 年 1 月 24 日の予定のようです)。v2 では様々な変更点があり、その中心の 1 つが [Prerender API](https://github.com/withastro/astro/pull/5297) と呼ばれるものです。これは、Static Generation と SSR をページごとに切り替えられるようにするための機能です。具体的には、SSR が有効化されているとき、
 
 * SSR をデフォルトとするが、
 * 特定のページにおいて事前レンダリング (prerender) をオプトイン可能とする (ページ内で `export const prerender = true;` と記述すると、そのページはビルド時に事前レンダリングされる)
