@@ -14,7 +14,7 @@ https://www.youtube.com/watch?v=8pDqJVdNa44
 
 動画は 1 時間 18 分ほどあり、React の誕生から普及までを当事者たちが語る形式となっています。
 
-動画自体は大変に素晴らしいのですが、その中で言及される資料やツイートが多く、個人的に気になったため、動画に登場する時系列順にまとめてみました。すべてを網羅できているわけではありませんが、大半はおさえることができたのではないかと思っています。また、動画に登場する方々が日本の開発者の間では知られていない可能性も考慮し、動画内でのプロフィール^[なお、Andrew Clark は先日 [Vercel への移籍](https://twitter.com/acdlite/status/1623353741750546439)を発表するなど、プロフィールが必ずしも現在の情報を表わしているわけではないことに注意してください。]を Twitter や GitHub へのリンクとともに付すようにしています。すでに動画を見たかどうかに関わらず、React の歴史に興味がある方の参考になれば幸いです。
+動画自体は大変に素晴らしいのですが、その中で言及されている資料やツイートが多く、個人的に気になったため、動画に登場する時系列順にまとめてみました。すべてを網羅できているわけではありませんが、大半はおさえることができたのではないかと思っています。また、動画に登場する開発者たちが日本の開発者の間では知られていない可能性も考慮し、動画内でのプロフィール^[なお、Andrew Clark は先日 [Vercel への移籍](https://twitter.com/acdlite/status/1623353741750546439)を発表するなど、プロフィールが必ずしも現在の情報を表わしているわけではないことに注意してください。]を Twitter や GitHub へのリンクとともに付すようにしています。すでに動画を見たかどうかに関わらず、React の歴史に興味がある方の参考になれば幸いです。
 
 # 主な登場人物
 
@@ -126,7 +126,7 @@ https://twitter.com/acdlite
 
 https://github.com/acdlite
 
-# 動画内で言及された資料
+# 動画内で言及されていた資料など
 
 ## 0:44
 
@@ -134,7 +134,7 @@ https://github.com/jordwalke/FaxJs
 
 ## 2:41
 
-The Social Network https://www.imdb.com/title/tt1285016/
+https://www.imdb.com/title/tt1285016/
 
 ## 3:04
 
@@ -158,15 +158,15 @@ https://twitter.com/will_bailey
 
 ## 5:42
 
-BoltJS https://techcrunch.com/2011/08/29/boltjs/amp/
+https://techcrunch.com/2011/08/29/boltjs/amp/
 
 ## 8:51
 
-FBolt https://twitter.com/_seangroff/status/1403638031542894593
+https://twitter.com/_seangroff/status/1403638031542894593
 
 ## 11:46
 
-World of Warcraft https://worldofwarcraft.com/
+https://worldofwarcraft.com/
 
 ## 19:04
 
@@ -174,11 +174,11 @@ https://twitter.com/jingc
 
 ## 19:11
 
-https://youtu.be/nYkdrAPrdcw?list=PLb0IAmt7-GS188xDYE-u1ShQmFFGbrk0v (TODO: https://reactjs.org/blog/2014/05/06/flux.html)
+https://youtu.be/nYkdrAPrdcw
 
 ## 21:50
 
-Facebook Camera https://about.fb.com/news/2012/05/introducing-facebook-camera/amp/
+https://about.fb.com/news/2012/05/introducing-facebook-camera/amp/
 
 ## 22:28
 
@@ -186,7 +186,7 @@ https://twitter.com/miekd
 
 ## 23:32
 
-TODO: jshtml
+http://web.archive.org/web/20210824132636/https://j11y.io/cool-stuff/introducing-jshtml/
 
 ## 29:35
 
@@ -230,7 +230,13 @@ https://twitter.com/nathansmith/status/339876554354069504
 
 ## 42:06
 
-TODOS: books
+https://www.penguinrandomhouse.com/books/688819/unmasking-autism-by-devon-price-phd/
+
+https://www.lizandmollie.com/big-feelings
+
+https://global.oup.com/academic/product/garners-modern-english-usage-9780197599020
+
+https://www.penguinrandomhouse.com/books/703321/hell-followed-with-us-by-by-andrew-joseph-white/9781682633243
 
 ## 42:23
 
@@ -248,9 +254,6 @@ https://github.com/facebook/react/issues/122
 
 https://stackoverflow.com/a/21736116
 
-## 46:54
-
-TODO: books
 
 ## 48:24
 
@@ -258,7 +261,7 @@ https://reactjs.org/blog/2013/06/12/community-roundup.html
 
 ## 48:27
 
-TODO: https://podcasts.apple.com/jp/podcast/073-jsj-react-with-pete-hunt-and-jordan-walke/id1237401284?i=1000385505700&l=en
+https://topenddevs.com/podcasts/javascript-jabber/episodes/073-jsj-react-with-pete-hunt-and-jordan-walke
 
 ## 48:28
 
@@ -290,7 +293,11 @@ https://twitter.com/brandonbloom/status/413770492215324673
 
 ## 51:35
 
-TODO: books
+https://www.oreilly.com/library/view/closure-the-definitive/9781449381882/
+
+https://www.gutenberg.org/files/2814/2814-h/2814-h.htm
+
+など複数の書籍。多すぎるため割愛。
 
 ## 52:25
 
@@ -326,7 +333,7 @@ https://archive.jlongster.com/Removing-User-Interface-Complexity,-or-Why-React-i
 
 ## 54:22
 
-TODO: https://www.google.com/amp/s/amp.theguardian.com/news/datablog/2014/feb/04/facebook-in-numbers-statistics
+https://www.theguardian.com/news/datablog/2014/feb/04/facebook-in-numbers-statistics
 
 ## 54:25
 
@@ -403,10 +410,6 @@ https://twitter.com/reactjs/status/560860759576436736
 ## 1:00:59
 
 https://twitter.com/dlschafer/status/560581127480827904
-
-## 1:02:17
-
-TODO: rauchg
 
 ## 1:02:19
 
