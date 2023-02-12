@@ -3,7 +3,7 @@ title: "React.js: The Documentary 資料集"
 emoji: "⚛️"
 type: "idea" # tech: 技術記事 / idea: アイデア
 topics: ["react"]
-published: false
+published: true
 ---
 
 # はじめに
