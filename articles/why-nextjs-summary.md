@@ -8,15 +8,27 @@ published: false
 
 ## はじめに
 
-## The Web Platform (ウェブというプラットフォームの軽視)
+10 月 26 日に [Next.js Conf](https://nextjs.org/conf) が開催されましたが、それと前後して [Kent C. Dodds](https://twitter.com/kentcdodds) (以下 kentcdodds と呼びます) と [Lee Robinson](https://twitter.com/leeerob) (以下 leerob と呼びます) がそれぞれ
+
+https://www.epicweb.dev/why-i-wont-use-nextjs
+
+https://leerob.io/blog/using-nextjs
+
+という記事を公開しました。前者はタイトルの通り、Testing Library の作者であり、Remix の共同創業者の一人でもある偉大な教育者 kentcdodds が Next.js を使わない理由を述べたものです。そして後者は、Vercel の VP of Developer Experience である leerob が前者に対する反論を述べたものです。筆者は両方の記事を公開後すぐに面白く読み、そしてどちらにも頷けるところがあったため、両者の主張を要約してまとめてみることにしました。筆者が重要だと感じた箇所にフォーカスし大胆に要約していますが、あくまで一つの切り取り方であるため、二人の主張を正確に知りたい場合は是非原文に当たるようお願いします。また、両記事ともに公開後も更新され続けているため、時間の経過に従い以下の内容とのズレが生じる可能性についても留意してください。
+
+以下の各セクションでは、まず kentcdodds の主張を要約し、続いて leerob の反論を要約しています。筆者の感想も付記していますが、あくまで感想ですので流し読みしていただければ幸いです。また、セクションのタイトルは kentcdodds の記事の見出しをそのまま引用し、また括弧内で筆者が読み取った彼の主張の核心と思われるものを日本語で表現しています。
+
+## The Web Platform (ウェブというプラットフォームに対する軽視)
 
 kentcdodds 曰く:
 
-- Next.js はウェブ標準の API をラップしており、Next.js 特有の API の使用をユーザーに強いる。[Testing Library](https://testing-library.com/) が登場する前の [Enzyme](https://enzymejs.github.io/enzyme/) と同じような立ち位置にあり、Next.js で学んだ知識には可搬性 (transferability) がない。ウェブ標準の API、たとえば `Request` や `Response` を適切に提供している Remix を使おう。
+- Next.js はウェブ標準の API をラップしており、Next.js 特有の API の使用をユーザーに強いる。[Testing Library](https://testing-library.com/) が登場する前の [Enzyme](https://enzymejs.github.io/enzyme/) と同じような立ち位置にあり、Next.js で学んだ知識には可搬性 (transferability) がない。`Request` や `Response` などウェブ標準の API を適切に提供している Remix を使おう。
 
 leerob 曰く:
 
-- Next.js は Remix よりも歴史が長く、Pages Router など過去の機能については、確かにウェブ標準の API よりも Node.js の API に近い。しかし Remix v1 がリリースされた 2021 年には、Next.js も [Middleware](https://nextjs.org/blog/next-12#introducing-middleware) でウェブ API をサポートし始めている。さらに App Router の [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers) においては、`Request` や `Response` だけでなく、それらを抽象化した [`cookies()`](https://nextjs.org/docs/app/api-reference/functions/cookies) や [`headers()`](https://nextjs.org/docs/app/api-reference/functions/headers) まで提供している。Next.js は、Remix など他のフレームワークと同様に、ウェブ API を重要視している。
+- Next.js は Remix よりも歴史が長く、Pages Router など過去の機能については、確かにウェブ標準の API よりも Node.js の API に近い。しかし Remix v1 がリリースされた 2021 年には、Next.js も [Middleware](https://nextjs.org/blog/next-12#introducing-middleware) でウェブ API をサポートし始めている。さらに [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers) においては、`Request` や `Response` だけでなく、それらを抽象化してより使いやすくした [`cookies()`](https://nextjs.org/docs/app/api-reference/functions/cookies) や [`headers()`](https://nextjs.org/docs/app/api-reference/functions/headers) まで提供している。Next.js は、Remix など他のフレームワークと同様に、ウェブ API を重要視している。
+
+筆者感想: ここでは leerob の反論が妥当であるように感じられます。kentcdodds は Next.js に関する古い認識に (わざと？) 基づいて印象操作をしているのでしょうか。初っ端で少し不安になってきました。
 
 ## Independence (Vercel との癒着)
 
@@ -36,25 +48,25 @@ leerob 曰く:
 
 kentcdodds 曰く:
 
-- Next.js は React と一体化しつつあり、両者の境界線は曖昧になりつつある。多数の React チームメンバーが Vercel に移籍したが、そのせいで React チームはますます非協力的になってしまった。非協力的なチームはソフトウェアにとって良くない兆候だ。
+- Next.js は React と一体化しつつあり、両者の境界線は曖昧になりつつある。多数の React チームメンバーが Vercel に移籍したが、そのせいで React チームはますます非協力的になってしまった。Redwood や Apollo のメンテナも[同じような不満](https://twitter.com/phry/status/1718185739328844085)を漏らしている。非協力的なチームはソフトウェアにとって良くない兆候だ。
 
 leerob 曰く:
 
 - 最近になって React のドキュメントにおいても `useFormStatus` や [tainting](https://react.dev/reference/react/experimental_taintUniqueValue) に関する記述が登場するようになり、React の API を Next.js が使用しているという関係がわかりやすくなったはずだ。両者の境界が分かりにくくなっていたことは事実ではあるが意図したものではなく、今後は線引をより明確にするよう努めたい。
 
-(筆者も kentcdodds と同様に両者の境界が曖昧であると感じており、たとえば Server Actions はこのツイートを見るまで Next.js の機能であると誤解していた。この点について leerob も認めていると思われるので、今後の改善に期待したい。また、React チームが非協力的になってきたという意見については客観的な証拠もなく、これだけでは kentcdodds の一方的な思い込みとしか判断できない)
+筆者感想: 筆者も kentcdodds と同様に両者の境界が曖昧になってきたという漠然とした印象は抱いており、たとえば Server Actions については[このツイート](https://twitter.com/reactjs/status/1716573234160967762)を見るまで Next.js の機能であると誤解していました。この点について leerob も認めていると思われるので、今後の改善に期待したいです。一方、React チームが非協力的になってきたという意見については客観的な証拠もなく、これだけでは kentcdodds の一方的な思い込みとしか判断できないように感じられます。ただ、同じような思いを抱いている開発者は少なからずいるようなので、React チームがこの点についてどのように考えているのかは気になるところです。
 
 ## Experimenting on my users (実験台になるユーザー)
 
 Kent C. Dodds 曰く:
 
-- Next.js は安定版と称して React のカナリア版の機能を自身に組み込んでいる。その結果ユーザーのアプリケーションは不安定な実験台とされている。App Router で苦しんでいる人の数は殊の外多いようだ。React の安定した機能のみが組み込まれている Remix を使おう。RSC は安定してから使えばいい。
+- Next.js は安定版と称して React の[カナリア](https://en.wikipedia.org/wiki/Sentinel_species)版の機能を自身に組み込んでいる。その結果ユーザーのアプリケーションは不安定な実験台とされている。App Router で苦しんでいる人の数は殊の外多いようだ。React の安定した機能のみが組み込まれている Remix を使おう。RSC は安定してから使えばいい。
 
 leerob 曰く:
 
-- React の[ブログ記事](https://react.dev/blog/2023/05/03/react-canaries)に名言されている通り、カナリア版をフレームワークが採用することについて問題はない。確かに App Router に関して改善すべき点は多いが、それはカナリア版が悪いというわけではなく、我々の実装の問題だ。RSC はすでに多くのトップサイトで採用されており、十分に production ready といえる。
+- React の[ブログ記事](https://react.dev/blog/2023/05/03/react-canaries)に名言されている通り、カナリア版の機能をフレームワークが採用することについて問題はない。確かに App Router に関して改善すべき点は多いが、それはカナリア版が悪いというわけではなく、我々の実装の問題だ。RSC はすでに多くのトップサイトで採用されており、十分に production ready といえる。
 
-(React 側のブログ記事を読む限り、leerob の主張の通り、カナリア版の使用自体は問題なさそう。ユーザーで実験しているというのは明らかに言い過ぎで、ポジショントークに近い)
+筆者感想: React 側のブログ記事を読む限り、leerob の主張の通り、確かにカナリア版を使用すること自体は React チームの意図に即しており問題なさそうに思えます。RSC を使用しているトップサイトが多いことは RSC が安定していることの根拠としては弱く、「安定」という言葉を定義した上で直接的に安定していることを証明してほしくもありますが、そもそもの kentcdodds がふわっとした物言いであるため、ふわっとした返答しかできないとも言えます。また、ユーザーで実験しているというのは明らかに言い過ぎであり、これは少し印象操作が過ぎるのではないかと感じました。
 
 ## Too much magic (多すぎる魔法)
 
@@ -66,17 +78,21 @@ leerob 曰く:
 
 - `fetch` に関してはその通りだろう。コミュニティからのフィードバックをもとに改善の方向性を決めていきたい。
 
-## Complexity (複雑さ) と Stability (安定性)
+筆者感想: ここでは leerob は kentcdodds の主張の正しさを率直に認めているように思えます。Next.js に加えて React 自身も `fetch` を[拡張してしまっている](https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating#fetching-data-on-the-server-with-fetch)らしいため落とし所がどうなるのか筆者はわかりませんが、気になる方は https://github.com/vercel/next.js/discussions/54075 といった関連する discussions などを参照するといいかもしれません。
+
+## Complexity (複雑さ)
 
 kentcdodds 曰く:
 
-- Next.js はどんどん複雑になっている。React の Server Actions はフォームを POST に変えてしまうが、セマンティクスの変更は複雑度を増加させる。こうした API をそのまま取り入れ複雑度の増大に加担する Next.js ではなく、複雑度を最小限に抑えて API を設計している Remix を使おう。
+- Next.js はどんどん複雑になっている。React の Server Actions はフォームを POST に変えてしまうが、セマンティクスの変更は複雑度を増加させる。こうした API をそのまま取り入れ複雑度の増大に加担しようとする Next.js ではなく、複雑度を最小限に抑えて API を設計している Remix を使おう。
 
 leerob 曰く:
 
 - App Router は Pages Router とは別のモデルであり、ほぼ新しいフレームワークとすらいえる。学びの場として新しく[チュートリアル](https://nextjs.org/learn)を提供している。
 
-(leerob は「複雑でない」とはっきり否定すべきだが、そのように言わないため歯切れが悪く感じる。セマンティクスの変更などについてはハッキリとした理由を示してくれないと不安になる。ただ一方で、複雑でないことを証明することもまた難しいのはわかる)
+筆者感想: ここでは leerob は「複雑でない」とはっきり否定すべきだと思いますが、そのように言わないため歯切れが悪く感じます (ここでも「複雑」という言葉の定義がないため直接的な反論が難しい気もしますが)。というよりも、新しいチュートリアルで学び直さなければいけないという意味では、複雑になっているという事実を暗黙に認めているようにも思えます。また、kentcdodds が触れているフォームのセマンティクスの変更などの点については、ハッキリとした理由や反論を示してくれないと `fetch` の際と同様の不安を感じます。
+
+## Stability (安定性)
 
 kentcdodds 曰く:
 
@@ -84,6 +100,8 @@ kentcdodds 曰く:
 
 leerob 曰く:
 
-- メジャーバージョンの数とフレームワークの安定性とは何の関係もない。
+- メジャーバージョンの数とフレームワークの安定性とは何の関係もない。[codemods](https://nextjs.org/docs/app/building-your-application/upgrading/codemods) や[アップグレードガイド](https://nextjs.org/docs/app/building-your-application/upgrading/app-router-migration)を適切に提供しているため、危惧しているようなバージョンアップに伴う不安は小さいはずだ。
+
+筆者感想: 具体的に過去の Next.js のメジャーバージョンアップにおける難点を挙げていない時点で、kentcdodds の主張には説得力がないように思えます。バージョン番号の大きさを不安定さの証のように言うのはさすがに失笑せざるを得ません。
 
 ## おわりに
