@@ -1,5 +1,5 @@
 ---
-title: "Next.js に対する Kent C.Dodds の批判と、Lee Robinson のアンサーの要約"
+title: "Next.js に対する Kent C. Dodds の批判と、Lee Robinson のアンサーの要約"
 emoji: "🤔"
 type: "idea" # tech: 技術記事 / idea: アイデア
 topics: ["nextjs", "react"]
