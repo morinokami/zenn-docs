@@ -58,7 +58,7 @@ leerob 曰く:
 
 ## Experimenting on my users (実験台になるユーザー)
 
-Kent C. Dodds 曰く:
+kentcdodds 曰く:
 
 - Next.js は安定版と称して React の[カナリア](https://en.wikipedia.org/wiki/Sentinel_species)版の機能を自身に組み込んでいる。その結果ユーザーのアプリケーションは不安定な実験台となっている。App Router で苦しんでいる人の数は殊の外多いようだ。React の安定した機能のみが組み込まれている Remix を使おう。RSC は安定してから使えばいい。
 
