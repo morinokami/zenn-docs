@@ -60,21 +60,20 @@ export default function App() {
 コードを見ればわかるように、フォームのスキーマを定義し、それをもとに `useForm` を呼び出し、然るべき場所に `register` や `handleSubmit` を配置するだけで、バリデーションやエラーメッセージの表示などの機能を実現できています。これが基本的な RHF の使い方です。RHF を使わず自前で同じことを実装する場合について考えてみると、RHF のありがたさについて理解できるはずです。
 
 ## Server Actions について
-https://react.dev/reference/react/use-server
 https://nextjs.org/docs/app/api-reference/functions/server-actions
 
-Server Actions とは、クライアント側から呼び出される、サーバーサイドで実行可能な関数です。いわゆる RPC (Remote Procedure Call) の仕組みが React の世界に正式にもたらされたものであるといえます。[Server Components](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md) が data fetching をサーバーサイドに移動するための仕組みと考えると、Server Actions は data mutation をサーバーサイドに移動するために導入された仕組みであり、両者は相補的な関係となっています。
+[Server Actions](https://nextjs.org/docs/app/api-reference/functions/server-actions) とは、クライアント側から呼び出される、サーバーサイドで実行可能な関数です。いわゆる RPC (Remote Procedure Call) の仕組みが React の世界にもたらされたものであるといえます。[Server Components](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md) が data fetching をサーバーサイドに移動するための仕組みと考えると、Server Actions は data mutation をサーバーサイドに移動するために導入された仕組みであり、両者は相補的な関係となっています。サーバーサイドにおける data fetching や data mutation の仕組みは従来、[`getServerSideProps`](https://nextjs.org/docs/pages/building-your-application/data-fetching/get-server-side-props) や [`loader`](https://remix.run/docs/en/main/route/loader)、[API Routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) など、各フレームワーク独自の方式により実現されていましたが、Server Components と Server Actions により、正式に React の世界における第一級市民となったわけです。
 
 ```mermaid
 graph RL
-D[data source]-->|fetch|S1[Server Components]
+D[Data Source]-->|fetch|S1[Server Components]
 S1-->APP[App]
 ```
 
 ```mermaid
 graph LR
 APP[App]-->S2[Server Actions]
-S2-->|mutate|D[data source]
+S2-->|mutate|D[Data Source]
 ```
 
 Server Actions により、
@@ -88,20 +87,26 @@ Server Actions により、
 
 https://twitter.com/adamrackis/status/1717607565260124613
 
-だと思いますが、クライアントから直接 SQL クエリを実行するという見た目が多くの人々に衝撃を与えたようです。果てには Vercel CEO の Guillermo Rauch が悪ノリでミームジェネレータまで作ってしまい、なかなか楽しい展開でした:
+だと思いますが、クライアントから直接 SQL クエリを実行するという見た目が多くの人々に衝撃を与えたようです。果てには Vercel CEO の Guillermo Rauch が悪ノリでミームジェネレータまで作ってしまい、一連の展開はなかなか楽しいものでした:
 
 https://twitter.com/rauchg/status/1718416777322123645
 
 ### サポート状況
 
-10 月 5 日、React の Canary 版に Server Actions のサポートが[追加](https://github.com/facebook/react/blob/main/CHANGELOG-canary.md#october-5-2023-1830-canary-546178f91-20231005)されました。React の Canary 版は[フレームワークにとっての安定版である](https://react.dev/blog/2023/05/03/react-canaries)とみなされるため、この時点で各 React フレームワークが Server Actions を正式にサポートする前提が整ったといえます。そしてこれを受け、Next.js はバージョン 14 において Server Actions のサポート段階を [Stable へと引き上げ](https://nextjs.org/blog/next-14)ました。この記事を書いている段階で Server Actions をサポートしている Next.js 以外のフレームワークはないため、以下でコード例などを提示する際は Next.js プロジェクトであることを前提とすることとします。
+2023 年 10 月 5 日、React の Canary 版に Server Actions のサポートが[追加](https://github.com/facebook/react/blob/main/CHANGELOG-canary.md#october-5-2023-1830-canary-546178f91-20231005)されました。React の Canary 版は[フレームワークにとっての安定版である](https://react.dev/blog/2023/05/03/react-canaries)とみなされるので、この時点で各 React フレームワークが Server Actions を正式にサポートするための前提が整ったといえます。そしてこれを受け、Next.js はバージョン 14 において Server Actions のサポート段階を [Stable へと引き上げ](https://nextjs.org/blog/next-14)ました。この記事を書いている段階で Server Actions をサポートしている Next.js 以外のフレームワークはないため、以下でコード例などを提示する際は Next.js プロジェクトにおいて実行されることを前提としています。
+
+### `'use server'`
+
+概念としての Server Actions について理解できたところで、ここからは具体的に Server Actions の実装方式や実行方式について説明していきます。ですがその前の準備として、`'use server'` というディレクティブについて確認しておきます。
+
+React の[ドキュメント](https://react.dev/reference/react/use-server)によると、
+
+> `'use server'` marks server-side functions that can be called from client-side code.
+
+とあります。これを訳すと「クライアントサイドのコードから呼び出されるサーバーサイドの関数にマークを付ける」といった意味ですが、この「サーバーサイドの関数」とは Server Actions のことです。つまり、`'use server'` というディレクティブは、「ここからは Server Actions ですよ」というメッセージを React に伝える役割をもちます。[`'use client'`](https://react.dev/reference/react/use-client) が、あるファイルとそこから `import` されるコンポーネント郡が Client Components であることを伝える、つまり Server Components と Client Components の境界にマークを付けるために使用されるのと同様に、`'use server'` はコンポーネントとサーバーサイドの処理の境界にマークを付けるために使用されます。
 
 ### 実装方式
 https://nextjs.org/docs/app/api-reference/functions/server-actions#convention
-
-`'use server'` ディレクトリについて確認します。React の[ドキュメント](https://react.dev/reference/react/use-server)によると、
-
-> `'use server'` marks server-side functions that can be called from client-side code.
 
 ### 実行方式
 https://nextjs.org/docs/app/api-reference/functions/server-actions#invocation
