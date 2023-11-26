@@ -29,7 +29,7 @@ Server Actions により、
 - API レイヤー (Next.js の言葉では API Routes あるいは Route Handlers) を介さず直接サーバーサイドの関数をコンポーネントから実行できる
 - ほげ
 
-などの効用がもたらされることが期待されています^[Server Actions がもたらす恩恵については、Next.js 14 のアナウンスメント https://nextjs.org/blog/next-14#forms-and-mutations や、日本語であれば https://azukiazusa.dev/blog/why-use-server-actions/ がよくまとまっています]。
+などの効用がもたらされることが期待されています^[TODO: (消す) Server Actions がもたらす恩恵については、Next.js 14 のアナウンスメント https://nextjs.org/blog/next-14#forms-and-mutations や、日本語であれば https://azukiazusa.dev/blog/why-use-server-actions/ がよくまとまっています]。
 
 余談ですが、Server Actions に関するミームが X 上で少し前に流行っていましたね。震源は
 
@@ -161,7 +161,7 @@ export default function FormApp() {
 - `<input type="submit">`
 - `<input type="image">`
 
-の [`formAction`](https://react.dev/reference/react-dom/components/input#props) prop に Server Actions を指定することもできます。`form` の `action` と同時に指定された場合、`formAction` が優先されます。以下は `action` と `formAction` を実験として同時に指定した場合の例ですが、`action` に指定された `action1` は、`formAction` に指定された `action2` にオーバーライドされるため、実際には `action2` のみ実行されます (これは ESLint で警告が出てほしいですね):
+の [`formAction`](https://react.dev/reference/react-dom/components/input#props) prop に Server Actions を指定することもできます。`form` の `action` と同時に指定された場合、`formAction` が優先されます。以下は `action` と `formAction` を実験として同時に指定した場合の例ですが、`action` に指定された `action1` は、`formAction` に指定された `action2` にオーバーライドされるため、実際には `action2` のみ実行されます:
 
 ```tsx:page.tsx
 async function action1(formData: FormData) {
@@ -187,6 +187,8 @@ export default function FormApp() {
   );
 }
 ```
+
+なお、上では一方がオーバーライドされる例を示しましたが、`action` と `formAction` を同時に指定できることを利用し、一つのフォームで複数の Server Actions を実行することも可能です。詳しくは React の[公式ドキュメント](https://react.dev/reference/react-dom/components/form#handling-multiple-submission-types)を参照してください。
 
 ### Custom Invocation による方式
 
@@ -232,10 +234,26 @@ export default async incrementLike() {
 なお、`useTransition` フックは、UI をブロックせずに
 
 ## Progressive Enhancement
-https://nextjs.org/docs/app/api-reference/functions/server-actions#progressive-enhancement
-https://developer.mozilla.org/en-US/docs/Glossary/Progressive_Enhancement
-https://en.wikipedia.org/wiki/Progressive_enhancement
-https://remix.run/docs/en/main/discussion/progressive-enhancement
+
+Wikipedia によると、[Progressive Enhancement](https://en.wikipedia.org/wiki/Progressive_enhancement) とは
+
+> Progressive enhancement is a strategy in web design that puts emphasis on web content first, allowing everyone to access the basic content and functionality of a web page, whilst users with additional browser features or faster Internet access receive the enhanced version instead.
+
+ということを意味します。つまり、ウェブページの基本的なコンテンツや機能にすべてのユーザーがアクセスできるようにすることをベースラインとし、その上でユーザーの環境に応じて段階的に (progressive) 体験を拡張する (enhance) ということです。Server Actions の文脈においては、JavaScript が無効になっている環境においてもフォームの送信が可能であることがベースラインとなるでしょう。そして JavaScript が有効であれば、たとえばフォームの送信後にフルページのリロードをおこなわずに結果を画面に反映させるなど、よりリッチな体験を提供することを考えます。
+
+上述したように、Server Actions の実行形式には
+
+- `action` prop を使用する方式
+- `formAction` prop を使用する方式
+- Custom Invocation による方式
+
+という三方式がありますが、`action` と `formAction` を使用する方式であれば Progressive Enhancement が有効化されます。つまり、JavaScript が無効な環境であっても、通常の HTML のフォームとして振る舞うためデータの送信が可能となります。一方、Custom Invocation による方式ではイベントハンドラーの中で Server Actions を呼び出すため、JavaScript が無効な環境ではフォームの送信ができず、Progressive Enhancement は無効化されます。よって、Progressive Enhancement の観点からは、Custom Invocation は他の選択肢と比較して望ましくないといえるでしょう。
+
+なお、Progressive Enhancement の議論をする際、上でも書いたように「JavaScript が無効な環境」が仮定されることが多い気がしますが、これは少しミスリーディングであると思われます。というのも、現代では大多数のユーザーは JavaScript を有効化しているため、「そこまでする意味があるのか」という疑問がすぐさま頭に浮かんでくるためです。こうした疑問点を解消するために少し補足すると、ここで念頭に置くべきは、「JavaScript を明示的に無効化している一部のユーザー」だけではなく、「JavaScript のロード・Hydration を待つことになる大多数のユーザー」です。ユーザーが JavaScript を有効化していたとしても、Progressive Enhancement が考慮されていないアプリケーションであれば、Hydration が完了するまでのあいだはインタラクティブな操作ができません。ブラウザ上での初期レンダリングから Hydration が完了するまでの時間はゼロにはならないということ、そしてネットワーク環境は多くのユーザーにとって依然として不安定であり、Hydration が完了するまでの時間が増加する可能性は誰にでもあるということを考えると、Progressive Enhancement は依然として重要な考え方であることがわかるでしょう。
+
+実はこうした説明は、Next.js のドキュメントよりも [Remix のドキュメント](https://remix.run/docs/en/main/discussion/progressive-enhancement#resilience-and-accessibility)に端的にわかりやすく書かれています。最後に、筆者が特に気に入っている文章を引用しておきます:
+
+> While your users probably don't browse the web with JavaScript disabled, everybody has JavaScript disabled until it has finished loading. As soon as you begin server rendering your UI, you need to account for what happens when they try to interact with your app before JavaScript has loaded.
 
 ## useFormState と useFormStatus
 https://react.dev/reference/react-dom/hooks/useFormState
@@ -322,6 +340,7 @@ https://nextjs.org/blog/next-14
 
 https://nextjs.org/docs/app/api-reference/functions/server-actions
 https://react.dev/reference/react/use-server
+https://react.dev/reference/react-dom/components/form
 https://react.dev/reference/react-dom/hooks/useFormState
 https://react.dev/reference/react-dom/hooks/useFormStatus
 https://nextjs.org/blog/security-nextjs-server-components-actions
@@ -339,3 +358,8 @@ https://zenn.dev/cybozu_frontend/articles/server-actions-and-revalidate
 https://speakerdeck.com/mugi_uno/next-dot-js-app-router-deno-mpa-hurontoendoshua-xin
 https://azukiazusa.dev/blog/why-use-server-actions/
 https://azukiazusa.dev/blog/use-form-state-to-display-error-messages-in-server-actions-forms/
+
+### Progressive Enhancement
+
+https://en.wikipedia.org/wiki/Progressive_enhancement
+https://developer.mozilla.org/en-US/docs/Glossary/Progressive_Enhancement
