@@ -251,13 +251,161 @@ Wikipedia によると、[Progressive Enhancement](https://en.wikipedia.org/wiki
 
 なお、Progressive Enhancement の議論をする際、上でも書いたように「JavaScript が無効な環境」が仮定されることが多い気がしますが、これは少しミスリーディングであると思われます。というのも、現代では大多数のユーザーは JavaScript を有効化しているため、「そこまでする意味があるのか」という疑問がすぐさま頭に浮かんでくるためです。こうした疑問点を解消するために少し補足すると、ここで念頭に置くべきは、「JavaScript を明示的に無効化している一部のユーザー」だけではなく、「JavaScript のロード・Hydration を待つことになる大多数のユーザー」です。ユーザーが JavaScript を有効化していたとしても、Progressive Enhancement が考慮されていないアプリケーションであれば、Hydration が完了するまでのあいだはインタラクティブな操作ができません。ブラウザ上での初期レンダリングから Hydration が完了するまでの時間はゼロにはならないということ、そしてネットワーク環境は多くのユーザーにとって依然として不安定であり、Hydration が完了するまでの時間が増加する可能性は誰にでもあるということを考えると、Progressive Enhancement は依然として重要な考え方であることがわかるでしょう。
 
-実はこうした説明は、Next.js のドキュメントよりも [Remix のドキュメント](https://remix.run/docs/en/main/discussion/progressive-enhancement#resilience-and-accessibility)に端的にわかりやすく書かれています。最後に、筆者が特に気に入っている文章を引用しておきます:
+実はこうした説明は、Next.js のドキュメントよりも [Remix のドキュメント](https://remix.run/docs/en/main/discussion/progressive-enhancement#resilience-and-accessibility)に端的にわかりやすく書かれています。最後に、筆者が特に気に入っている文章をそこから引用しておきます:
 
 > While your users probably don't browse the web with JavaScript disabled, everybody has JavaScript disabled until it has finished loading. As soon as you begin server rendering your UI, you need to account for what happens when they try to interact with your app before JavaScript has loaded.
 
 ## useFormState と useFormStatus
-https://react.dev/reference/react-dom/hooks/useFormState
-https://react.dev/reference/react-dom/hooks/useFormStatus
+
+### useFormState
+
+さて、ここまでの説明により、Server Actions を定義して実際に呼び出すことができるようになりました。ところで、`action` や `formAction` によって Server Actions を実行できるわけですが、一般に何らかの処理をおこなう際にはその実行結果の確認もセットとなります。たとえば、フォームから送信されたデータが適切でない場合や、Server Actions 内で実行した DB 操作が失敗し処理が継続できなくなった場合などにおいて、実行した側のコードにその旨を伝達する場合などです。上述したように、Custom Invocation を用いた場合は例外的に Server Actions の戻り値をそのまま受け取ることができるのですが、`action` や `formAction` を用いた場合は各 prop に Server Action を直接渡しているため、Custom Invocation のように戻り値を受け取ることはできません。こうした場合に Server Actions の実行結果を受け取るために用意されているフックが [`useFormState`](https://react.dev/reference/react-dom/hooks/useFormState) です。
+
+`useFormState` は、
+
+- Server Action そのもの^[なお、実際は Server Actions ではない通常の関数を指定することも可能です。]
+- フォームの実行結果の初期値を表わす状態
+
+を引数として受け取り、
+
+- 現在のフォームの状態
+- Server Action を実行するための関数
+
+を返します (これは [`useReducer`](https://react.dev/reference/react/useReducer) と似ていますね)。つまり、
+
+```ts
+const [state, dispatch] = useFormState(action, initialState);
+```
+
+のように使います。`dispatch` をフォームの `action` などにセットして実行することで、Server Action の実行結果をもとに `state` が更新されるため、`state` を通じて実行結果にアクセスできるようになります。
+
+簡単な例で具体的に確認してみましょう。以下は、初期状態を 0 とし、状態を 1 だけ増加させる Server Action を実行するボタンと、その結果を表示するコンポーネントの例です:
+
+```tsx:page.tsx
+"use client";
+
+import { useFormState } from "react-dom";
+import { increment } from "./actions";
+
+export default function StatefulForm() {
+  const [state, dispatch] = useFormState(increment, 0);
+  return (
+    <form>
+      {state}
+      <button formAction={dispatch}>+1</button>
+    </form>
+  );
+}
+```
+
+そして以下が上で使用している Server Action の実体である `increment` の実装となります。これまでの実装と異なり、第一引数に直前の状態を表わす `prevState` が渡され、第二引数に `formState` が渡されることに注意してください:
+
+```ts:actions.ts
+"use server";
+
+export async function increment(prevState: number, formData: FormData) {
+  return prevState + 1;
+}
+```
+
+以上のコードを動かしてみると、ボタンをクリックするたびにサーバーにリクエストが飛び、Server Action の実行結果が画面に反映されます。このように、`useFormState` を用いてフォームの状態を保持し、Server Actions の実行結果を画面に反映させることができます。
+
+また、`useFormState` は Progressive Enhancement にも対応しています。実際、ブラウザの設定で JavaScript を無効化した上でボタンをクリックすると、フォームが送信され、次の値が埋め込まれた HTML がブラウザにレンダリングされることが確認できるはずです。
+
+このように、`useFormState` により、Server Actions からフォームへのコミュニケーションが可能となります。以下でまた詳しく説明しますが、この応用としてフォームから送信されたデータのバリデーション結果の表示なども実現できます。
+
+なお、Server Actions から返すことができるのは[シリアライズ](https://developer.mozilla.org/en-US/docs/Glossary/Serialization)可能な値に限定されることに注意してください。たとえば Date オブジェクトなどはシリアライズできないため、Server Actions から返すことはできません。
+
+### useFormStatus
+
+[`useFormStatus`](https://react.dev/reference/react-dom/hooks/useFormStatus) は、フォームの送信状態に関する情報を取得するためのフックです (`useFormState` と名前が似ているため注意してください)。`useFormState` を用いればフォームを送信した結果について知ることはできますが、たとえばボタンの連打を防ぐために「フォームの値を送信し、その結果を待っている」かどうかを判定したい場合などには対応できません。`useFormStatus` により、そうしたフォームの送信状態に関する情報を利用することができるようになります。
+
+具体的な使用法は以下のようになります:
+
+```ts
+const { pending, data, method, action } = useFormStatus();
+```
+
+返り値の意味はそれぞれ以下の通りです:
+
+- `pending`: フォームの実行結果を待っている場合は `true`、完了している場合は `false`
+- `data`: フォームから送信されたデータ
+- `method`: フォームの送信に使用された HTTP メソッド、`get` または `post` という文字列が入る
+- `action`: フォームの `action` prop に渡された Server Action
+
+`useFormStatus` についてはシグネチャを見るとその意図がわかりやすくなるかもしれません。以下は `useFormStatus` の[型定義からの抜粋](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/a35d2b719fd8fbb9d7dc204e70d4dc38b27ebe37/types/react-dom/canary.d.ts#L112-L128)です:
+
+```ts
+interface FormStatusNotPending {
+  pending: false;
+  data: null;
+  method: null;
+  action: null;
+}
+
+interface FormStatusPending {
+  pending: true;
+  data: FormData;
+  method: string;
+  action: string | ((formData: FormData) => void | Promise<void>);
+}
+
+type FormStatus = FormStatusPending | FormStatusNotPending;
+
+function useFormStatus(): FormStatus;
+```
+
+つまり、`useFormStatus` はフォームの送信がペンディング (完了待ち) 状態かをまず大きく表わし、ペンディング状態 (`FormStatusPending`) であれば上述した送信状態に関する情報がセットされ、そうでなければ (`FormStatusNotPending`) それらの情報は `null` (`pending` に関しては `false`) となるということです。この意図を読み取ると、たとえば `pending` を使用して送信ボタンを無効化することなどがこのフックの主要な用途であることがわかります。
+
+ところで、一点注意しなければならないこととして、`useFormStatus` はそれを使うコンポーネントの親コンポーネントの `form` 要素に関する情報を返すということです。すなわち、
+
+```ts:actions.ts
+"use server";
+
+export async function action(formData: FormData) {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+}
+```
+
+のような Server Action があるとき、
+
+```tsx:page.tsx
+import { useFormStatus } from "react-dom";
+import action from './actions';
+
+export default function FormApp() {
+  const status = useFormStatus();
+  return (
+    <form action={action}>
+      <button disabled={status.pending}>Submit</button>
+    </form>
+  );
+}
+```
+
+のようには書けないということです。代わりに、`useFormStatus` を使うコンポーネントを新たに作成し、そのコンポーネントを `form` 要素の子要素として配置する必要があります:
+
+```tsx:page.tsx
+"use client";
+
+import { useFormStatus } from "react-dom";
+import { action } from "./actions";
+
+function Submit() {
+  const status = useFormStatus();
+  return <button disabled={status.pending}>Submit</button>;
+}
+
+export default function FormApp() {
+  return (
+    <div>
+      <form action={action}>
+        <Submit />
+      </form>
+    </div>
+  );
+}
+```
 
 ## バリデーション
 https://github.com/vercel/next-learn/blob/main/dashboard/final-example/app/lib/actions.ts
