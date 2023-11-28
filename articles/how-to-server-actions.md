@@ -355,7 +355,7 @@ type FormStatus = FormStatusPending | FormStatusNotPending;
 function useFormStatus(): FormStatus;
 ```
 
-つまり、`useFormStatus` はフォームの送信がペンディング (完了待ち) 状態かをまず大きく表わし、ペンディング状態 (`FormStatusPending`) であれば上述した送信状態に関する情報がセットされ、そうでなければ (`FormStatusNotPending`) それらの情報は `null` (`pending` に関しては `false`) となるということです。この意図を読み取ると、たとえば `pending` を使用して送信ボタンを無効化することなどがこのフックの主要な用途であることがわかります。
+つまり、`useFormStatus` はフォームの送信がペンディング (完了待ち) 状態か (`FormStatusPending | FormStatusNotPending`) をまず大きく表わし、ペンディング状態 (`FormStatusPending`) であれば上述した送信状態に関する情報がセットされ、そうでなければ (`FormStatusNotPending`) それらの情報は `null` (`pending` に関しては `false`) となるということです。この意図を読み取ると、たとえば `pending` を使用して送信ボタンを無効化することなどがこのフックの主要な用途であることがわかります。
 
 ところで、一点注意しなければならないこととして、`useFormStatus` はそれを使うコンポーネントの親コンポーネントの `form` 要素に関する情報を返すということです。すなわち、
 
@@ -370,14 +370,16 @@ export async function action(formData: FormData) {
 のような Server Action があるとき、
 
 ```tsx:page.tsx
+"use client";
+
 import { useFormStatus } from "react-dom";
-import action from './actions';
+import { action } from "./actions";
 
 export default function FormApp() {
-  const status = useFormStatus();
+  const { pending } = useFormStatus(); // ❌
   return (
     <form action={action}>
-      <button disabled={status.pending}>Submit</button>
+      <button disabled={pending}>{pending ? "送信中" : "送信"}</button>
     </form>
   );
 }
@@ -392,8 +394,8 @@ import { useFormStatus } from "react-dom";
 import { action } from "./actions";
 
 function Submit() {
-  const status = useFormStatus();
-  return <button disabled={status.pending}>Submit</button>;
+  const { pending } = useFormStatus(); // ✅
+  return <button disabled={pending}>{pending ? "送信中" : "送信"}</button>;
 }
 
 export default function FormApp() {
