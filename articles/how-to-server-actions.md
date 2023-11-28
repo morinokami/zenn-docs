@@ -410,10 +410,38 @@ export default function FormApp() {
 ```
 
 ## バリデーション
-https://github.com/vercel/next-learn/blob/main/dashboard/final-example/app/lib/actions.ts
+
+下で述べるセキュリティとも関係しますが、Server Actions においても入力値に対するバリデーションは欠かせません。実装の詳細であるため詳しく述べることは避けますが、各 Server Actions には一意の ID が割り振られており、フォームはこの ID の値を裏側で同時に送信し、サーバーサイドでは送信された ID に対応する関数を特定してそれを呼び出す、というのが Server Actions の大まかな仕組みとなっています。このことは、ID を知ってさえいれば任意の引数を渡して Server Actions を呼び出せるということを[意味します](https://nextjs.org/blog/security-nextjs-server-components-actions#write)。これがバリデーションが必要となる理由です。
+
+バリデーション自体は通常の関数と同様、引数が期待する値かどうかを確認すれば良いでしょう。様々な方法が考えられますが、Next.js の [examples](https://github.com/vercel/next.js/blob/canary/examples/next-forms/app/actions.ts) や [チュートリアル](https://nextjs.org/learn/dashboard-app/mutating-data)で使われている [Zod](https://zod.dev/) を用いた方法が現状では Idiomatic であると考えられるため、ここではそれを見てみましょう:
+
+```ts:actions.ts
+"use server";
+
+import { z } from "zod";
+
+const FormSchema = z.object({
+  id: z.string().min(1),
+});
+
+export async function action(formData: FormData) {
+  const validatedFields = FormSchema.safeParse({
+    id: formData.get("id"),
+  });
+
+  if (!validatedFields.success) {
+    // バリデーションエラー
+  }
+
+  // ...
+}
+```
+
+まず、フォームから送信されるべき値を `FormSchema` という名前のスキーマにより定義しています。続いて、ここでは `FormData` が引数であるため、[`get`](https://developer.mozilla.org/en-US/docs/Web/API/FormData/get) メソッドを用いてキーに対応する値を取り出し、そこからオブジェクトを組み上げ、スキーマを用いてパースします。この結果を `validatedFields` という変数に保存していますが、バリデーションエラーがあれば `validatedFields.success` が `false` となるため、その場合はエラー処理をおこない、そうでなければ `validatedFields` の値を使って処理を継続する、というのが大まかな流れとなります。話をわかりやすくするためにスキーマを単純化していますが、フォームの要件に応じてスキーマが複雑化したとしても大筋は変わらないはずです。
 
 ## エラーハンドリング
 https://twitter.com/dan_abramov/status/1725627709387120970: Custom Error は JSON を返し、Unexpected Error は Error Boundary でキャッチすればいいという話
+https://speakerdeck.com/mugi_uno/next-dot-js-app-router-deno-mpa-hurontoendoshua-xin
 
 ## セキュリティ
 https://nextjs.org/blog/security-nextjs-server-components-actions
@@ -505,6 +533,7 @@ https://github.com/leerob/nextjs-postgres-email-client
 
 https://zenn.dev/cybozu_frontend/articles/server-actions-error
 https://zenn.dev/cybozu_frontend/articles/server-actions-and-revalidate
+https://zenn.dev/cybozu_frontend/articles/server-actions-deep-dive
 https://speakerdeck.com/mugi_uno/next-dot-js-app-router-deno-mpa-hurontoendoshua-xin
 https://azukiazusa.dev/blog/why-use-server-actions/
 https://azukiazusa.dev/blog/use-form-state-to-display-error-messages-in-server-actions-forms/
