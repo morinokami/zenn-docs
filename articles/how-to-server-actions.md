@@ -8,6 +8,7 @@ published: false
 
 ## はじめに
 
+
 ## Server Actions とは何か
 
 [Server Actions](https://nextjs.org/docs/app/api-reference/functions/server-actions) とは、クライアント側から呼び出される、サーバーサイドで実行可能な関数です。いわゆる RPC (Remote Procedure Call) の仕組みが React の世界にもたらされたものであるといえます。[Server Components](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md) が data fetching をサーバーサイドに移動するための仕組みと考えると、Server Actions は data mutation をサーバーサイドに移動するために導入された仕組みであり、両者は相補的な関係となっています。サーバーサイドにおける data fetching や data mutation の仕組みは従来、[`getServerSideProps`](https://nextjs.org/docs/pages/building-your-application/data-fetching/get-server-side-props) や [`loader`](https://remix.run/docs/en/main/route/loader)、[API Routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) など、各フレームワーク独自の方式により実現されていましたが、Server Components と Server Actions により、正式に React の世界における第一級市民となったといえます。
@@ -39,9 +40,11 @@ https://twitter.com/adamrackis/status/1717607565260124613
 
 https://twitter.com/rauchg/status/1718416777322123645
 
+
 ## サポート状況
 
 2023 年 10 月 5 日、React の Canary 版に Server Actions のサポートが[追加](https://github.com/facebook/react/blob/main/CHANGELOG-canary.md#october-5-2023-1830-canary-546178f91-20231005)されました。React の Canary 版は[フレームワークにとっての安定版である](https://react.dev/blog/2023/05/03/react-canaries)とみなされるので、この時点で各 React フレームワークが Server Actions を正式にサポートするための前提が整ったといえます。そしてこれを受け、Next.js はバージョン 14 において Server Actions のサポート段階を [Stable へと引き上げ](https://nextjs.org/blog/next-14)ました。この記事を書いている段階で Server Actions をサポートしている Next.js 以外のフレームワークはないため、以下でコード例などを提示する際は Next.js プロジェクトにおいて実行されることを前提としています。
+
 
 ## `'use server'`
 
@@ -52,6 +55,7 @@ React の[ドキュメント](https://react.dev/reference/react/use-server)に�
 > `'use server'` marks server-side functions that can be called from client-side code.
 
 とあります。これを訳すと「クライアントサイドのコードから呼び出されるサーバーサイドの関数にマークを付ける」といった意味になりますが、この「サーバーサイドの関数」とは Server Actions のことです。つまり、`'use server'` というディレクティブは、「ここからは Server Actions ですよ」というメッセージを React に伝える役割をもちます。[`'use client'`](https://react.dev/reference/react/use-client) が、あるファイルとそこから `import` されるコンポーネント群が Client Components であることを伝える、つまり Server Components と Client Components の境界にマークを付けるために使用されるのと同様に、`'use server'` はコンポーネントとサーバーサイドの処理の境界にマークを付けるために使用されます。
+
 
 ## 実装方式
 
@@ -123,6 +127,9 @@ export async function myAction() {
 - サーバーサイドでのみ実行されるコードがハッキリするため可読性やメンテナビリティが向上する
 
 などのメリットがあると考えられます。
+
+### TODO: 引数の `bind`
+
 
 ## 実行方式
 
@@ -233,6 +240,7 @@ export default async incrementLike() {
 
 なお、`useTransition` フックは、UI をブロックせずに
 
+
 ## Progressive Enhancement
 
 Wikipedia によると、[Progressive Enhancement](https://en.wikipedia.org/wiki/Progressive_enhancement) とは
@@ -254,6 +262,7 @@ Wikipedia によると、[Progressive Enhancement](https://en.wikipedia.org/wiki
 実はこうした説明は、Next.js のドキュメントよりも [Remix のドキュメント](https://remix.run/docs/en/main/discussion/progressive-enhancement#resilience-and-accessibility)に端的にわかりやすく書かれています。最後に、筆者が特に気に入っている文章をそこから引用しておきます:
 
 > While your users probably don't browse the web with JavaScript disabled, everybody has JavaScript disabled until it has finished loading. As soon as you begin server rendering your UI, you need to account for what happens when they try to interact with your app before JavaScript has loaded.
+
 
 ## useFormState と useFormStatus
 
@@ -409,6 +418,7 @@ export default function FormApp() {
 }
 ```
 
+
 ## バリデーション
 
 下で述べるセキュリティとも関係しますが、Server Actions においても入力値に対するバリデーションは欠かせません。実装の詳細であるため詳しく述べることは避けますが、各 Server Actions には一意の ID が割り振られており、フォームはこの ID の値を裏側で同時に送信し、サーバーサイドでは送信された ID に対応する関数を特定してそれを呼び出す、というのが Server Actions の大まかな仕組みとなっています。このことは、ID を知ってさえいれば任意の引数を渡して Server Actions を呼び出せるということを[意味します](https://nextjs.org/blog/security-nextjs-server-components-actions#write)。これがバリデーションが必要となる理由です。
@@ -439,12 +449,15 @@ export async function action(formData: FormData) {
 
 まず、フォームから送信されるべき値を `FormSchema` という名前のスキーマにより定義しています。続いて、ここでは `FormData` が引数であるため、[`get`](https://developer.mozilla.org/en-US/docs/Web/API/FormData/get) メソッドを用いてキーに対応する値を取り出し、そこからオブジェクトを組み上げ、スキーマを用いてパースします。この結果を `validatedFields` という変数に保存していますが、バリデーションエラーがあれば `validatedFields.success` が `false` となるため、その場合はエラー処理をおこない、そうでなければ `validatedFields` の値を使って処理を継続する、というのが大まかな流れとなります。話をわかりやすくするためにスキーマを単純化していますが、フォームの要件に応じてスキーマが複雑化したとしても大筋は変わらないはずです。
 
+
 ## エラーハンドリング
 https://twitter.com/dan_abramov/status/1725627709387120970: Custom Error は JSON を返し、Unexpected Error は Error Boundary でキャッチすればいいという話
 https://speakerdeck.com/mugi_uno/next-dot-js-app-router-deno-mpa-hurontoendoshua-xin
 
+
 ## セキュリティ
 https://nextjs.org/blog/security-nextjs-server-components-actions
+
 
 ## フォーム向けライブラリとの併用可能性
 
@@ -505,6 +518,7 @@ https://github.com/orgs/react-hook-form/discussions/10757
 
 ### React Hook Form の Server Actions 対応について
 https://github.com/react-hook-form/react-hook-form/pull/11061
+
 
 ## 参考
 
