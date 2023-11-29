@@ -8,6 +8,16 @@ published: false
 
 ## はじめに
 
+今年の春頃に発表された Server Actions ですが、Next.js 14 の発表を機に実際に使い始めてみるとまだまだ情報が少なく、また React や Next.js の公式ドキュメントを中心に色々な情報源を行ったり来たりする必要性を感じました。ただ、そのように断片的ながらも色々な情報を吸収しながらコードを書いていくうちに、Server Actions に関して最低限押さえておくべき事項の全体像が見えてきたため、ここに文書としてまとめておこうと思います。Server Actions の使い方を理解する上で個人的に重要だと思った文書は末尾に[参考](#参考)としてまとめてありますので、この記事を起点にぜひそれらも読んでみてください。
+
+なお余談ですが、Server Actions に関するミームが X 上で少し前に流行っていましたね。震源は
+
+https://twitter.com/adamrackis/status/1717607565260124613
+
+だと思いますが、クライアントから直接 SQL クエリを実行するという見た目が多くの人々に衝撃を与えたようです。果てには Vercel CEO の Guillermo Rauch が悪ノリでミームジェネレータまで作ってしまい、これら一連の展開はなかなか楽しいものでした:
+
+https://twitter.com/rauchg/status/1718416777322123645
+
 
 ## Server Actions とは何か
 
@@ -31,14 +41,6 @@ Server Actions により、
 - ほげ
 
 などの効用がもたらされることが期待されています^[TODO: (消す) Server Actions がもたらす恩恵については、Next.js 14 のアナウンスメント https://nextjs.org/blog/next-14#forms-and-mutations や、日本語であれば https://azukiazusa.dev/blog/why-use-server-actions/ がよくまとまっています]。
-
-余談ですが、Server Actions に関するミームが X 上で少し前に流行っていましたね。震源は
-
-https://twitter.com/adamrackis/status/1717607565260124613
-
-だと思いますが、クライアントから直接 SQL クエリを実行するという見た目が多くの人々に衝撃を与えたようです。果てには Vercel CEO の Guillermo Rauch が悪ノリでミームジェネレータまで作ってしまい、一連の展開はなかなか楽しいものでした:
-
-https://twitter.com/rauchg/status/1718416777322123645
 
 
 ## サポート状況
