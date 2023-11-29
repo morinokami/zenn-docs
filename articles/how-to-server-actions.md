@@ -126,6 +126,8 @@ function Bookmark({ slug }) {
 }
 ```
 
+TODO: Closures
+
 なお、同じファイルであれば以下のようにコンポーネントの外側に置いても構いません:
 
 ```tsx
@@ -138,6 +140,8 @@ export default function ServerComponent() {
   // ...
 }
 ```
+
+以上見てきたように、Server Components と同じファイルに Server Actions を定義することができますが、Client Components で同じことはできないことに注意してください。`'use client'` が置かれたファイル内で Server Actions を定義しようとすると、`It is not allowed to define inline "use server" annotated Server Actions in Client Components.` というエラーが発生します。
 
 ### 単独のファイルに定義する方式
 
@@ -158,9 +162,38 @@ export async function myAction() {
 
 などのメリットがあると考えられます。
 
-### TODO: 引数の `bind`
+### 引数の `bind`
 
-[`bind`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind) メソッドを使用して、ある Server Action をもとに一部の引数を固定した新しい Server Action を定義することもできます。
+[`bind`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind) メソッドを使用して、ある Server Action をもとに一部の引数を固定した新しい Server Action を定義することもできます。以下は Next.js の[ドキュメント](https://nextjs.org/docs/app/api-reference/functions/server-actions#binding-arguments)に書かれている例となります:
+
+```jsx:app/client-component.jsx
+'use client'
+ 
+import { updateUser } from './actions'
+ 
+export function UserProfile({ userId }) {
+  const updateUserWithId = updateUser.bind(null, userId)
+ 
+  return (
+    <form action={updateUserWithId}>
+      <input type="text" name="name" />
+      <button type="submit">Update User Name</button>
+    </form>
+  )
+}
+```
+
+```js:app/actions.js
+'use server'
+ 
+export async function updateUser(userId, formData) {
+  // ...
+}
+```
+
+上の例において、`updateUser` は `formData` の他に `userId` を必要とします。`<form action={updateUserWithId(userId)}>` のように書くことはできないため、ここでは `bind` を用いて `userId` を固定した新しい Server Action を定義しています。このように、Server Actions に追加の引数を渡したい場合は `bind` を使用することで実現できます。
+
+ところで上の結果は、`<input type="hidden" name="id" value={userId} />` のようにフォームに隠しフィールドを追加し、`formData` 経由で `userId` を受け取るようにしても実現可能です。そうした場合、フォーム内の HTML にそのまま `userId` の値が埋め込まれることが相違点となります。`bind` を使用した場合は HTML 内に表示されることはないため、その点は一つの使い分けになるかもしれません。ただし、あくまで HTML 上では見えないというだけであり、フォームを送信した際のペイロードには暗号化されずにそのまま含まれてしまうため、重要な情報を秘匿するための手段としては使えないことに注意してください。
 
 
 ## 実行方式
@@ -485,6 +518,8 @@ export async function action(formData: FormData) {
 ## エラーハンドリング
 https://twitter.com/dan_abramov/status/1725627709387120970: Custom Error は JSON を返し、Unexpected Error は Error Boundary でキャッチすればいいという話
 https://speakerdeck.com/mugi_uno/next-dot-js-app-router-deno-mpa-hurontoendoshua-xin
+https://nextjs.org/docs/app/building-your-application/routing/error-handling#securing-sensitive-error-information
+https://nextjs.org/blog/security-nextjs-server-components-actions#error-handling
 
 
 ## セキュリティ
