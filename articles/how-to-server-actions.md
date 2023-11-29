@@ -58,6 +58,34 @@ React の[ドキュメント](https://react.dev/reference/react/use-server)に�
 
 とあります。これを訳すと「クライアントサイドのコードから呼び出されるサーバーサイドの関数にマークを付ける」といった意味になりますが、この「サーバーサイドの関数」とは Server Actions のことです。つまり、`'use server'` というディレクティブは、「ここからは Server Actions ですよ」というメッセージを React に伝える役割をもちます。[`'use client'`](https://react.dev/reference/react/use-client) が、あるファイルとそこから `import` されるコンポーネント群が Client Components であることを伝える、つまり Server Components と Client Components の境界にマークを付けるために使用されるのと同様に、`'use server'` はコンポーネントとサーバーサイドの処理の境界にマークを付けるために使用されます。
 
+`'use server'` は、
+
+```ts
+async function action(formData: FormData) {
+  'use server';
+  // ...
+}
+```
+
+のように非同期関数の先頭に記述します。これにより、この `action` 関数が Server Action であると認識されます。あるいは、
+
+
+```ts
+'use server';
+
+export async function action(formData: FormData) {
+  // ...
+}
+```
+
+のようにファイルの先頭に記述することも可能です。この場合、ファイル内のすべての関数が Server Action であると認識されます。
+
+なお、これらのディレクティブについて、他のコードと雰囲気が異なるため奇妙に思われる方がいるかもしれませんが、もともと Javascript にはこのディレクティブの先祖 (?) に当たる `'use strict'` があり、これは [Strict モード](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode)にオプトインするためのディレクティブです。また、非公式なものとしては asm.js における `'use asm'` などのディレクティブもあります。こうした既存の記法を拡張するかたちで `'use client'` や `'use server'` などのディレクティブが導入されたものと思われますが、これらのディレクティブの導入に関するより詳細な議論については
+
+https://github.com/reactjs/rfcs/pull/227
+
+などを参照してください。
+
 
 ## 実装方式
 
@@ -131,6 +159,8 @@ export async function myAction() {
 などのメリットがあると考えられます。
 
 ### TODO: 引数の `bind`
+
+[`bind`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind) メソッドを使用して、ある Server Action をもとに一部の引数を固定した新しい Server Action を定義することもできます。
 
 
 ## 実行方式
