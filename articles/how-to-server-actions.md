@@ -521,7 +521,7 @@ https://speakerdeck.com/mugi_uno/next-dot-js-app-router-deno-mpa-hurontoendoshua
 https://nextjs.org/docs/app/building-your-application/routing/error-handling#securing-sensitive-error-information
 https://nextjs.org/blog/security-nextjs-server-components-actions#error-handling
 
-さて、バリデーションをおこなうとすれば、バリデーションが通らなかったときの振る舞いについても考慮する必要があります。さらに、バリデーション以外にも処理を継続できない場合はあり得るため、当然ですがそうした場合にどうするかについても決めなければいけません。これについてドキュメントなどにおいて明確に指針が示されているわけではありませんが、一般に関数において処理を継続できなくなった場合、大きく二つの方向性があると思われます:
+さて、上のようにバリデーションをおこなうとすれば、バリデーションが通らなかったときの振る舞いについても考慮する必要があります。さらに、バリデーション以外にも処理を継続できない場合はあり得るため、当然ですがそうした場合にどうするかについても決めておかなければいけません。これについてドキュメントなどにおいて明確に指針が示されているわけではありませんが、一般に関数において処理を継続できなくなった場合、大きく二つの方向性があると思われます:
 
 - 例外を投げる
 - エラーコードなど何らかの値を返す (すでに見たように、`useFormState` を使うか、または Custom Invocation をおこなってこの値を取得できます)
@@ -532,7 +532,7 @@ https://nextjs.org/blog/security-nextjs-server-components-actions#error-handling
 >
 > This is a security precaution to avoid leaking potentially sensitive details included in the error to the client.
 >
-> The message property contains a generic message about the error and the digest property contains an automatically generated hash of the error that can be used to match the corresponding error in server-side logs.
+> The `message` property contains a generic message about the error and the `digest` property contains an automatically generated hash of the error that can be used to match the corresponding error in server-side logs.
 
 とあります。つまり、プロダクション環境では、エラーメッセージなどに含まれるセンシティブな情報がクライアントサイドで露出しないよう、サーバーサイドで発生した `Error` の詳細は隠蔽されたかたちでクライアントに渡される、ということです。実際、以下のコード
 
@@ -573,16 +573,208 @@ export default function Page() {
 
 ここにも書かれているように、Server Actions から `throw` した `Error` にセットされたメッセージをクライアント側で取得することはできません。つまり、実質的には「エラーが発生した」という事実を伝えられるだけだということです。これは大きな制約といえるでしょう。
 
-それでは、以上の制約を踏まえた上で、どのように Server Actions における異常系を処理すればいいでしょうか。このことに関する Dan Abramov の意見を見てみましょう:
+また、上では `try/catch` を使うために Custom Invocation により Server Actions を呼び出していますが、`action` や `formAction` を使った場合は `Error` をキャッチすること自体そもそも不可能です。
+
+それでは、以上の制約を踏まえた上で、どのように Server Actions における異常系を処理すればいいでしょうか。これを考えるヒントとして、Dan Abramov の意見を見てみましょう:
 
 https://twitter.com/dan_abramov/status/1725627709387120970
 
 つまり、
 
 - バリデーションエラーなど予測可能なエラーについては、JSON を返す
-- その他の予測できないエラーについては、Error Boundary でキャッチする
+- その他の予測できないエラーについては、[Error Boundary](https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary) でキャッチする
 
-ということですね。上で見たように、
+ということですね。上で見たように、クライアントにエラーの詳細を伝えたい場合に `Error` を `throw` する方法では上手くいかないため、「この入力値が invalid である」といった情報を JSON 等に詰めて返すということになります。文字列を返すというのが最も簡易な方法ですが、現実的にはその他の情報も必要になると思われるため、JSON を返すというのは妥当でしょう。一方、予測できないエラーについては、`throw` された `Error` の中身を見てもクライアント側で何か対処できるわけではなく、`action` などから呼び出した場合は `try/catch` すら使用できないため、すでに React の仕組みとして組み込まれている Error Boundary に任せるのが自然だというのもわかります。要件によってはこの方針では上手くいかない場合もあるかもしれませんが、いずれにせよ、プロジェクトにおけるこうしたエラーハンドリングの方針をまず決めておくことが重要です。
+
+なお、Custom Invocation の場合のみ Error Boundary によるキャッチができないという点に注意する必要があります。これは
+
+https://legacy.reactjs.org/docs/error-boundaries.html#introducing-error-boundaries
+
+に書かれている
+
+> Error boundaries do not catch errors for ... Event handlers
+
+という制約によるものです。そのため、Custom Invocation を使用する場合は `try/catch` によるエラーハンドリングをおこなう必要があります。こうした事情を受け、以下のコード例による説明も、「`action` と `formAction` の場合」と「Custom Invocation の場合」とに分けておこなうこととします。
+
+### `action` と `formAction` の場合
+
+まず、メッセージのみをやり取りする最も簡易的なパターンのコードを見てみましょう:
+
+```tsx:page.tsx
+"use client";
+
+import { useFormState, useFormStatus } from "react-dom";
+import { createTodo } from "./actions";
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" disabled={pending}>
+      Create
+    </button>
+  );
+}
+
+export default function FormApp() {
+  const initialState = { message: "" };
+  const [state, dispatch] = useFormState(createTodo, initialState);
+  return (
+    <form action={dispatch}>
+      {state.message && <p aria-live="polite">{state.message}</p>}
+      <input type="text" name="todo" />
+      <SubmitButton />
+    </form>
+  );
+}
+```
+
+```ts:actions.ts
+"use server";
+
+import { z } from "zod";
+
+const FormSchema = z.object({
+  todo: z.string().min(1),
+});
+
+export async function createTodo(
+  state: { message: string },
+  formData: FormData,
+) {
+  const validatedFields = FormSchema.safeParse({
+    todo: formData.get("todo"),
+  });
+
+  if (!validatedFields.success) {
+    return { message: "Invalid todo data" };
+  }
+
+  try {
+    // DB 等への保存処理
+    return { message: "Todo created successfully" };
+  } catch (e) {
+    return { message: "Failed to create todo" };
+  }
+}
+```
+
+Server Action 側の処理は、バリデーションに失敗した場合や DB への保存処理が失敗した場合には対応するエラーメッセージを返し、それ以外の場合には成功のメッセージを返すというものです。フォーム側では `useFormState` を使用してメッセージを受け取り、それを画面に表示しています。
+
+続いて、与えられた `FormData` のどの値が invalid であるかを区別できるように拡張してみましょう。ここではフィールドは一つしかないため自明ですが、複数のデータを受け取った場合にも対応できるようにする必要があります。Zod には各プロパティごとにエラーをグルーピングした結果を返す [`fieldErrors`](https://github.com/colinhacks/zod/blob/master/ERROR_HANDLING.md#flattening-errors) というプロパティが存在するため、これを使って以下のように書き換えてみます:
+
+```tsx:page.tsx
+"use client";
+
+import { useFormState, useFormStatus } from "react-dom";
+import { createTodo } from "./actions";
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" disabled={pending}>
+      Create
+    </button>
+  );
+}
+
+export default function FormApp() {
+  const initialState = { fieldErrors: {}, message: "" };
+  const [state, dispatch] = useFormState(createTodo, initialState);
+  return (
+    <form action={dispatch}>
+      {state.message && <p aria-live="polite">{state.message}</p>}
+      <input type="text" name="todo" aria-describedby="todo-error" />
+      <SubmitButton />
+      {/* fieldErrors を表示 */}
+      {state.fieldErrors?.todo && (
+        <p id="todo-error" aria-live="polite">{state.fieldErrors.todo}</p>
+      )}
+    </form>
+  );
+}
+```
+
+```ts:actions.ts
+"use server";
+
+import { z } from "zod";
+
+const FormSchema = z.object({
+  todo: z.string().min(1),
+});
+
+export async function createTodo(
+  state: { message: string },
+  formData: FormData,
+) {
+  const validatedFields = FormSchema.safeParse({
+    todo: formData.get("todo"),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      // fieldErrors を追加
+      fieldErrors: validatedFields.error.flatten().fieldErrors,
+      message: "Invalid todo data",
+    };
+  }
+
+  try {
+    // DB 等への保存処理
+    return { message: "Todo created successfully" };
+  } catch (e) {
+    return { message: "Failed to create todo" };
+  }
+}
+```
+
+この変更により、フォーム全体に関するメッセージと、各入力値に関するバリデーションエラーメッセージをそれぞれやり取りできるようになりました。ただ、
+
+- `createTodo` の引数 `state` の型
+- `createTodo` の返り値の型
+- `initialState` の型
+
+が連動することが表現されていない点が少し気持ち悪いため、筆者は以下のようなヘルパーを定義して使っています (実務で使っているものはもう少し複雑です):
+
+```ts
+export type FormState<FormSchema> = {
+  message: string;
+  fieldErrors?: Partial<Record<keyof FormSchema, string[]>>;
+};
+```
+
+この `FormState` を使うと、上のコードは
+
+```tsx:page.tsx
+import { CreateTodoState, createTodo } from "./actions";
+
+// ...
+
+export default function FormApp() {
+  const initialState: CreateTodoState = { fieldErrors: {}, message: "" };
+  // ...
+}
+```
+
+```ts:actions.ts
+const FormSchema = z.object({
+  todo: z.string().min(1),
+});
+export type CreateTodoState = FormState<z.infer<typeof FormSchema>>;
+
+export async function createTodo(
+  state: CreateTodoState,
+  formData: FormData,
+): Promise<CreateTodoState> {
+  // ...
+}
+```
+
+のように書き直すことができます。
+
+以上、`action` 等を使った場合のエラーハンドリングのコード例について見てきましたが、ここでの書き方は Next.js の[チュートリアル](https://nextjs.org/learn)を参考にしている部分が多いため、そちらも参照してください。
+
+### Custom Invocation の場合
 
 
 ## セキュリティ
