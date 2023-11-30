@@ -521,6 +521,69 @@ https://speakerdeck.com/mugi_uno/next-dot-js-app-router-deno-mpa-hurontoendoshua
 https://nextjs.org/docs/app/building-your-application/routing/error-handling#securing-sensitive-error-information
 https://nextjs.org/blog/security-nextjs-server-components-actions#error-handling
 
+さて、バリデーションをおこなうとすれば、バリデーションが通らなかったときの振る舞いについても考慮する必要があります。さらに、バリデーション以外にも処理を継続できない場合はあり得るため、当然ですがそうした場合にどうするかについても決めなければいけません。これについてドキュメントなどにおいて明確に指針が示されているわけではありませんが、一般に関数において処理を継続できなくなった場合、大きく二つの方向性があると思われます:
+
+- 例外を投げる
+- エラーコードなど何らかの値を返す (すでに見たように、`useFormState` を使うか、または Custom Invocation をおこなってこの値を取得できます)
+
+ここで、どちらを選択すべきかという議論の前に、Server Actions がもつ制限について認識しておく必要があります。Next.js の[ドキュメント](https://nextjs.org/docs/app/building-your-application/routing/error-handling#securing-sensitive-error-information)によると、
+
+> During production, the `Error` object forwarded to the client only includes a generic `message` and `digest` property.
+>
+> This is a security precaution to avoid leaking potentially sensitive details included in the error to the client.
+>
+> The message property contains a generic message about the error and the digest property contains an automatically generated hash of the error that can be used to match the corresponding error in server-side logs.
+
+とあります。つまり、プロダクション環境では、エラーメッセージなどに含まれるセンシティブな情報がクライアントサイドで露出しないよう、サーバーサイドで発生した `Error` の詳細は隠蔽されたかたちでクライアントに渡される、ということです。実際、以下のコード
+
+```ts:actions.ts
+"use server";
+
+export async function action() {
+  throw new Error("エラーメッセージ");
+}
+```
+
+```tsx:page.tsx
+"use client";
+
+import { useTransition } from "react";
+import { action } from "./actions";
+
+export default function Page() {
+  const [_, startTransition] = useTransition();
+
+  function onClick() {
+    startTransition(async () => {
+      try {
+        await action();
+      } catch (e) {
+        console.error((e as Error).message);
+      }
+    });
+  }
+
+  return <button onClick={onClick}>送信</button>;
+}
+```
+
+を `next start` コマンドにより実行して「送信」ボタンを押したとき、`エラーメッセージ` という文字列がコンソールに表示されることを期待するかもしれませんが、実際には以下のような文字列が表示されます:
+
+> Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.
+
+ここにも書かれているように、Server Actions から `throw` した `Error` にセットされたメッセージをクライアント側で取得することはできません。つまり、実質的には「エラーが発生した」という事実を伝えられるだけだということです。これは大きな制約といえるでしょう。
+
+それでは、以上の制約を踏まえた上で、どのように Server Actions における異常系を処理すればいいでしょうか。このことに関する Dan Abramov の意見を見てみましょう:
+
+https://twitter.com/dan_abramov/status/1725627709387120970
+
+つまり、
+
+- バリデーションエラーなど予測可能なエラーについては、JSON を返す
+- その他の予測できないエラーについては、Error Boundary でキャッチする
+
+ということですね。上で見たように、
+
 
 ## セキュリティ
 https://nextjs.org/blog/security-nextjs-server-components-actions
