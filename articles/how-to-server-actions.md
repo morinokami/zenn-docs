@@ -303,7 +303,7 @@ export default async incrementLike() {
 
 この例では、`onClick` イベントハンドラーの内部で直接 `incrementLike` を呼び出しています。また、これまでの例と異なり、`incrementLike` が通常の関数のように値を返しており、クライアント側でその値を受け取って使用していることも重要です。Custom Invocation では通常の関数と同じように Server Actions を呼び出すため、その返り値をそのまま受け取ることができるのです。ただし、`action` や `formAction` で Server Actions の実行結果を受け取ることができないというわけではなく、代わりに `formState` などのフックを使用して実行結果を取得します。これについては後述します。
 
-なお、`useTransition` フックは、UI をブロックせずに
+TODO: なお、`useTransition` フックは、UI をブロックせずに
 
 
 ## Progressive Enhancement
