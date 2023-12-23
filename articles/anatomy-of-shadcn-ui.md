@@ -8,7 +8,7 @@ published: true
 
 ## 訳者序文
 
-以下の文章は、[shandcn/ui](https://ui.shadcn.com/) の内部構造について解説している [The anatomy of shadcn/ui](https://manupa.dev/blog/anatomy-of-shadcn-ui) を、原著者である [@manupadev](https://twitter.com/manupadev) 氏の[許可](https://twitter.com/manupadev/status/1737860265096691982)のもとに日本語へと翻訳したものです。
+以下の文章は、[shadcn/ui](https://ui.shadcn.com/) の内部構造について解説している [The anatomy of shadcn/ui](https://manupa.dev/blog/anatomy-of-shadcn-ui) を、原著者である [@manupadev](https://twitter.com/manupadev) 氏の[許可](https://twitter.com/manupadev/status/1737860265096691982)のもとに日本語へと翻訳したものです。
 
 shadcn/ui のモチベーションや使い方に関する日本語の解説は少なくありませんが、その実装に焦点を絞って解説した文章は、訳者が知る範囲では存在しませんでした。shadcn/ui は単にコンポーネントライブラリとして優れているだけでなく、同時にコンポーネントの実装パターン集としても学ぶところが多く、そのエッセンスを知ることは多くの開発者にヒントを与えるだろうと訳者は考えていました。そうした折に、まさにドンピシャの内容の記事を発見したため、ここに翻訳して公表することとしました。shadcn/ui をなんとなく使っている状態を脱して一歩深く理解するきっかけが欲しい方や、モダンなコンポーネントの実装にはどういったライブラリが使われているのかについて興味がある方などにとって役立つ記事であると思います。
 
