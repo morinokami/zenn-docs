@@ -3,7 +3,7 @@ title: "shandcn/ui の内部構造を探る"
 emoji: "🔎"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["react", "shadcnui"]
-published: false
+published: true
 ---
 
 ## 訳者序文
