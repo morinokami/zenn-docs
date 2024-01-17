@@ -1,5 +1,5 @@
 ---
-title: "プログラミング言語 HTML を学ぶ"
+title: "プログラミング言語 HTML 入門"
 emoji: "🐨"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["html"]
