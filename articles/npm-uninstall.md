@@ -14,23 +14,33 @@ https://twitter.com/bholmesdev/status/1784972421776199697
 
 2024 年の 4 月 24 日に [Node.js 22](https://nodejs.org/en/blog/announcements/v22-release-announce) がリリースされました。ESM を 条件付きで `require` する機能や、`--run` フラグによる npm スクリプトのパフォーマンス改善などが v22 で追加され、2009 年に Ryan Dahl が Node.js をリリースしてから 15 年が経つ今も、Node.js は進化を続けています^[[Node.js: The Documentary](https://www.youtube.com/watch?v=LB8KwiiUGy0) はいいぞ。]。
 
-こうして Node.js が強化されていくにつれ、以前はサードパーティーのパッケージを使用して実現することが一般的であった機能が Node.js のみで実現可能となる場合があります。冒頭に引用した Ben Holmes の動画では、そのように不要となったパッケージとして
+こうして Node.js 自身が強化されていくにつれ、以前はサードパーティーのパッケージを使用して実現することが一般的であった機能が Node.js のみで実現可能となり、当該パッケージが不要となるような場合があります。冒頭に引用した Ben Holmes の動画では、そのように不要となったパッケージとして
 
 - `dotenv`
 - `node-fetch`
 - `chalk`
 - `mocha`
 
-が挙げられていますが、この記事では「これらのパッケージ + α が本当に不要になったのか」、あるいは「不要とまでは言えなくとも、特定条件下で乗り換えるべきか」について考察していきます^[たとえば Promise がネイティブに組み込まれたことにより [Bluebird](https://github.com/petkaantonov/bluebird/) が不要になったりなど、過去に遡ればこういった例は数多くあるでしょうが、この記事ではすべてを網羅することは目指しません。あくまで上のツイートを起点として、加えて気になったいくつかのパッケージについて触れるにとどめます。]。
+が挙げられていますが、この記事では「これらのパッケージ + α が本当に不要になったのか」、あるいは「不要とまでは言えなくとも、特定条件下で乗り換えるべきか」について考察していきます^[たとえば Promise がネイティブに組み込まれたことにより [Bluebird](https://github.com/petkaantonov/bluebird/) が不要になったりなど、過去に遡ればこういった例は数多くあるでしょうが、この記事ではすべてを網羅することは目指しません。あくまで上のツイートを起点として、2024 年というタイミングで重要そうないくつかのパッケージについて触れるにとどめます。]。
 
-ところで、サードパーティーのパッケージにより提供されていた機能が Node.js に組み込まれることのメリットは何でしょうか。依存関係が減ることはそれ自体が良いことであると素朴に感じられますが、改めて考えてみると、以下のようなメリットがありそうです:
+ところで、サードパーティーのパッケージにより提供されていた機能が Node.js に組み込まれることのメリットは何でしょうか。依存関係が減ることはそれ自体が良いことであると素朴に感じられますが、改めて考えてみると、以下のようなメリットが期待できそうです:
 
-- 一貫性: 
-- セキュリティ:
-- パフォーマンス:
-- 保守性:
+- 保守性
+  - パッケージの管理コストが減る
+  - 互換性問題が減る (たとえば特定のパッケージが最新の Node.js に対応していない場合、そのパッケージを使用しているプロジェクトは Node.js のバージョンアップができないといった問題が発生しうる)
+- パフォーマンス
+  - サードパーティーのパッケージと比べ開発リソースが豊富な Node.js が提供するバージョンの方が高速である、あるいは将来的に高速化されると期待できる
+  - (やや些末だが) パッケージインストールの時間が短縮され、その結果 CI/CD の実行時間も短縮される
+  - (やや些末だが) パッケージのロード時間が短縮される
+  - (やや些末だが) バンドルサイズが減る
+- セキュリティ
+  - 脆弱性が埋め込まれたコードを実行するリスクが減る
+- 一貫性
+  - (サードパーティーのパッケージをパッチワークすることに比較し) Node.js という主体が統一的な API を提供することが期待される
 
-blah blah
+ただし、これらの多くはあくまで「期待」であり、実際には真逆の結果となるかもしれないことに注意が必要です。たとえばパフォーマンスの項目などはわかりやすいですが、実際にはサードパーティー製のパッケージのほうが高速であるということは容易に起こり得るため、速度が重要であるような状況であれば、外部のパッケージをあえて使い続けるという判断も必要になってきます。API の一貫性といった側面も、人によって結論は異なってくるでしょう。よって、実際にパッケージを置き換えるかどうかを判断するには、上のような様々な観点から検討することが重要です。
+
+それでは以下で、実際に各パッケージに関して検討していきます。
 
 ## node-fetch
 
@@ -48,9 +58,9 @@ https://adventures.nodeland.dev/archive/which-http-client-for-nodejs-should-node
 
 [v20.6.0](https://nodejs.org/en/blog/release/v20.6.0) で [`--env-file`](https://nodejs.org/docs/latest-v22.x/api/cli.html#--env-fileconfig) オプションが追加されるまで、Node.js において `.env` ファイルから環境変数を読み込むためには [Dotenv](https://github.com/motdotla/dotenv) を使用することが一般的でした。Dotenv を使用すると、`require('dotenv').config()` または `import 'dotenv/config'` というコードを記述すれば、`process.env` にプロジェクトのルートに置かれた `.env` ファイルの内容が読み込まれ、環境変数として利用可能となります。
 
-ファイルから環境変数を読み込むためのこうした機能を提供するためのオプションが、上述した `--env-file` です。`node --env-file=.env index.js` のようにプログラムを実行すれば、Dotenv を使用した場合と同様の効果が得られます。dotenv では、`.env` ファイルにコメントを記述したり、複数行に渡る値の設定が可能ですが、`--env-file` でも同じことができます。シンプルに `.env` ファイルの内容を環境変数として読み込むだけであれば、`--env-file` があれば十分であると言えそうです。
+ファイルから環境変数を読み込むためのこうした機能を提供するためのオプションが、上述した `--env-file` です。`node --env-file=.env index.js` のようにプログラムを実行すれば、Dotenv を使用した場合と同様の効果が得られます。Dotenv では、`.env` ファイルにコメントを記述したり、複数行に渡る値の設定が可能ですが、`--env-file` でも同じことができます。シンプルに `.env` ファイルの内容を環境変数として読み込むだけであれば、`--env-file` があれば十分であると言えそうです。
 
-また、[Node.js を設定するための環境変数](https://nodejs.org/docs/latest-v22.x/api/cli.html#environment-variables)を設定した `.env` を `--env-file` により読み込むと、その設定が適用された状態で Node.js が実行されます。仕組み上、Node.js プロセスの実行後に環境変数を読み込む必要がある Dotenv ではこうした挙動を実現することは[難しい](https://github.com/motdotla/dotenv/issues/314)ため、この点は `--env-file` のユニークな点と言えるでしょう。
+また、[Node.js 自体を設定するための環境変数](https://nodejs.org/docs/latest-v22.x/api/cli.html#environment-variables)を記載した `.env` を `--env-file` により読み込むと、その設定が適用された状態で Node.js が実行されます。仕組み上、Node.js プロセスの実行後に環境変数を読み込む必要がある Dotenv ではこうした挙動を実現することは[難しい](https://github.com/motdotla/dotenv/issues/314)ため、この点は `--env-file` のユニークな点と言えるでしょう。
 
 ただし、Dotenv では [dotenv-expand](https://github.com/motdotla/dotenv-expand) により変数の展開が可能ですが、`--env-file` ではそのような機能は現在提供されていません。また、これは `--env-file` オプションの責務からは逸脱する機能ですが、[dotenv-vault](https://github.com/dotenv-org/dotenv-vault) が提供する `.env` を共有するための仕組みも Node.js には現状存在しません。こうした機能が必要な場合は、引き続き Dotenv およびそのエコシステムを使用することが必要です。
 
@@ -62,7 +72,7 @@ https://github.com/nodejs/node/issues/49148
 
 ## Chalk
 
-CLI 向けのコマンドを作成する際、ターミナルに表示する文字列のスタイルを変更するためには [ANSI エスケープシーケンス](https://en.wikipedia.org/wiki/ANSI_escape_code) を使用するという選択肢がありますが、エスケープシーケンスを文字列に正確に埋め込みながらコードを書くのは煩雑です。こうした難点を解消し、ターミナル上に表示する文字列を簡単にスタイリングするためのパッケージが [chalk](https://github.com/chalk/chalk) です。chalk により、`chalk.red('Hello, world!')` のような直感的にわかりやすいコードを使用して、文字列に色を付けたり、文字の太さを変えたりすることができます。
+CLI 向けのコマンドを作成する際、ターミナルに表示する文字列のスタイルを変更するためには [ANSI エスケープシーケンス](https://en.wikipedia.org/wiki/ANSI_escape_code) を使用するという選択肢がありますが、エスケープシーケンスを文字列に正確に埋め込みながらコードを書くのは煩雑です。こうした難点を解消し、ターミナル上に表示する文字列を簡単にスタイリングするためのパッケージが [Chalk](https://github.com/chalk/chalk) です。Chalk により、`chalk.red('Hello, world!')` のような直感的にわかりやすいコードを使用して、文字列に色を付けたり、文字の太さを変えたりすることができます。
 
 [v21.7.0](https://nodejs.org/en/blog/release/v21.7.0) と [v20.12.0](https://nodejs.org/en/blog/release/v20.12.0) において、Chalk のようにターミナル上の文字列をスタイリングするための [`util.styleText`](https://nodejs.org/docs/latest-v22.x/api/util.html#utilstyletextformat-text) という API が Node.js に追加されました。使い方は `format` と `text` を引数として与えるだけで、たとえば以下のようにして簡単に文字列をスタイリングできます:
 
@@ -121,11 +131,11 @@ console.log(styleText('red', 'Hello, world!'));
   - `bgCyanBright`
   - `bgWhiteBright`
 
-ほとんどの項目は chalk とオーバーラップしているため、基本的なスタイリングが目的であれば `util.styleText` で十分そうです。[Wes Bos](https://twitter.com/wesbos) の[動画](https://x.com/wesbos/status/1773001110057337130) を参考に、すべての前景色と背景色を組み合わせた画像を作成してみましたので、こちらも参考にしてください:
+多くの項目は Chalk とオーバーラップしているため、基本的なスタイリングが目的であれば `util.styleText` で十分そうです。[Wes Bos](https://twitter.com/wesbos) の[動画](https://x.com/wesbos/status/1773001110057337130) を参考に、すべての前景色と背景色を組み合わせた画像を作成してみましたので、こちらも参考にしてください:
 
 ![styleText でサポートされている前景色と背景色の組み合わせ](/images//npm-uninstall/styleText.png)
 
-ただし、chalk のようなスタイルをチェーンする書き方が好みである場合や、chalk でしか提供されていない [API](https://www.npmjs.com/package/chalk#api) が必要な場合などは、そのまま chalk を使い続ければよいでしょう。
+ただし、Chalk のようなスタイルをチェーンする書き方が好みである場合や、Chalk でしか提供されていない [API](https://www.npmjs.com/package/chalk#api) が必要な場合などは、そのまま Chalk を使い続ければよいでしょう。
 
 ところで、パフォーマンスについても一応調べてみたところ、以下のような簡単なベンチマークでは Chalk に軍配が上がったことも付記しておきます。[Vitest](https://vitest.dev/) には experimental な機能として [bench](https://vitest.dev/api/#bench) 関数があり、これは内部で [Tinybench](https://github.com/tinylibs/tinybench) を使用しているのですが、テストコードを書くように気軽にベンチマークが実行できる点が気になっていたため、今回はこれを用いて以下のコードを実行しました:
 
@@ -196,7 +206,17 @@ Node.js 22.1.0 on Ryzen 9 5900X + Ubuntu 22.04 という環境での実行結果
 
 ## Mocha
 
-[Mocha](https://mochajs.org/) は Node.js 向けのテストフレームワークです。
+[Mocha](https://mochajs.org/) は Node.js 向けの軽量なテストフレームワークです。同様のテストフレームワークとしては [Jest](https://jestjs.io/) や [Vitest](https://vitest.dev/) なども有名ですが、Mocha は [Chai](https://www.chaijs.com/) などのアサーションライブラリと組み合わせて使用するように設計されており、軽量なテストランナーといった趣きがあるのが特徴です。
+
+Node.js の [v18.0.0](https://nodejs.org/en/blog/release/v18.0.0) と [v16.17.0](https://nodejs.org/en/blog/release/v16.17.0) においてテストランナーの機能が組み込まれたことにより、Mocha の役割をある程度代替することが可能となりました。特に [v20.0.0](https://nodejs.org/en/blog/release/v20.0.0) からは Stable な機能となっており、[`--test-reporter`](https://nodejs.org/docs/latest-v22.x/api/test.html#test-reporters) によるフィードバック形式の指定、[`--watch`](https://nodejs.org/docs/latest-v22.x/api/test.html#watch-mode) によるウォッチモードでのテスト実行、[`assert`](https://nodejs.org/docs/latest-v22.x/api/assert.html) による様々な形式のアサーション、[カバレッジ](https://nodejs.org/docs/latest-v22.x/api/test.html#collecting-code-coverage) の取得、などがサポートされており、本格的なテストを記述するための準備が出来上がってきていると言えそうです。
+
+他と異なり検討事項が多く、また筆者が Mocha についてあまり詳しくないため、Mocha を代替可能かどうかについて断定することは避けますが、基本的なテストを記述することは十分に可能なように見えるため、小規模なプロジェクトなどで本 API を試し始めていくのが良さそうです。
+
+なお、大きなプロジェクトで Mocha から Node.js のテストランナーに乗り換えた事例としては、[Astro](https://astro.build/) があります:
+
+https://astro.build/blog/node-test-migration/
+
+これを読むと、Node.js のテストランナーがテストファイルごとにプロセスを生成しており速度的な課題があったことや、Chai と比較してアサーションの表現力が劣る点があること、OSS プロジェクトとしてどのようにマイグレーションを進めていったか、など興味深い内容を知ることができます。Astro のような著名なプロジェクトが、各局面でどういった判断を下していったかを報告している貴重な資料であるため、興味がある方はぜひ一読することをおすすめします。
 
 ## Nodemon
 
@@ -210,7 +230,7 @@ Nodemon と異なり、`--watch` はエントリーポイントと関係のな�
 
 ## glob
 
-[v22.0.0](https://nodejs.org/en/blog/announcements/v22-release-announce) で [glob](https://nodejs.org/docs/latest-v22.x/api/fs.html#fspromisesglobpattern-options) と [globSync](https://nodejs.org/docs/latest-v22.x/api/fs.html#fsglobsyncpattern-options) という関数が実験的な機能として追加されました。[glob](https://en.wikipedia.org/wiki/Glob_(programming)) とは一般に、ワイルドカードを使用してファイルパスを指定するためのパターンマッチングのことを指しますが、Node.js において glob を使用するには従来 [glob](https://www.npmjs.com/package/glob) や [fast-glob](https://www.npmjs.com/package/fast-glob) などのサードパーティーパッケージを使用する必要がありました。
+[v22.0.0](https://nodejs.org/en/blog/announcements/v22-release-announce) で [glob](https://nodejs.org/docs/latest-v22.x/api/fs.html#fspromisesglobpattern-options) と [globSync](https://nodejs.org/docs/latest-v22.x/api/fs.html#fsglobsyncpattern-options) という関数が実験的な機能として追加されました。[Glob](https://en.wikipedia.org/wiki/Glob_(programming)) とは一般に、ワイルドカードを使用してファイルパスを指定するためのパターンマッチングのことを指しますが、Node.js において Glob を使用するには従来 [glob](https://www.npmjs.com/package/glob) や [fast-glob](https://www.npmjs.com/package/fast-glob) などのサードパーティーパッケージを使用する必要がありました。
 
 v22 によって glob が Node.js 本体に組み込まれたため、たとえば
 
@@ -220,9 +240,9 @@ import { globSync } from 'node:fs';
 console.log(globSync('**/*.js'));
 ```
 
-のようにしてファイルパスを簡単に取得できるようになりました。
+のようにしてファイルパスを簡単に取得できるようになりました。シンプルなパターンであれば、これで一旦は対応できそうです。
 
-なお、パフォーマンスに関しては、https://github.com/isaacs/node-glob?tab=readme-ov-file#benchmark-results にあるパターンを `globSync` のみ測定した限りでは、`glob` や `fast-glob` に分がありそうです。長くなるため、気になる方は以下のアコーディオンをクリックして詳細を表示してください:
+なお、パフォーマンスに関して、https://github.com/isaacs/node-glob?tab=readme-ov-file#benchmark-results にあるパターンを `globSync` のみ測定した限りでは、`glob` や `fast-glob` に分がありそうです。長くなるため、気になる方は以下のアコーディオンをクリックして詳細を表示してください:
 
 :::details `globSync` のパフォーマンス比較
 実行したコードは以下の通りです:
@@ -729,10 +749,10 @@ describe('**/[0-9]/**/*.txt', () => {
 このように、ほぼすべてのパターンにおいて `fs.globSync` が最も遅い結果となりました。
 :::
 
-現在指定可能なオプションは `cwd` と `exclude` のみとまだ限られており、Stability のステータスも上述のように Experimental の扱いであるため、既存の glob パッケージ等をすぐに置き換え可能とは言い難いでしょう。
+現在指定可能なオプションは `cwd` と `exclude` のみとまだ限られており、Stability のステータスも上述のように Experimental の扱いであるため、既存の glob パッケージ等をすぐに置き換え可能であるとは言い難いでしょう。
 
 ## おわりに
 
 自分は普段から基本的にプロジェクトの依存を少なくしたいと考えており、それに関する情報を目にするたびに適宜試しているのですが、そうした情報がどこかにまとまっていれば便利だと思いこの記事を書きました。時間が経つに連れて Stability のステータスや API が変化したり、他のパッケージが不要になっていくことが予想されますが、なるべく記事の情報を最新に保っていく予定です。
 
-なお、言うまでもないことですが、パッケージの背後には無数のコントリビューターがおり、彼らのおかげで便利な機能が提供され、またそれが Node.js 本体の改善を促し、エコシステム全体が発展してきました。不要となって削除することとなっても、それに関わった人たちへのリスペクトの気持ちは忘れずにいたいと思います^[気を整え、拝み、祈り、構えて、`npm uninstall` 🙏]。
+なお、言うまでもないことですが、各パッケージの背後には無数のコントリビューターがおり、彼らのおかげで便利な機能が提供され、またそのことが Node.js 本体の改善を促し、エコシステム全体が発展してきました。不要となって削除することとなっても、開発に関わった人たちへのリスペクトの気持ちは忘れずにいたいと思います^[気を整え、拝み、祈り、構えて、`npm uninstall` 🙏]。
