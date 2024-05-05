@@ -1,5 +1,5 @@
 ---
-title: "Node.js の進化により不要となった (?) パッケージ"
+title: "Node.js の進化により不要となったかもしれないパッケージたち"
 emoji: "🐢"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["npm", "nodejs"]
@@ -162,7 +162,7 @@ describe('Nest styles', () => {
 })
 ```
 
-Node.js 22.1.0 on Ryzen 9 5900X + Ubuntu 22.04 という環境での実行結果は以下の通りでした:
+Node.js 22.1.0 on Ryzen 9 5900X + Ubuntu 22.04 という環境での実行結果は以下の通りでした^[このあと Node.js 22.1.0 on Apple M1 + macOS Sonoma 14.4.1 でも試しましたが同様の結果でした。]:
 
 ```
  ✓ tests/color.bench.js (6) 6951ms
@@ -210,4 +210,16 @@ Nodemon と異なり、`--watch` はエントリーポイントと関係のな�
 
 ## glob、fast-glob
 
-[v22.0.0](https://nodejs.org/en/blog/announcements/v22-release-announce) で [glob](https://nodejs.org/docs/latest-v22.x/api/fs.html#fspromisesglobpattern-options) と [globSync](https://nodejs.org/docs/latest-v22.x/api/fs.html#fsglobsyncpattern-options) という関数が実験的な機能として追加されました。
+[v22.0.0](https://nodejs.org/en/blog/announcements/v22-release-announce) で [glob](https://nodejs.org/docs/latest-v22.x/api/fs.html#fspromisesglobpattern-options) と [globSync](https://nodejs.org/docs/latest-v22.x/api/fs.html#fsglobsyncpattern-options) という関数が実験的な機能として追加されました。[glob](https://en.wikipedia.org/wiki/Glob_(programming)) とは一般に、ワイルドカードを使用してファイルパスを指定するためのパターンマッチングのことを指しますが、Node.js において glob を使用するには従来 [glob](https://www.npmjs.com/package/glob) や [fast-glob](https://www.npmjs.com/package/fast-glob) などのサードパーティーパッケージを使用する必要がありました。
+
+v22 によって glob が Node.js 本体に組み込まれたため、たとえば
+
+```js
+import { globSync } from 'node:fs';
+
+console.log(globSync('**/*.js'));
+```
+
+のようにしてファイルパスを簡単に取得できるようになりました。
+
+ただし、指定可能なオプションは `cwd` と `exclude` のみとまだ限られており、Stability のステータスも上述のように Experimental の扱いであるため、既存の glob パッケージ等をすぐに置き換え可能とは言い難いでしょう。
