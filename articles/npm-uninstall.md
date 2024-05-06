@@ -1,9 +1,9 @@
 ---
-title: "Node.js の進化により不要となったかもしれないパッケージたち"
+title: "Node.js の進化に伴い不要となったかもしれないパッケージたち"
 emoji: "🐢"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["npm", "nodejs"]
-published: false
+published: true
 ---
 
 ## tl;dr
@@ -38,15 +38,15 @@ https://twitter.com/bholmesdev/status/1784972421776199697
 - 一貫性
   - (サードパーティーのパッケージをパッチワークすることに比較し) Node.js という主体が統一的な API を提供することが期待される
 
-ただし、これらの多くはあくまで「期待」であり、実際には真逆の結果となるかもしれないことに注意が必要です。たとえばパフォーマンスの項目などはわかりやすいですが、実際にはサードパーティー製のパッケージのほうが高速であるということは容易に起こり得るため、速度が重要であるような状況であれば、外部のパッケージをあえて使い続けるという判断も必要になってきます。API の一貫性といった側面も、人によって結論は異なってくるでしょう。よって、実際にパッケージを置き換えるかどうかを判断するには、上のような様々な観点から検討することが重要です。
+ただし、これらの多くはあくまで「期待」であり、実際には真逆の結果となるかもしれないことに注意が必要です。たとえばパフォーマンスの項目などはわかりやすいですが、実際にはサードパーティー製のパッケージのほうが高速であるということは容易に起こり得るため、速度が重要であるような状況であれば、外部のパッケージをあえて使い続けるという判断も必要になってきます。API の一貫性といった側面も、人によって結論は異なってくるでしょう。よって、実際にパッケージを置き換えるかどうかを判断する際には、上のような様々な観点から検討することが重要です。
 
-それでは以下で、実際に各パッケージに関して検討していきます。
+それでは以下で、実際に各パッケージについて検討していきます。
 
 ## node-fetch
 
 [node-fetch](https://github.com/node-fetch/node-fetch) は、ブラウザの [Fetch](https://fetch.spec.whatwg.org/) API を Node.js で使用するためのパッケージです。現在でこそ Node.js には [Stable](https://nodejs.org/api/documentation.html#stability-index) な機能として [`fetch`](https://nodejs.org/docs/latest-v22.x/api/globals.html#fetch) が組み込まれていますが、この API がフラグ付きで使用可能となったのは [v17.5.0](https://nodejs.org/en/blog/release/v17.5.0)、[v16.15.0](https://nodejs.org/en/blog/release/v16.15.0) からであり、それ以前にブラウザの Fetch API を Node.js で使用するためには `node-fetch` を使用する必要がありました。
 
-`node-fetch` の目的が「ブラウザと互換性のある Fetch API を Node.js の世界にもたらすこと」であるとすると、v22 で同じ目的の `fetch` が Stable として組み込まれた時点で、`node-fetch` を積極的に使用する理由はほとんどなくなったと言えるでしょう。Node.js の `fetch` が内部的に使用している [undici](https://github.com/nodejs/undici) の README には[仕様との差分](https://github.com/nodejs/undici?tab=readme-ov-file#specification-compliance)に関する言及がありますが^[少し前にも、ガベージコレクションの挙動の差異を原因とするメモリリークについて触れた [Malte Ubl のツイート](https://twitter.com/cramforce/status/1762142087930433999)が話題となっていました。]、こうした差分は当然ながら `node-fetch` にも[存在](https://github.com/node-fetch/node-fetch?tab=readme-ov-file#difference-from-client-side-fetch)しており、使用するコンテキストによっては具体的な差分の内容が重要となりそうですが、差分自体の有無という点では両者とも同様です。個人的には、[web-platform-tests](https://github.com/web-platform-tests/wpt) などのテストスイートの結果が[確認](https://wpt.fyi/results/?label=master&product=node.js-18%5Bstable%5D&product=node.js-20%5Bstable%5D&product=node.js-21%5Bstable%5D&product=node.js%5Bexperimental%5D&view=subtest)可能となっている点や、単純に使用者すなわち監視の目が多いことから、仕様へのコンプライアンスという観点からは Node.js の `fetch` の方が今後は信頼できるのではないかと考えています。
+`node-fetch` の目的が「ブラウザと互換性のある Fetch API を Node.js の世界にもたらすこと」であるとすると、v22 で同じ目的の `fetch` が Stable として組み込まれた時点で、`node-fetch` を積極的に使用する理由はほとんどなくなったと言えるでしょう。Node.js の `fetch` が内部的に使用している [undici](https://github.com/nodejs/undici) の README には[仕様との差分](https://github.com/nodejs/undici?tab=readme-ov-file#specification-compliance)に関する言及がありますが^[少し前にも、ガベージコレクションの挙動の差異を原因とするメモリリークについて触れた [Malte Ubl のツイート](https://twitter.com/cramforce/status/1762142087930433999)が話題となっていました。]、こうした差分は当然ながら `node-fetch` にも[存在](https://github.com/node-fetch/node-fetch?tab=readme-ov-file#difference-from-client-side-fetch)しており、使用するコンテキストによっては具体的な差分の内容が重要となりそうですが、差分自体の有無という点では両者とも同様です。個人的には、[web-platform-tests](https://github.com/web-platform-tests/wpt) などのテストスイートの結果が[確認](https://wpt.fyi/results/?label=master&product=node.js-18%5Bstable%5D&product=node.js-20%5Bstable%5D&product=node.js-21%5Bstable%5D&product=node.js%5Bexperimental%5D&view=subtest)可能となっている点や、単純に使用者すなわち監視の目が多いことから、仕様へのコンプライアンスという観点からは Node.js の `fetch` の方が信頼できるのではないかと考えています。
 
 なお、パフォーマンスの観点から `node-fetch` を使用する理由があるかどうかについては、[Matteo Collina](https://twitter.com/matteocollina) による以下の記事が参考になります:
 
@@ -56,15 +56,15 @@ https://adventures.nodeland.dev/archive/which-http-client-for-nodejs-should-node
 
 ## Dotenv
 
-[v20.6.0](https://nodejs.org/en/blog/release/v20.6.0) で [`--env-file`](https://nodejs.org/docs/latest-v22.x/api/cli.html#--env-fileconfig) オプションが追加されるまで、Node.js において `.env` ファイルから環境変数を読み込むためには [Dotenv](https://github.com/motdotla/dotenv) を使用することが一般的でした。Dotenv を使用すると、`require('dotenv').config()` または `import 'dotenv/config'` というコードを記述すれば、`process.env` にプロジェクトのルートに置かれた `.env` ファイルの内容が読み込まれ、環境変数として利用可能となります。
+[v20.6.0](https://nodejs.org/en/blog/release/v20.6.0) で [`--env-file`](https://nodejs.org/docs/latest-v22.x/api/cli.html#--env-fileconfig) オプションが追加されるまで、Node.js において `.env` ファイルから環境変数を読み込むためには [Dotenv](https://github.com/motdotla/dotenv) を使用することが一般的でした。Dotenv を使用すると、`require('dotenv').config()` または `import 'dotenv/config'` というコードを記述すれば、プロジェクトのルートに置かれた `.env` ファイルの内容が `process.env` に読み込まれ、環境変数として利用可能となります。
 
 ファイルから環境変数を読み込むためのこうした機能を提供するためのオプションが、上述した `--env-file` です。`node --env-file=.env index.js` のようにプログラムを実行すれば、Dotenv を使用した場合と同様の効果が得られます。Dotenv では、`.env` ファイルにコメントを記述したり、複数行に渡る値の設定が可能ですが、`--env-file` でも同じことができます。シンプルに `.env` ファイルの内容を環境変数として読み込むだけであれば、`--env-file` があれば十分であると言えそうです。
 
 また、[Node.js 自体を設定するための環境変数](https://nodejs.org/docs/latest-v22.x/api/cli.html#environment-variables)を記載した `.env` を `--env-file` により読み込むと、その設定が適用された状態で Node.js が実行されます。仕組み上、Node.js プロセスの実行後に環境変数を読み込む必要がある Dotenv ではこうした挙動を実現することは[難しい](https://github.com/motdotla/dotenv/issues/314)ため、この点は `--env-file` のユニークな点と言えるでしょう。
 
-ただし、Dotenv では [dotenv-expand](https://github.com/motdotla/dotenv-expand) により変数の展開が可能ですが、`--env-file` ではそのような機能は現在提供されていません。また、これは `--env-file` オプションの責務からは逸脱する機能ですが、[dotenv-vault](https://github.com/dotenv-org/dotenv-vault) が提供する `.env` を共有するための仕組みも Node.js には現状存在しません。こうした機能が必要な場合は、引き続き Dotenv およびそのエコシステムを使用することが必要です。
+ただし、Dotenv では [dotenv-expand](https://github.com/motdotla/dotenv-expand) により変数の展開が可能ですが、`--env-file` ではそのような機能は 2024 年現在提供されていません。また、これは `--env-file` オプションの責務からは逸脱する機能ですが、[dotenv-vault](https://github.com/dotenv-org/dotenv-vault) が提供する `.env` を共有するための仕組みも Node.js には現状存在しません。こうした機能が必要な場合は、引き続き Dotenv およびそのエコシステムを使用することが必要です。
 
-さらに、API の Stability は現在 1.1 Active development となっており、今後小さな変更が生じる可能性はあるため、完全に安定した状態の機能を使いたい場合も Dotenv の使用を検討すべきでしょう。
+さらに、API の Stability は現在 1.1 Active development となっており、今後何らかの小さな変更が生じる可能性はあるため、完全に安定した状態の機能を使いたい場合も Dotenv の使用を検討すべきでしょう。
 
 なお、Node.js の `.env` ファイルサポートに関する開発状況は以下の issue から確認可能です:
 
@@ -137,7 +137,7 @@ console.log(styleText('red', 'Hello, world!'));
 
 ただし、Chalk のようなスタイルをチェーンする書き方が好みである場合や、Chalk でしか提供されていない [API](https://www.npmjs.com/package/chalk#api) が必要な場合などは、そのまま Chalk を使い続ければよいでしょう。
 
-ところで、パフォーマンスについても一応調べてみたところ、以下のような簡単なベンチマークでは Chalk に軍配が上がったことも付記しておきます。[Vitest](https://vitest.dev/) には experimental な機能として [bench](https://vitest.dev/api/#bench) 関数があり、これは内部で [Tinybench](https://github.com/tinylibs/tinybench) を使用しているのですが、テストコードを書くように気軽にベンチマークが実行できる点が気になっていたため、今回はこれを用いて以下のコードを実行しました:
+ところで、パフォーマンスについても一応調べてみたところ、以下のような簡単なベンチマークでは Chalk に軍配が上がったことも付記しておきます。[Vitest](https://vitest.dev/) には Experimental な機能として [bench](https://vitest.dev/api/#bench) 関数があり、これは内部で [Tinybench](https://github.com/tinylibs/tinybench) を使用しているのですが、テストコードを書くように気軽にベンチマークが実行できる点が最近気に入っているため、今回はこれを用いて以下のコードを実行しました:
 
 ```js
 import chalk from 'chalk'
@@ -208,7 +208,7 @@ Node.js 22.1.0 on Ryzen 9 5900X + Ubuntu 22.04 という環境での実行結果
 
 [Mocha](https://mochajs.org/) は Node.js 向けの軽量なテストフレームワークです。同様のテストフレームワークとしては [Jest](https://jestjs.io/) や [Vitest](https://vitest.dev/) なども有名ですが、Mocha は [Chai](https://www.chaijs.com/) などのアサーションライブラリと組み合わせて使用するように設計されており、軽量なテストランナーといった趣きがあるのが特徴です。
 
-Node.js の [v18.0.0](https://nodejs.org/en/blog/release/v18.0.0) と [v16.17.0](https://nodejs.org/en/blog/release/v16.17.0) においてテストランナーの機能が組み込まれたことにより、Mocha の役割をある程度代替することが可能となりました。特に [v20.0.0](https://nodejs.org/en/blog/release/v20.0.0) からは Stable な機能となっており、[`--test-reporter`](https://nodejs.org/docs/latest-v22.x/api/test.html#test-reporters) によるフィードバック形式の指定、[`--watch`](https://nodejs.org/docs/latest-v22.x/api/test.html#watch-mode) によるウォッチモードでのテスト実行、[`assert`](https://nodejs.org/docs/latest-v22.x/api/assert.html) による様々な形式のアサーション、[カバレッジ](https://nodejs.org/docs/latest-v22.x/api/test.html#collecting-code-coverage) の取得、などがサポートされており、本格的なテストを記述するための準備が出来上がってきていると言えそうです。
+Node.js の [v18.0.0](https://nodejs.org/en/blog/release/v18.0.0) と [v16.17.0](https://nodejs.org/en/blog/release/v16.17.0) において[テストランナー](https://nodejs.org/docs/latest-v22.x/api/test.html)の機能が組み込まれたことにより、Mocha の役割をある程度代替することが可能となりました。特に [v20.0.0](https://nodejs.org/en/blog/release/v20.0.0) からは Stable な機能となっており、[`--test-reporter`](https://nodejs.org/docs/latest-v22.x/api/test.html#test-reporters) によるフィードバック形式の指定、[`--watch`](https://nodejs.org/docs/latest-v22.x/api/test.html#watch-mode) によるウォッチモードでのテスト実行、[`assert`](https://nodejs.org/docs/latest-v22.x/api/assert.html) による様々な形式のアサーション、[カバレッジ](https://nodejs.org/docs/latest-v22.x/api/test.html#collecting-code-coverage) の取得、等々がサポートされており、本格的なテストを記述するための準備が出来上がってきていると言えそうです。
 
 他と異なり検討事項が多く、また筆者が Mocha についてあまり詳しくないため、Mocha を代替可能かどうかについて断定することは避けますが、基本的なテストを記述することは十分に可能なように見えるため、小規模なプロジェクトなどで本 API を試し始めていくのが良さそうです。
 
@@ -224,7 +224,7 @@ https://astro.build/blog/node-test-migration/
 
 Nodemon と同様にファイルを監視してアプリケーションを再起動するための [`--watch`](https://nodejs.org/docs/latest-v22.x/api/cli.html#--watch) オプションが、[v18.11.0](https://nodejs.org/en/blog/release/v18.11.0) と [v16.19.0](https://nodejs.org/en/blog/release/v16.19.0) で追加されました。`node --watch index.js` のようにエントリーポイントを指定するだけで、このファイルとその依存関係を監視し、更新があればアプリケーションを再起動してくれます。このオプションは [v22](https://nodejs.org/en/blog/announcements/v22-release-announce#watch-mode-node---watch) において Stable となりました。
 
-Nodemon と異なり、`--watch` はエントリーポイントと関係のないパスを監視してくれません。そうした目的のためには `--watch-path` というオプションが用意されており、`node --watch-path=./src index.js` のように監視対象のパスを指定できます。ただし、[ドキュメント](https://nodejs.org/docs/latest-v22.x/api/cli.html#--watch-path)によると、公式にサポートされている OS は macOS と Windows だけとされており、Linux では動作しない可能性がある点に注意してください^[筆者が Ubuntu 22.04 で試した限りにおいては動いているようでした。]。
+Nodemon と異なり、`--watch` はエントリーポイントと関係のないパスを監視してくれません。そうした目的のためには `--watch-path` というオプションが用意されており、`node --watch-path=./src index.js` のように監視対象のパスを指定できます。ただし[ドキュメント](https://nodejs.org/docs/latest-v22.x/api/cli.html#--watch-path)によると、公式にサポートされている OS は macOS と Windows だけとされており、Linux では動作しない可能性がある点に注意してください^[筆者が Ubuntu 22.04 で試した限りにおいては動いているようでした。]。
 
 このように、「ファイルの変更を検知してアプリケーションを再起動する」という目的においては、`--watch` と `--watch-path` オプションで単純なケースであれば対応できそうです。ただし、たとえば glob パターンにより監視対象を指定したり、特定の監視イベントに対して何らかの処理を実行するなど、Nodemon にできてこれらのオプションだけではできないことは多岐にわたります。よって、乗り換えの前にきちんとユースケースを検討することが重要になりそうです。
 
@@ -236,7 +236,6 @@ v22 によって glob が Node.js 本体に組み込まれたため、たとえ�
 
 ```js
 import { globSync } from 'node:fs';
-
 console.log(globSync('**/*.js'));
 ```
 
