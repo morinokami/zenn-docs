@@ -133,7 +133,7 @@ console.log(styleText('red', 'Hello, world!'));
 
 多くの項目は Chalk とオーバーラップしているため、基本的なスタイリングが目的であれば `util.styleText` で十分そうです。[Wes Bos](https://twitter.com/wesbos) の[動画](https://x.com/wesbos/status/1773001110057337130) を参考に、すべての前景色と背景色を組み合わせた画像を作成してみましたので、こちらも参考にしてください:
 
-![styleText でサポートされている前景色と背景色の組み合わせ](/images//npm-uninstall/styleText.png)
+![styleText でサポートされている前景色と背景色の組み合わせ](/images/npm-uninstall/styleText.png)
 
 ただし、Chalk のようなスタイルをチェーンする書き方が好みである場合や、Chalk でしか提供されていない [API](https://www.npmjs.com/package/chalk#api) が必要な場合などは、そのまま Chalk を使い続ければよいでしょう。
 
