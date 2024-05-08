@@ -77,8 +77,8 @@ CLI 向けのコマンドを作成する際、ターミナルに表示する文�
 [v21.7.0](https://nodejs.org/en/blog/release/v21.7.0) と [v20.12.0](https://nodejs.org/en/blog/release/v20.12.0) において、Chalk のようにターミナル上の文字列をスタイリングするための [`util.styleText`](https://nodejs.org/docs/latest-v22.x/api/util.html#utilstyletextformat-text) という API が Node.js に追加されました。使い方は `format` と `text` を引数として与えるだけで、たとえば以下のようにして簡単に文字列をスタイリングできます:
 
 ```js
-import { styleText } from 'node:util';
-console.log(styleText('red', 'Hello, world!'));
+import { styleText } from 'node:util'
+console.log(styleText('red', 'Hello, world!'))
 ```
 
 `util.styleText` でサポートされている `format` は以下の通りです:
@@ -235,8 +235,8 @@ Nodemon と異なり、`--watch` はエントリーポイントと関係のな�
 v22 によって glob が Node.js 本体に組み込まれたため、たとえば
 
 ```js
-import { globSync } from 'node:fs';
-console.log(globSync('**/*.js'));
+import { globSync } from 'node:fs'
+console.log(globSync('**/*.js'))
 ```
 
 のようにしてファイルパスを簡単に取得できるようになりました。シンプルなパターンであれば、これで一旦は対応できそうです。
@@ -749,6 +749,42 @@ describe('**/[0-9]/**/*.txt', () => {
 :::
 
 現在指定可能なオプションは `cwd` と `exclude` のみとまだ限られており、Stability のステータスも上述のように Experimental の扱いであるため、既存の glob パッケージ等をすぐに置き換え可能であるとは言い難いでしょう。
+
+## Commander.js、Yargs
+
+:::message
+https://x.com/mizdra/status/1787311995009843490 の @mizdra さんのコメントで、`parseArgs` が抜けていたことに気付きました。Thanks!!
+:::
+
+[Commander.js](https://github.com/tj/commander.js) や [Yargs](https://yargs.js.org/)、[minimist](https://github.com/minimistjs/minimist) などのパッケージはいずれも、CLI コマンドの実行時にコマンドライン引数をパースし、ヘルプの表示やバリデーション、サブコマンドの設定など、CLI コマンドに必要な機能を提供する役割を担います。Node.js では `process.argv` からコマンド引数を取得でき、これを直接利用して CLI コマンドを作成することもできますが、上に述べたような本格的な機能を実装するためにはそれなりの手間が掛かります。そのため、きちんとしたパッケージとして配布するといった目的で CLI コマンドを作成するような場合には、こうしたパッケージを利用してコマンドライン引数をパースすることが一般的となっています。
+
+Node.js [v18.3.0](https://nodejs.org/en/blog/release/v18.3.0) と [v16.17.0](https://nodejs.org/en/blog/release/v16.17.0) で、上記パッケージのようにコマンドライン引数をパースするための機能である [`util.parseArgs`](https://nodejs.org/docs/latest-v22.x/api/util.html#utilparseargsconfig) が追加されました。この API は [v20.0.0](https://nodejs.org/en/blog/release/v20.0.0) で Stable となりました。
+
+たとえば名前と言語を受け取り、受け取った言語に対応する挨拶を返すようなコマンドは、`util.parseArgs` を使うと以下のように実装できます:
+
+```js:greet.js
+import { parseArgs } from 'node:util'
+
+const options = {
+  name: {
+    type: 'string',
+    short: 'n',
+  },
+  japanese: {
+    type: 'boolean',
+    short: 'j',
+    default: false,
+  },
+}
+
+const { values: { name, japanese } } = parseArgs({ options })
+
+console.log(`${japanese ? 'こんにちは' : 'Hello'} ${name}!`)
+```
+
+`options` に引数やその型、短縮形、デフォルト値などを指定し、`parseArgs` に渡すと、与えられたオプションに基づいて `process.argv` をパースしてくれます。これを `node greet.js -n 太郎 --japanese` のように実行すると、`こんにちは 太郎!` と表示されます。
+
+以上のように、コマンド引数をパースして利用するための最低限の機能が `util.parseArgs` には組み込まれているため、簡単なコマンドであればこれを使って実装しても良さそうです。ただし、たとえば与えたオプションなどから自動的にヘルプを生成する機能などは個人的に入っていてほしいですが、他のパッケージにあるようなそうした便利な機能はまだまだ足りないように思われるため、要件が単純でない場合は Commander.js や Yargs などのパッケージも同時に比較検討し、適切な選択をする必要がありそうです。
 
 ## おわりに
 
