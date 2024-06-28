@@ -1,0 +1,14 @@
+title: "Codemod への招待"
+summary: "TODO"
+topics: ["codemod", "ast", "jscodeshift"]
+published: false
+price: 0 # 有料の場合200〜5000
+# 本に含めるチャプターを順番に並べましょう
+chapters:
+  - motivation
+  - dive-into-codemod
+  - what-is-ast
+  - how-codemod-works
+  - jscodeshift
+  - gritql
+  - ast-grep
