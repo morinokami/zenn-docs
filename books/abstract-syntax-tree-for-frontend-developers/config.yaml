@@ -1,0 +1,13 @@
+title: "フロントエンド開発者のための AST 実践入門"
+summary: "TODO: 書く"
+topics: [ast, javascript, frontend, web]
+published: false
+price: 0 # 有料の場合200〜5000
+# 本に含めるチャプターを順番に並べましょう
+chapters:
+  - what-is-ast
+  - build-your-own-calculator-from-scratch
+  - eslint
+  - unified
+  - jscodeshift
+  - react-compiler
