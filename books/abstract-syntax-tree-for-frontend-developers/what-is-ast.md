@@ -77,11 +77,13 @@ JavaScript プロジェクトの開発では、他の言語と比較し AST を�
 
 また、TypeScript によりコードを記述することは、2024 年現在もはやモダンですらないほどに当たり前のこととなりましたが、TypeScript はあくまで JavaScript のスーパーセットであり、そのままでは JavaScript の処理系は実行できません^[[Node.js v22.6.0](https://nodejs.org/en/blog/release/v22.6.0) において `--experimental-strip-types` というフラグが実験的な機能として追加されました。これは型アノテーションを自動的に削除することで、`.ts` ファイルを Node.js が直接実行することを可能にするものです。Enum や Namespaces など、TypeScript の一部の機能はサポートされてはいませんが、Deno や Bun などのように処理系そのものが TypeScript をサポートし、コード変換を不要としようとする流れがあるようです。]。そこで、TypeScript のコードをまず JavaScript へとコンパイルし、コンパイルされた JavaScript を実行するという手順が取られるわけですが、このコンパイルの過程においても AST が生成されており、そこでたとえば型アノテーションなどの TypeScript 固有の構文に対応するノードが削除あるいは d.ts ファイルに変換されるといった処理がおこなわれます。
 
-さらに、うんたらかんたら
-
 :::message
 [コラム] コンパイルとトランスパイル
 :::
+
+さらに、うんたらかんたら
+
+TODO: AST の具体的な利用例を列挙？
 
 
 ## ESTree と各種パーサー
@@ -107,8 +109,9 @@ TODO: 単に並列するのではなく、「何系と何系があり、X は何
 - [AST Explorer](https://astexplorer.net/)
 - [JavaScript AST Visualizer](https://www.jointjs.com/demos/abstract-syntax-tree)
 - [The ESTree Spec](https://github.com/estree/estree)
-- [ESTree とは](https://sosukesuzuki.dev/advent/2022/06/)
 - [JavaScript ASTを始める最初の一歩](https://efcl.info/2016/03/06/ast-first-step/)
+- [ESTree とは](https://sosukesuzuki.dev/advent/2022/06/)
 - [ESTree 互換っぽい AST を出力する JavaScript のパーサーまとめ](https://zenn.dev/sosukesuzuki/scraps/fa4d48f9098d66)
 - [Understand Abstract Syntax Trees - ASTs - in Practical and Useful Ways for Frontend Developers](https://www.youtube.com/watch?v=tM_S-pa4xDk)
 - [Harnessing The Power of Abstract Syntax Trees by Jamund Ferguson](https://www.youtube.com/watch?v=8uOXIM4giH8)
+- [JavaScript AST入門](https://nextpublishing.jp/book/9728.html)
