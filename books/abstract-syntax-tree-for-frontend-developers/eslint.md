@@ -71,6 +71,91 @@ module.exports = plugin;
 
 ## カスタムルールの作成
 
+### プロジェクトの準備
+
+まずはカスタムルールを実装するためのプロジェクトを準備しましょう。以下のコマンドにより、npm プロジェクトを初期化してください:
+
+```sh
+$ mkdir eslint-plugin-nullpo
+$ cd eslint-plugin-nullpo
+$ npm init -y
+```
+
+続いて、カスタムルールを配置するためのディレクトリと、必要となるファイルをプレースホルダーとして作成しておきます:
+
+```sh
+$ mkdir -p src/rules
+$ touch src/index.ts src/rules/ban-nullpo.ts src/rules/ban-nullpo.test.ts
+```
+
+各ファイルの役割は以下の通りです:
+
+- `src/index.ts`: プラグインのエントリーポイントとなるファイルです。ここでプラグインを定義し `export` します。
+- `src/rules/ban-nullpo.ts`: カスタムルールの実装を記述するファイルです。
+- `src/rules/ban-nullpo.test.ts`: カスタムルールのテストを記述するファイルです。
+
+なお、`rules` ディレクトリにルールの実装とテストを置いていますが、これは必須ではありません。複数のカスタムルールを作成する場合には `rules` ディレクトリのような場所を用意して管理することが一般的^[たとえば [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint/tree/main/packages/eslint-plugin) や [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) などはこの構成となっています。]ですが、今回のようにルールの数が少ない場合はフラットに配置しても問題ないでしょう。
+
+### TypeScript 環境の構築
+
+カスタムルールを作成するにあたり、JavaScript を使うことも可能ですが、補完などの恩恵を受けるために TypeScript を使用します。以下のコマンドにより、必要なパッケージをインストールします:
+
+```sh
+$ npm install @typescript-eslint/utils
+$ npm install @types/node @typescript-eslint/parser @typescript-eslint/rule-tester typescript vitest
+```
+
+カスタムルールを作成するにあたり特に重要なパッケージの役割は以下の 2 つです:
+
+- `@typescript-eslint/utils`: ESLint のカスタムルールを作成するための `ESLintUtils` などのユーティリティ関数を提供するパッケージです。[`@typescript-eslint/eslint-plugin`](https://typescript-eslint.io/packages/eslint-plugin) のプラグインはこのパッケージを使用して作成されています。詳しくは[ドキュメント](https://typescript-eslint.io/packages/utils)を参照してください。
+- `@typescript-eslint/rule-tester`: ESLint に組み込まれている [`RuleTester`](https://eslint.org/docs/latest/integrate/nodejs-api#ruletester) をフォークし、TypeScript 向けのルールをテストするために拡張したパッケージです。ESLint の `RuleTester` と同様に、あるルールに対して問題のない `valid` なコード例と、問題のある `invalid` なコード例と期待されるエラー内容を設定し、ルールが正しく動作するかをテストします。詳しくは[ドキュメント](https://typescript-eslint.io/packages/rule-tester)を参照してください。
+
+続いて tsconfig.json を作成します。今回は簡易的に `tsc` によりビルドすることとします:
+
+```json:tsconfig.json
+{
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts"],
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "outDir": "dist",
+    "declaration": true,
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+最後に、package.json にビルド用コマンドと `peerDependencies` を追加しておきましょう:
+
+```json:package.json
+{
+  ...
+  "scripts": {
+    "build": "tsc"
+  },
+  ...
+  "peerDependencies": {
+    "eslint": "^9.0.0"
+  }
+}
+```
+
+### メタ情報の記述
+
+### テストの作成
+
+### ルールの実装
+
+### プラグインの作成
+
+### 動作確認
+
+### 推奨設定の追加
+
 
 ## Biome と GritQL
 
