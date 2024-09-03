@@ -69,6 +69,11 @@ module.exports = plugin;
 以上により、ESLint の概要と、カスタムルールやプラグインの意義や関係について理解できたところで、次節から実際にカスタムルールを作成していきます。
 
 
+## How ESLint works
+
+TODO: ESLint が実際にどのようにして AST を使ってコードを検査しているかについて説明する。
+
+
 ## カスタムルール作成のための準備
 
 ### プロジェクトの準備
@@ -464,30 +469,30 @@ import { ESLintUtils } from "@typescript-eslint/utils";
 const createRule = ESLintUtils.RuleCreator((name) => name);
 
 export const rule = createRule({
-	create(context) {
-		return {
-			Literal(node) {
-				if (typeof node.value === "string" && node.value.includes("ぬるぽ")) {
-					context.report({
-						node,
-						messageId: "ga!",
-					});
-				}
-			},
-		};
-	},
-	name: "no-nullpo",
-	meta: {
-		type: "problem",
-		docs: {
-			description: "Smack ぬるぽ (nullpo) with a hammer",
-		},
-		messages: {
-			"ga!": "ガッ 🔨",
-		},
-		schema: [],
-	},
-	defaultOptions: [],
+  create(context) {
+    return {
+      Literal(node) {
+        if (typeof node.value === "string" && node.value.includes("ぬるぽ")) {
+          context.report({
+            node,
+            messageId: "ga!",
+          });
+        }
+      },
+    };
+  },
+  name: "no-nullpo",
+  meta: {
+    type: "problem",
+    docs: {
+      description: "Smack ぬるぽ (nullpo) with a hammer",
+    },
+    messages: {
+      "ga!": "ガッ 🔨",
+    },
+    schema: [],
+  },
+  defaultOptions: [],
 });
 ```
 
@@ -497,10 +502,91 @@ export const rule = createRule({
 
 ### プラグインの作成
 
+プラグインを作成することで、他のプロジェクトからカスタムルールを利用できるようになります。まずはプラグイン用のファイルを作成しましょう:
+
+```sh
+$ touch src/index.ts
+```
+
+このファイルから `meta` と `rules` というキーをもつオブジェクトをエクスポートすれば、プラグインとしての最低限の要件を満たせます。`meta` には、`name` と `version` などプラグインに関するメタ情報を記述します。また `rules` オブジェクトには、プラグインが提供するカスタムルールをその名前をキーとして登録します:
+
+```ts:src/index.ts
+import fs from "node:fs";
+
+import { rule as noNullpo } from "./rules/no-nullpo.js";
+
+const pkg = JSON.parse(
+  fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+);
+
+export default {
+  meta: {
+    name: pkg.name,
+    version: pkg.version,
+  },
+  rules: {
+    "no-nullpo": noNullpo,
+  },
+};
+```
+
 ### 動作確認
 
 ### 推奨設定の追加
 
+ESLint のプラグインには、たとえば `@eslint/js` のように推奨設定が含まれていることがあります。推奨設定は、いわばそのプラグインのデフォルト設定であり、ユーザーがそのプラグインを利用する際に、設定の手間を省いたり、そのプラグインの最適な使い方を知るための手助けとなります。`src/index.ts` の `plugin` オブジェクトに `configs` というキーを追加し、その中に上で設定した設定を記述しましょう:
+
+```ts:src/index.ts
+import fs from "node:fs";
+
+import { rule as noNullpo } from "./rules/no-nullpo.js";
+
+const pkg = JSON.parse(
+  fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+);
+
+const plugin = {
+  configs: {
+    get recommended() {
+      return recommended;
+    },
+  },
+  meta: {
+    name: pkg.name,
+    version: pkg.version,
+  },
+  rules: {
+    "no-nullpo": noNullpo,
+  },
+};
+
+const recommended = {
+  plugins: {
+    nullpo: plugin,
+  },
+  rules: {
+    "nullpo/no-nullpo": "error",
+  },
+};
+
+export default plugin;
+```
+
+これにより、ユーザー側の設定ファイルでこの推奨設定 `recommended` を参照できるようになりました。以下のように `eslint.config.mjs` を書き換えましょう:
+
+```js:eslint.config.mjs
+import nullpo from "eslint-plugin-nullpo";
+
+export default [
+  nullpo.configs.recommended,
+]
+```
+
+これを保存した上で ESLint を実行し、以前と同様にルールが適用されていれば成功です:
+
+```sh
+TODO: 実行結果
+```
 
 ## Biome と GritQL
 
