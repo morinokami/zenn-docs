@@ -69,7 +69,7 @@ module.exports = plugin;
 以上により、ESLint の概要と、カスタムルールやプラグインの意義や関係について理解できたところで、次節から実際にカスタムルールを作成していきます。
 
 
-## How ESLint works
+## How ESLint works (ESLint のメンタルモデル)
 
 TODO: ESLint が実際にどのようにして AST を使ってコードを検査しているかについて説明する。
 
