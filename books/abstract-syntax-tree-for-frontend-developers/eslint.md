@@ -134,18 +134,12 @@ $ npm install @types/node @typescript-eslint/parser @typescript-eslint/rule-test
 }
 ```
 
-最後に、package.json にビルド用コマンドと `peerDependencies` を追加しておきましょう:
+最後に package.json に `"type": "module"` を指定しておきましょう:
 
 ```json:package.json
 {
+  "type": "module",
   ...
-  "scripts": {
-    "build": "tsc"
-  },
-  ...
-  "peerDependencies": {
-    "eslint": "^9.0.0"
-  }
 }
 ```
 
@@ -248,7 +242,6 @@ const ruleTester = new RuleTester();
 {
   ...
   "scripts": {
-    "build": "tsc",
     "test": "vitest"
   },
   ...
@@ -259,6 +252,11 @@ const ruleTester = new RuleTester();
 
 ```sh
 $ npm run test
+
+> eslint-plugin-nullpo@0.0.1 test
+> vitest
+
+
  DEV  v2.0.5 /home/foo/dev/eslint-plugin-nullpo
 
  ❯ src/rules/no-nullpo.test.ts (0)
@@ -502,13 +500,9 @@ export const rule = createRule({
 
 ### プラグインの作成
 
-プラグインを作成することで、他のプロジェクトからカスタムルールを利用できるようになります。まずはプラグイン用のファイルを作成しましょう:
+プラグインを作成することで、他のプロジェクトからカスタムルールを利用できるようになります。まずはプラグイン用のファイルである、`src/index.ts` を開いてください。
 
-```sh
-$ touch src/index.ts
-```
-
-このファイルから `meta` と `rules` というキーをもつオブジェクトをエクスポートすれば、プラグインとしての最低限の要件を満たせます。`meta` には、`name` と `version` などプラグインに関するメタ情報を記述します。また `rules` オブジェクトには、プラグインが提供するカスタムルールをその名前をキーとして登録します:
+このファイルから [`meta`](https://eslint.org/docs/latest/extend/plugins#meta-data-in-plugins) と [`rules`](https://eslint.org/docs/latest/extend/plugins#rules-in-plugins) というキーをもつオブジェクトをエクスポートすれば、プラグインとしての最低限の要件を満たせます。`meta` には、`name` と `version` などプラグインに関するメタ情報を記述します。また `rules` オブジェクトには、プラグインが提供するカスタムルールをその名前をキーとして登録します:
 
 ```ts:src/index.ts
 import fs from "node:fs";
@@ -530,7 +524,125 @@ export default {
 };
 ```
 
+最後に、package.json に、`files` と `main` フィールド、ビルド用のコマンド、そして `peerDependencies` を追加します:
+
+```json:package.json
+{
+  ...
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  ...
+  "peerDependencies": {
+    "eslint": "^9.0.0"
+  }
+}
+```
+
+ビルドを実行し、`dist` ディレクトリにプラグインのビルドファイルが生成されていることを確認しましょう:
+
+```sh
+$ npm run build
+$ tree dist
+dist
+├── index.d.ts
+├── index.js
+├── index.js.map
+└── rules
+    ├── no-nullpo.d.ts
+    ├── no-nullpo.js
+    └── no-nullpo.js.map
+
+1 directory, 6 files
+```
+
 ### 動作確認
+
+まず、[`npm link`](https://docs.npmjs.com/cli/v10/commands/npm-link) コマンドをプラグインのルートディレクトリで実行し、プラグインへのグローバルなシンボリックリンクを作成しておきます:
+
+```sh
+$ npm link
+$ npm ls -g # プラグインがリンクされていることを確認
+```
+
+続いて、プラグインをテストするためのプロジェクトを新たに作成します:
+
+```sh
+$ mkdir test-nullpo
+$ cd test-nullpo
+$ npm init -y
+$ npm link eslint-plugin-nullpo
+```
+
+ESLint の初期化コマンドを実行します:
+
+```sh
+$ npm init @eslint/config@latest
+@eslint/create-config: v1.3.1
+
+✔ How would you like to use ESLint? · problems
+✔ What type of modules does your project use? · esm
+✔ Which framework does your project use? · none
+✔ Does your project use TypeScript? · javascript
+✔ Where does your code run? · node
+The config that you've selected requires the following dependencies:
+
+eslint, globals, @eslint/js
+✔ Would you like to install them now? · No / Yes
+✔ Which package manager do you want to use? · npm
+☕️Installing...
+```
+
+プラグインをプロジェクトにリンクします:
+
+```sh
+$ npm link eslint-plugin-nullpo
+```
+
+生成された `eslint.config.mjs` を以下のように書き換えます:
+
+```js:eslint.config.mjs
+import globals from "globals";
+import pluginJs from "@eslint/js";
+import nullpo from "eslint-plugin-nullpo";
+
+export default [
+  {languageOptions: { globals: globals.node }},
+  pluginJs.configs.recommended,
+  {
+    plugins: {
+      nullpo,
+    },
+    rules: {
+      "nullpo/no-nullpo": "error",
+    },
+  },
+];
+```
+
+テスト対象のファイルを作成し、`"ぬるぽ"` を含む文字列を使用するコードを記述してください:
+
+```sh
+$ touch index.js
+$ echo 'const nullpo = "ぬるぽ";' > index.js
+```
+
+この段階で ESLint を実行すると、プラグインが正しく問題点を検出してくれるはずです！
+
+```sh
+npx eslint index.js            
+
+/home/foo/test-nullpo/index.js
+  1:7   error  'nullpo' is assigned a value but never used  no-unused-vars
+  1:16  error  ガッ 🔨                                        nullpo/no-nullpo
+
+✖ 2 problems (2 errors, 0 warnings)
+```
 
 ### 推奨設定の追加
 
@@ -572,20 +684,27 @@ const recommended = {
 export default plugin;
 ```
 
-これにより、ユーザー側の設定ファイルでこの推奨設定 `recommended` を参照できるようになりました。以下のように `eslint.config.mjs` を書き換えましょう:
+これにより、ユーザー側の設定ファイルでこの推奨設定 `recommended` を参照できるようになりました。プラグインを再度ビルドした上で、以下のように `eslint.config.mjs` を書き換えましょう:
 
 ```js:eslint.config.mjs
 import nullpo from "eslint-plugin-nullpo";
 
 export default [
+  // ...
   nullpo.configs.recommended,
 ]
 ```
 
-これを保存した上で ESLint を実行し、以前と同様にルールが適用されていれば成功です:
+再度 ESLint を実行し、以前と同様にルールが適用されていれば完了です。お疲れ様でした！
 
 ```sh
-TODO: 実行結果
+$ npx eslint index.js
+
+/home/foo/test-nullpo/index.js
+  1:7   error  'nullpo' is assigned a value but never used  no-unused-vars
+  1:16  error  ガッ 🔨                                        nullpo/no-nullpo
+
+✖ 2 problems (2 errors, 0 warnings)
 ```
 
 ## Biome と GritQL
