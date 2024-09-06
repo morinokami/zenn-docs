@@ -23,16 +23,16 @@ title: "ESLint によるコード検査"
 
 ## 章の流れ
 
-以下では、まず ESLint について概略し、ESLint を拡張するためのプラグインやカスタムルールについて説明します。その上で、ハンズオン形式により、「ぬるぽ」という文字列を検出し「ガッ」するカスタムルールを作成していきます。また、最後に発展的な話題として、ESLint を代替する可能性を秘めた Biome と、そのプラグイン記述言語の候補 GritQL について触れます。
+以下では、まず ESLint について概略し、ESLint を拡張するためのプラグインやカスタムルールについて説明します。さらに、ESLint が AST をどのように処理するかに関するイメージを提示します。その上で、ハンズオン形式により、「ぬるぽ」という文字列を検出し「ガッ」するカスタムルールを作成していきます。また、最後に発展的な話題として、ESLint を代替する可能性を秘めた Biome と、そのプラグイン記述言語の候補 GritQL について触れます。
 
 
 ## ESLint とプラグイン
 
-[ESLint](https://eslint.org/) は、JavaScript のコードを静的解析し、コードに潜む問題を検出・修正するためのツールです。ESLint では、コードが特定の規則に従っているかどうかをチェックする仕組みをルールと呼びます。多くのルールが初めから[組み込まれており](https://eslint.org/docs/latest/rules/)、使用されていない変数を検出する [no-unused-vars](https://eslint.org/docs/latest/rules/no-unused-vars) や、変数の命名規則にキャメルケースを要求する [camelcase](https://eslint.org/docs/latest/rules/camelcase) などがその例です。
+[ESLint](https://eslint.org/) は、JavaScript のコードを静的解析し、コードに潜む問題を実行前に検出・修正するためのツールです。ESLint では、コードが特定の規則に従っているかどうかをチェックする仕組みを[ルール](https://eslint.org/docs/latest/use/core-concepts/#rules)と呼びます。多くのルールが初めから[組み込まれており](https://eslint.org/docs/latest/rules/)、使用されていない変数を検出する [no-unused-vars](https://eslint.org/docs/latest/rules/no-unused-vars) や、変数の命名規則にキャメルケースを要求する [camelcase](https://eslint.org/docs/latest/rules/camelcase) などがその例です。
 
 こうした内蔵ルール以外が必要になった場合、ESLint をプラグインにより拡張できます。たとえば、React プロジェクトを検査するためのルールは ESLint 本体には含まれていませんが、[eslint-plugin-react](https://www.npmjs.com/package/eslint-plugin-react) というサードパーティー製のプラグインを使用することで、React プロジェクト専用のルールを ESLint によりチェックすることができます。ESLint のコア機能を拡張するためのプラグインは無数にあり、プロジェクトに応じて必要なプラグインを取捨選択できる拡張性が ESLint の強みの一つとなっています。
 
-また、サードパーティー製のプラグインにより必要な機能が提供されていない場合には、独自のルールを作成することも可能です。この独自のルールは[カスタムルール](https://eslint.org/docs/latest/extend/custom-rules)と呼ばれます。あとで詳しく説明しますが、カスタムルールは以下のような形式の JavaScript オブジェクトとして定義されます^[https://eslint.org/docs/latest/extend/custom-rules のサンプルを筆者が改変して引用しました。]:
+また、サードパーティー製のプラグインにより必要な機能が提供されていない場合には、独自のルールを作成することも可能です。コア機能に含まれない独自のルールは[カスタムルール](https://eslint.org/docs/latest/extend/custom-rules)と呼ばれます。あとで詳しく説明しますが、カスタムルールは以下のような形式の JavaScript オブジェクトとして定義されます^[https://eslint.org/docs/latest/extend/custom-rules のサンプルを筆者が改変して引用しました。]:
 
 ```js:customRule.js
 module.exports = {
@@ -52,7 +52,7 @@ module.exports = {
 };
 ```
 
-このルールには、`meta` と `create` という 2 つのプロパティが含まれています。`meta` はルールに関するメタ情報を含み、ざっくり眺めるだけでルールの説明 (`description`) やルールの種類 (`type`)、ルールが自動的に修正可能かどうか (`fixable`) などの情報が記述されていることがわかります。`create` はルールの本体であり、ESLint がコードの AST を走査する際に呼び出されるコールバック関数を返します。このように定義されたカスタムルールを、以下のように `rules` というオブジェクトに登録したものがプラグインです:
+このルールには、`meta` と `create` という 2 つのプロパティが含まれています。`meta` はルールに関するメタ情報を含み、ざっくり眺めるだけでルールの説明（`description`）やルールの種類（`type`）、ルールが自動的に修正可能かどうか（`fixable`）などの情報が記述されていることがわかります。`create` 関数はルールの本体であり、ESLint がコードの AST を走査する際に呼び出されるコールバック関数群をオブジェクトとして返します。このように定義されたカスタムルールを、以下のように `rules` というオブジェクトにまとめたものがプラグインです^[プラグインには、他にも設定値やプロセッサーを含められます。]:
 
 ```js:eslint-plugin-sample.js
 const customRule = require("./customRule");
@@ -64,14 +64,26 @@ const plugin = {
 module.exports = plugin;
 ```
 
-このようにプラグインを定義することで、ESLint の設定ファイルからプラグインを登録し、カスタムルールによりプロジェクト内のコードを検査できるようになります。
-
-以上により、ESLint の概要と、カスタムルールやプラグインの意義や関係について理解できたところで、次節から実際にカスタムルールを作成していきます。
+このようにプラグインを登録することで、他のプロジェクトの ESLint の設定ファイルでこのプラグインを利用し、そこで定義されたカスタムルールを用いてプロジェクト内のコードを検査できるようになります。
 
 
-## How ESLint works (ESLint のメンタルモデル)
+## ESLint と AST
 
-TODO: ESLint が実際にどのようにして AST を使ってコードを検査しているかについて説明する。
+続いて、ESLint が AST を通じてコードをどのように検査しているかについてのメンタルモデルを提示します。ESLint の動作の詳細すべてを解説することはしませんが、カスタムルールを追加するにあたり把握しておくべき大まかな動作イメージをここでつかんでください。
+
+<!-- TODO: ESLint が実際にどのようにして AST を使ってコードを検査しているかについて説明する。 -->
+
+ESLint はソースコードが与えられると、まずそれをパースし ESTree 互換の AST へと変換します。この際 [Espree](https://github.com/eslint/js/tree/main/packages/espree) と呼ばれる、[Acorn](https://github.com/ternjs/acorn) をベースとしたパーサーが使用されます。また、TypeScript など JavaScript の言語機能外のコードをパースするための[カスタムパーサー](https://eslint.org/docs/latest/extend/custom-parsers)を使用することもでき、たとえば [typescript-eslint](https://typescript-eslint.io/) は独自の [@typescript-eslint/parser](https://typescript-eslint.io/packages/parser) を提供しています。
+
+<!-- TODO: 「ソースコード」->「AST」の変換のイメージ図 -->
+
+ソースコードを AST に変換した上で、ESLint は AST を深さ優先で走査していきます。走査の過程では `VariableDeclarator` や `BinaryExpression` など様々なノードが現れますが、各ノードに対するチェック内容を定義したものが上で述べたカスタムルールです。ESLint は、あらかじめ設定ファイル内で有効化されているルールを保持しており、特定のノードに出会うたびに「このタイプのノードにはこのルールを適用する」という判断をおこないます。たとえば、オブジェクトリテラルにおけるキーの重複を禁止する [`no-dupe-keys`](https://eslint.org/docs/latest/rules/no-dupe-keys) というルールがありますが、このルールはオブジェクトリテラル全体を表わす `ObjectExpression` ノードや、その内部でプロパティに値を設定している `Property` ノードにおいてルールが適用されるように[実装](https://github.com/eslint/eslint/blob/main/lib/rules/no-dupe-keys.js)されています。つまり、`no-dupe-keys` が設定ファイルにおいて有効化されている場合、ESLint は `ObjectExpression` などのノードを見つけるたびに、同ルールを適用していくというわけです。
+
+<!-- TODO: 深さ優先で探索し、特定のノードにルールを適用しているイメージ図 -->
+
+ルールを適用して問題を検出した場合、ルール内で定義されたエラーメッセージを受け取り、それをユーザーに通知します。ここまでが、ユーザーが ESLint を通じてコードの問題点を発見するまでの一連の流れです。
+
+以上により、ESLint のカスタムルールやプラグインの概要、ESlint が与えられたルールを用いてどのように AST を検査するかについて理解できたはずです。この準備をもとに、次節から実際にカスタムルールを作成していきます。
 
 
 ## カスタムルール作成のための準備
@@ -716,6 +728,8 @@ $ npx eslint index.js
 - [Create Plugins](https://eslint.org/docs/latest/extend/plugins): プラグインの概略
 - [Custom Rules](https://eslint.org/docs/latest/extend/custom-rules): カスタムルールのリファレンス
 - [RuleTester](https://eslint.org/docs/latest/integrate/nodejs-api#ruletester): `RuleTester` のリファレンス
+- [Architecture](https://eslint.org/docs/latest/contribute/architecture/): ESLint のアーキテクチャに関するドキュメント
+- [traverser.js](https://github.com/eslint/eslint/blob/main/lib/shared/traverser.js): ESLint が AST を走査する際に使用している Traverser クラスのソースコード
 - [Building Custom Rules](https://typescript-eslint.io/developers/custom-rules): typescript-eslint によりカスタムルールを作成するためのガイド
 - [Building ESLint Plungins](https://typescript-eslint.io/developers/eslint-plugins): typescript-eslint によりプラグインを作成するためのガイド
 - [utils](https://typescript-eslint.io/packages/utils): `@typescript-eslint/utils` のドキュメント
