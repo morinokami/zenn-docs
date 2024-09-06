@@ -2,6 +2,8 @@
 title: "ESLint によるコード検査"
 ---
 
+TODO: リストにおける日本語（主に「ですます」とするかどうか、句点の使用）を統一する
+
 
 ## 章の目標
 
@@ -30,7 +32,7 @@ title: "ESLint によるコード検査"
 
 [ESLint](https://eslint.org/) は、JavaScript のコードを静的解析し、コードに潜む問題を実行前に検出・修正するためのツールです。ESLint では、コードが特定の規則に従っているかどうかをチェックする仕組みを[ルール](https://eslint.org/docs/latest/use/core-concepts/#rules)と呼びます。多くのルールが初めから[組み込まれており](https://eslint.org/docs/latest/rules/)、使用されていない変数を検出する [no-unused-vars](https://eslint.org/docs/latest/rules/no-unused-vars) や、変数の命名規則にキャメルケースを要求する [camelcase](https://eslint.org/docs/latest/rules/camelcase) などがその例です。
 
-こうした内蔵ルール以外が必要になった場合、ESLint をプラグインにより拡張できます。たとえば、React プロジェクトを検査するためのルールは ESLint 本体には含まれていませんが、[eslint-plugin-react](https://www.npmjs.com/package/eslint-plugin-react) というサードパーティー製のプラグインを使用することで、React プロジェクト専用のルールを ESLint によりチェックすることができます。ESLint のコア機能を拡張するためのプラグインは無数にあり、プロジェクトに応じて必要なプラグインを取捨選択できる拡張性が ESLint の強みの一つとなっています。
+こうした内蔵ルール以外が必要になった場合、ESLint をプラグインにより拡張できます。たとえば、React のコードを検査するためのルールは ESLint 本体には含まれていませんが、[eslint-plugin-react](https://www.npmjs.com/package/eslint-plugin-react) というサードパーティー製のプラグインを使用することで、React プロジェクト専用のルールを ESLint によりチェックすることができます。ESLint のコア機能を拡張するためのプラグインは無数にあり、プロジェクトに応じて必要なプラグインを取捨選択できる拡張性が ESLint の強みの一つとなっています。
 
 また、サードパーティー製のプラグインにより必要な機能が提供されていない場合には、独自のルールを作成することも可能です。コア機能に含まれない独自のルールは[カスタムルール](https://eslint.org/docs/latest/extend/custom-rules)と呼ばれます。あとで詳しく説明しますが、カスタムルールは以下のような形式の JavaScript オブジェクトとして定義されます^[https://eslint.org/docs/latest/extend/custom-rules のサンプルを筆者が改変して引用しました。]:
 
@@ -52,7 +54,7 @@ module.exports = {
 };
 ```
 
-このルールには、`meta` と `create` という 2 つのプロパティが含まれています。`meta` はルールに関するメタ情報を含み、ざっくり眺めるだけでルールの説明（`description`）やルールの種類（`type`）、ルールが自動的に修正可能かどうか（`fixable`）などの情報が記述されていることがわかります。`create` 関数はルールの本体であり、ESLint がコードの AST を走査する際に呼び出されるコールバック関数群をオブジェクトとして返します。このように定義されたカスタムルールを、以下のように `rules` というオブジェクトにまとめたものがプラグインです^[プラグインには、他にも設定値やプロセッサーを含められます。]:
+このルールには、`meta` と `create` という 2 つのプロパティが含まれています。`meta` はルールに関するメタ情報を含み、ざっくり眺めるだけでルールの説明（`description`）やその種類（`type`）、問題が自動的に修正可能かどうか（`fixable`）などの情報を記述可能なことがわかります。一方、`create` 関数はルールの本体であり、ESLint がコードの AST を走査する際に呼び出され問題の有無を判定するコールバック関数群をオブジェクトとして返します。このように定義されたカスタムルールを、以下のように `rules` というオブジェクトにまとめたものが[プラグイン](https://eslint.org/docs/latest/extend/plugins)です^[プラグインには、他にも設定値やプロセッサーを含められます。]:
 
 ```js:eslint-plugin-sample.js
 const customRule = require("./customRule");
@@ -64,14 +66,12 @@ const plugin = {
 module.exports = plugin;
 ```
 
-このようにプラグインを登録することで、他のプロジェクトの ESLint の設定ファイルでこのプラグインを利用し、そこで定義されたカスタムルールを用いてプロジェクト内のコードを検査できるようになります。
+このようにプラグインを作成することで、他のプロジェクトの ESLint の設定ファイルにおいてこのプラグインを利用し、そこで定義されたカスタムルールを用いてプロジェクト内のコードを検査できるようになります。
 
 
 ## ESLint と AST
 
 続いて、ESLint が AST を通じてコードをどのように検査しているかについてのメンタルモデルを提示します。ESLint の動作の詳細すべてを解説することはしませんが、カスタムルールを追加するにあたり把握しておくべき大まかな動作イメージをここでつかんでください。
-
-<!-- TODO: ESLint が実際にどのようにして AST を使ってコードを検査しているかについて説明する。 -->
 
 ESLint はソースコードが与えられると、まずそれをパースし ESTree 互換の AST へと変換します。この際 [Espree](https://github.com/eslint/js/tree/main/packages/espree) と呼ばれる、[Acorn](https://github.com/ternjs/acorn) をベースとしたパーサーが使用されます。また、TypeScript など JavaScript の言語機能外のコードをパースするための[カスタムパーサー](https://eslint.org/docs/latest/extend/custom-parsers)を使用することもでき、たとえば [typescript-eslint](https://typescript-eslint.io/) は独自の [@typescript-eslint/parser](https://typescript-eslint.io/packages/parser) を提供しています。
 
@@ -81,7 +81,7 @@ ESLint はソースコードが与えられると、まずそれをパースし 
 
 <!-- TODO: 深さ優先で探索し、特定のノードにルールを適用しているイメージ図 -->
 
-ルールを適用して問題を検出した場合、ルール内で定義されたエラーメッセージを受け取り、それをユーザーに通知します。ここまでが、ユーザーが ESLint を通じてコードの問題点を発見するまでの一連の流れです。
+ルールを適用して問題を検出した場合、ルール内で定義されたエラーメッセージを受け取り、それをユーザーに通知します。ここまでが、ユーザーが ESLint を通じてコードの問題点を発見するまでの一連の流れです。ソースコードから変換された AST を受け取った際、どのようにして特定の問題を検出しそれをユーザーに報告するかを定めたものが、ESLint におけるカスタムルールであるといえます。
 
 以上により、ESLint のカスタムルールやプラグインの概要、ESlint が与えられたルールを用いてどのように AST を検査するかについて理解できたはずです。この準備をもとに、次節から実際にカスタムルールを作成していきます。
 
@@ -111,11 +111,11 @@ $ touch src/index.ts src/rules/no-nullpo.ts src/rules/no-nullpo.test.ts
 - `src/rules/no-nullpo.ts`: カスタムルールの実装を記述するファイルです。
 - `src/rules/no-nullpo.test.ts`: カスタムルールのテストを記述するファイルです。
 
-なお、`rules` ディレクトリにルールの実装とテストを置いていますが、これは必須ではありません。複数のカスタムルールを作成する場合には `rules` ディレクトリのような場所を用意して管理することが一般的^[たとえば [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint/tree/main/packages/eslint-plugin) や [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) などはこの構成となっています。]ですが、今回のようにルールの数が少ない場合はフラットに配置しても問題ないでしょう。
+なお、`rules` ディレクトリにルールの実装とテストを置いていますが、これは必須ではありません。複数のカスタムルールを作成する場合には `rules` ディレクトリのような場所を用意して管理することが一般的^[たとえば [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint/tree/main/packages/eslint-plugin) や [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) などはこの構成となっています。]であるためそれに従っていますが、今回のようにルールの数が少ない場合は各ファイルをフラットに配置しても問題ないでしょう。
 
 ### TypeScript 環境の構築
 
-カスタムルールを作成するにあたり、JavaScript を使うことも可能ですが、補完などの恩恵を受けるために TypeScript を使用します。以下のコマンドにより、必要なパッケージをインストールします:
+カスタムルールを作成するにあたり、JavaScript を使うことも可能ですが、補完などの恩恵を受けるために TypeScript を使用することとします。以下のコマンドにより、必要なパッケージをインストールします:
 
 ```sh
 $ npm install @typescript-eslint/utils
@@ -124,8 +124,8 @@ $ npm install @types/node @typescript-eslint/parser @typescript-eslint/rule-test
 
 カスタムルールを作成するにあたり特に重要なパッケージの役割は以下の 2 つです:
 
-- `@typescript-eslint/utils`: ESLint のカスタムルールを作成するための `ESLintUtils` などのユーティリティ関数を提供するパッケージです。[`@typescript-eslint/eslint-plugin`](https://typescript-eslint.io/packages/eslint-plugin) のプラグインはこのパッケージを使用して作成されています。詳しくは[ドキュメント](https://typescript-eslint.io/packages/utils)を参照してください。
-- `@typescript-eslint/rule-tester`: ESLint に組み込まれている [`RuleTester`](https://eslint.org/docs/latest/integrate/nodejs-api#ruletester) をフォークし、TypeScript 向けのルールをテストするために拡張したパッケージです。ESLint の `RuleTester` と同様に、あるルールに対して問題のない `valid` なコード例と、問題のある `invalid` なコード例と期待されるエラー内容を設定し、ルールが正しく動作するかをテストします。詳しくは[ドキュメント](https://typescript-eslint.io/packages/rule-tester)を参照してください。
+- `@typescript-eslint/utils`: ESLint のカスタムルールを作成するための `ESLintUtils` など、複数のユーティリティを提供するパッケージです。[`@typescript-eslint/eslint-plugin`](https://typescript-eslint.io/packages/eslint-plugin) が提供するプラグインはこのパッケージを使用して作成されています。詳しくは[ドキュメント](https://typescript-eslint.io/packages/utils)を参照してください。
+- `@typescript-eslint/rule-tester`: ESLint に組み込まれている [`RuleTester`](https://eslint.org/docs/latest/integrate/nodejs-api#ruletester) をフォークし、TypeScript 向けのルールをテストするために拡張したパッケージです。ESLint の `RuleTester` と同様に、あるルールに対して「問題のない `valid` なコード例」と、「問題のある `invalid` なコード例と期待されるエラー内容」を設定し、ルールが正しく動作するかをテストします。詳しくは[ドキュメント](https://typescript-eslint.io/packages/rule-tester)を参照してください。
 
 続いて tsconfig.json を作成します。今回は簡易的に `tsc` によりビルドすることとします:
 
@@ -148,10 +148,10 @@ $ npm install @types/node @typescript-eslint/parser @typescript-eslint/rule-test
 
 最後に package.json に `"type": "module"` を指定しておきましょう:
 
-```json:package.json
+```diff json:package.json
 {
   "type": "module",
-  ...
+  // ...
 }
 ```
 
@@ -165,11 +165,13 @@ import { ESLintUtils } from "@typescript-eslint/utils";
 const createRule = ESLintUtils.RuleCreator((name) => name);
 ```
 
-`ESLintUtils.RuleCreator` には、ルールの名前を引数に取り、そのルールのドキュメントの URL を返すような関数を渡します。たとえば `no-foo` と `no-bar` という複数のルールを作成する場合、それぞれのドキュメントの URL は `https://example.com/docs/rules/no-foo` と `https://example.com/docs/rules/no-bar` のように同一のパターンをもつことが多いでしょう。`RuleCreator` に URL 生成関数を渡すことで、同一のパターンをもつ URL 文字列を何度も書かずに済むようになります。各ルールに対して生成された URL は、ESLint のルールオブジェクトの `meta.docs.url` に自動的に設定されます。今回はドキュメントの URL は存在しないため、便宜的にルール名をそのまま返すようにしている点に留意してください。
+`ESLintUtils.RuleCreator` には、ルールの名前を引数に取り、そのルールのドキュメントの URL を返すような関数を渡します。たとえば `no-foo` と `no-bar` という複数のルールを作成する場合、それぞれのドキュメントの URL は `https://example.com/docs/rules/no-foo` と `https://example.com/docs/rules/no-bar` のように同一のパターンをもつことが多いでしょう。`RuleCreator` に URL 生成関数を渡すことで、同一のパターンをもつ URL 文字列を何度も書かずに済むようになります。各ルールに対して生成された URL は、ESLint のルールオブジェクトの `meta.docs.url` に自動的に設定されます。今回はドキュメントの URL もドキュメント自体も存在しないため、便宜的にルール名をそのまま返すようにしている点に留意してください。
 
 続いて、上で作成した `createRule` を使ってルールを作成します:
 
 ```ts:src/rules/no-nullpo.ts
+// ...
+
 export const rule = createRule({
   create(context) {
     // TODO: ルールの実装
@@ -189,15 +191,15 @@ export const rule = createRule({
 });
 ```
 
-`name` にはカスタムルールの名前を記述します。今回は、ぬるぽ (nullpo) を禁止するルールであるため `no-nullpo` という名前を付けています^[ルール名に関する厳密な規則はありませんが、何かを禁止するようなルールの名前には `no-` や `ban-` をプレフィックスとして付けることが多いです。]。
+`name` にはカスタムルールの名前を記述します。今回は、ぬるぽ（nullpo）を禁止するルールであるため `no-nullpo` という名前を付けています^[ルール名に関する厳密な規則はありませんが、何かを禁止するようなルールの名前には `no-` や `ban-` をプレフィックスとして付けることが多いです。]。
 
 `meta` にはルールのメタ情報を記述します。ここで設定している各値の意味は以下の通りです:
 
 - `type`: ルールの種類を指定します。指定可能な値は以下となります:
   - `"problem"`: エラーやわかりづらい挙動を引き起こし得るようなコードを指摘します。
-  - `"suggestion"`: エラーを発生させるわけではないが、より良いコードの書き方を提案します。
+  - `"suggestion"`: エラーを発生させるわけではないものの、より良いコードの書き方があることを指摘します。
   - `"layout"`: 空白やセミコロンなど、コードの見た目に関する問題を指摘します。
-- `docs`: 
+- `docs`: ドキュメンテーションのための情報を記述します。ここではルールの短い説明を `description` に記述しています^[和訳すると『「ぬるぽ」をハンマーでぶっ叩く』のような意味となります。]。 
 - `messages`: ルールが出力するメッセージのリストです。キーにはメッセージの ID を、値にはメッセージの内容を記述します。ここでは「ぬるぽ」を検出した際に出力したいメッセージである「ガッ 🔨」を `ga!` という ID で登録しています。
 - `schema`: ルールのオプションを指定するためのスキーマを記述します。オプションがない場合は空の配列を指定します。
 
@@ -225,7 +227,7 @@ ruleTester.run("no-nullpo", rule, {
 
 `@typescript-eslint/rule-tester` からインポートした `RuleTester` を初期化し、その `run` メソッドにルール名、ルールの実体、そしてテストケースである `valid` と `invalid` を渡します。`valid` には問題のないコード例、`invalid` には問題のあるコード例を記述します。
 
-ところで、ESLint の `RuleTester` はテスト実行のために `afterAll` などのグローバルなフックが実行環境に存在していることを前提としています。今回はテストフレームワークとして [Vitest](https://vitest.dev/) を使用し、そこで提供されるフックを `RuleTester` に登録します。まずは Vitest をインストールします:
+ところで、ESLint の `RuleTester` はテスト実行のために `afterAll` などのグローバルなフックが実行環境に存在していることを前提としています。今回はテストフレームワークとして [Vitest](https://vitest.dev/) を使用し、そこで提供されるフックを `RuleTester` に登録します。まずは以下のコマンドにより Vitest をインストールします:
 
 ```sh
 $ npm install vitest --save-dev
@@ -260,7 +262,7 @@ const ruleTester = new RuleTester();
 }
 ```
 
-これでテストを記述するための準備が整いました。現時点でテストを実行すると、以下のようにテストが存在しないというエラーが表示されるはずです:
+これでテストを記述するための準備が整いました。現時点でテストを実行すると、以下のようにテストが存在しない（`No test found`）というエラーが表示されるはずです:
 
 ```sh
 $ npm run test
@@ -316,7 +318,7 @@ ruleTester.run("no-nullpo", rule, {
 
 `invalid` の要素となるオブジェクトには、`code` に問題のあるコード例を、`errors` にはそのコード例に対して発生することが期待されるエラーを指定します。すでに `createRule` の `meta.messages` において期待されるエラーメッセージを登録してあるため、ここではその ID を用いてエラーを指定しています。
 
-この段階でテストを実行すると、まだルールを実装していないため、`invalid` に指定したコードに対してエラーが発生せずテストが失敗するはずです:
+この段階でテストを実行すると、まだルールを実装していないため、`invalid` に指定したコードにおいてエラーが発生せず、テストが失敗するはずです:
 
 ```sh
  FAIL  src/rules/no-nullpo.test.ts > no-nullpo > invalid > const nullpo = "ぬるぽ";
@@ -334,7 +336,7 @@ AssertionError: Should have 1 error but had 0: []
 
 ## カスタムルールの作成
 
-### ルールの実装
+### `create` 関数について
 
 ここからは実際にカスタムルールの実装をおこなっていきます。上で TODO としていた `create` 関数の中身を埋めていきましょう。
 
@@ -343,12 +345,12 @@ AssertionError: Should have 1 error but had 0: []
 ```ts
 create(context) {
   return {
-    // コールバック関数を登録
+    // コールバック関数
   };
 }
 ```
 
-`context` オブジェクトは、その名の通り、ESLint がコードをチェックする際のコンテキストを保持します。たとえばチェック対象のファイルに関する情報や、使用しているパーサーなどの情報が含まれており、これらの情報をルールの実装に役立てることができます。また、`context` には複数のメソッドも登録されており、その中でも最も重要なものが `report` です。`report` メソッドは、コード内の問題を検出した際に ESLint に対してその旨を伝えるためのメソッドであり、カスタムルールを作成する際には必ず使用します。たとえば、`createRule` において `messages` に `foo` という ID でメッセージを登録しており、そのメッセージを使ってエラーや警告を ESLint に伝えるには、以下のように `report` メソッドを呼び出します:
+`context` オブジェクトはその名の通り、ESLint がコードをチェックする際のコンテキストを保持しています。たとえばチェック対象のファイルに関する情報や、使用しているパーサーなどの情報が含まれており、これらの情報をルールの実装に役立てることができます。また、`context` にはいくつかのメソッドも登録されており、その中でも最も重要なものが `report` です。`report` メソッドは、コード内の問題を検出した際に ESLint に対してその旨を伝えるためのメソッドであり、カスタムルールを作成する際には必ず使用します。たとえば、`createRule` において `messages` に `foo` という ID でメッセージを登録しており、そのメッセージを使ってエラーや警告を ESLint に伝えるには、以下のように `report` メソッドを呼び出します（`node` については後述します）:
 
 ```ts
 context.report({
@@ -359,7 +361,7 @@ context.report({
 
 `report` には、これ以外にも問題の発生箇所を示す `loc` オブジェクトや、問題を解消するための `fix` 関数などを渡すこともできますが、ここでは実装をシンプルに保つために `messageId` のみを使用してエラーレポートをおこないます。
 
-続いて、`create` が返すオブジェクトについて説明します。このオブジェクトは、「AST 内のあるノードに対し、ルールに適合しているかどうかを判定するための関数を与える」ことを目的とします。そこで指定された関数には引数としてノードが与えられるため、それをもとに問題の有無を判定し、問題がある場合は上述した `report` メソッドを呼び出すわけです。たとえば `ReturnStatement` ノードに対して関数を登録するには以下のように記述します:
+続いて、`create` が返すオブジェクトについて説明します。このオブジェクトは、「AST 内のあるノードに対し、ルールに適合しているかどうかを判定するための関数を与える」ことを目的とします。そこで指定された関数には引数としてノードの情報が `node` オブジェクトとして与えられるため、それをもとに問題の有無を判定し、問題がある場合は上述した `report` メソッドを呼び出すわけです。たとえば `ReturnStatement` ノードに対して関数を登録するには以下のように記述します:
 
 ```ts
 create(context) {
@@ -387,7 +389,9 @@ create(context) {
 2. ノードに対して問題の有無を判定する処理を記述する
 3. 問題がある場合は `report` メソッドを呼び出す
 
-それではまず、`no-nullpo` ルールを実装するにあたり、検査対象となるノードを特定しましょう。typescript-eslint の場合、内部で使用されるパーサーは `@typescript-eslint/parser`、正確には [`@typescript-eslint/typescript-estree`](https://typescript-eslint.io/packages/typescript-estree) ですが、このパーサーは ESTree 互換の AST を生成し、内部で使用されるノードの種類の数は[非常に膨大](https://typescript-eslint.io/packages/typescript-estree/ast-spec)です。そのため、対象となるノードを探すことは非常に骨が折れる作業のように思えますが、実際には [AST Explorer](https://astexplorer.net/) などのツールを使うことで、多くの場合はノードを特定可能です。以下は、AST Explorer にて `const nullpo = "ぬるぽ";` というコードを入力した際のスクリーンショットです:
+### ルールの実装
+
+それではまず、`no-nullpo` ルールを実装するにあたり、検査対象となるノードを特定しましょう。typescript-eslint の場合、内部で使用されるパーサーは `@typescript-eslint/parser`、正確には [`@typescript-eslint/typescript-estree`](https://typescript-eslint.io/packages/typescript-estree) です。このパーサーは ESTree 互換の AST を生成しますが、内部で使用されるノードの種類の数は[非常に膨大](https://typescript-eslint.io/packages/typescript-estree/ast-spec)です。一見、対象となるノードを探すことは非常に骨が折れる作業のように思えますが、実際には [AST Explorer](https://astexplorer.net/) などの補助ツールを使うことで、多くの場合はノードを簡単に特定することが可能です。以下は、AST Explorer にて `const nullpo = "ぬるぽ";` というコードを入力した際のスクリーンショットです:
 
 ![AST Explorer の使用例](/images/abstract-syntax-tree-for-frontend-developers/nullpo-ast.png)
 
@@ -403,7 +407,7 @@ create(context) {
 }
 ```
 
-さて、続いてはこの `Literal` ノードが「ぬるぽ」を含む文字列かどうかの判定処理を記述します。`Literal` ノードは、その名前の通りリテラルを表わすノードであり、文字列以外の値をもっている可能性があります。よって、`node` を通じて値が文字列かどうかをまず判定する必要がありますが、`node` は `value` プロパティをもっており、ここにリテラル自体の値が格納されているため、その型を `typeof` 演算子を使って判定します:
+さて、続いてはこの `Literal` ノードが「ぬるぽ」を含む文字列かどうかの判定処理を記述します。`Literal` ノードは、その名前の通りリテラルを表わすノードであり、`1` や `false` など、文字列以外の値である可能性があります。よって、`node` を通じて値が文字列かどうかをまず判定する必要がありますが、`node` は `value` プロパティをもっており、ここにリテラル自体の値が格納されているため、その型を `typeof` 演算子を使って判定します:
 
 ```ts:src/rules/no-nullpo.ts
 create(context) {
@@ -417,7 +421,7 @@ create(context) {
 }
 ```
 
-続いて、文字列が「ぬるぽ」を含むかどうかを判定しますが、これにはまた `node.value` を使えば良さそうです:
+続いて、文字列が「ぬるぽ」を含むかどうかを判定しますが、これも同様に `node.value` を使えば良さそうです:
 
 ```ts:src/rules/no-nullpo.ts
 create(context) {
@@ -431,7 +435,7 @@ create(context) {
 }
 ```
 
-これで問題があるかどうかの判定処理の記述が完了しました。最後に、`report` メソッドによりコードに問題がある旨を ESLint に伝達しましょう:
+これで問題があるかどうかの判定処理の記述が完了しました。最後に、`report` メソッドを使用してコードに問題がある旨を ESLint に伝達しましょう:
 
 ```ts:src/rules/no-nullpo.ts
 create(context) {
@@ -506,15 +510,16 @@ export const rule = createRule({
 });
 ```
 
+TODO: Update
 以上により、目的としていたカスタムルールを実装することができましたが、前章までに学んだ AST の知識が活きることを実感できたのではないでしょうか。また、上の実例をベースとして、たとえば「`nullpo` という変数には特定の文字列が格納される必要がある」といったルールを新たに作成することとなったとしても、AST を調べて対象のノードを特定し、判定処理を実装するという具体的なイメージをもてるようになったはずです。
 
-カスタムルールの作成自体は以上で完了ですが、最後にこのルールをプラグイン化し、実際に他のプロジェクトで利用できることを確認しましょう。
+カスタムルールの作成自体は以上で完了ですが、最後にこのルールをプラグイン化し、実際に他のプロジェクトで利用できることを確認しておきましょう。
 
 ### プラグインの作成
 
 プラグインを作成することで、他のプロジェクトからカスタムルールを利用できるようになります。まずはプラグイン用のファイルである、`src/index.ts` を開いてください。
 
-このファイルから [`meta`](https://eslint.org/docs/latest/extend/plugins#meta-data-in-plugins) と [`rules`](https://eslint.org/docs/latest/extend/plugins#rules-in-plugins) というキーをもつオブジェクトをエクスポートすれば、プラグインとしての最低限の要件を満たせます。`meta` には、`name` と `version` などプラグインに関するメタ情報を記述します。また `rules` オブジェクトには、プラグインが提供するカスタムルールをその名前をキーとして登録します:
+このファイルから [`meta`](https://eslint.org/docs/latest/extend/plugins#meta-data-in-plugins) と [`rules`](https://eslint.org/docs/latest/extend/plugins#rules-in-plugins) というキーをもつオブジェクトをエクスポートすれば、プラグインとしての最低限の要件を満たせます。`meta` には、プラグインの名前（`name`）とバージョン（`version`）など、プラグインに関するメタ情報を記述します。また `rules` オブジェクトには、プラグインが提供するカスタムルールをその名前をキーとして登録します:
 
 ```ts:src/index.ts
 import fs from "node:fs";
@@ -556,7 +561,7 @@ export default {
 }
 ```
 
-ビルドを実行し、`dist` ディレクトリにプラグインのビルドファイルが生成されていることを確認しましょう:
+ビルドを実行し、`dist` ディレクトリにプラグインのビルドファイルが生成されていることを確認してください:
 
 ```sh
 $ npm run build
@@ -582,13 +587,12 @@ $ npm link
 $ npm ls -g # プラグインがリンクされていることを確認
 ```
 
-続いて、プラグインをテストするためのプロジェクトを新たに作成します:
+続いて、別のディレクトリに移動した上で、プラグインをテストするためのプロジェクトを新たに作成します:
 
 ```sh
 $ mkdir test-nullpo
 $ cd test-nullpo
 $ npm init -y
-$ npm link eslint-plugin-nullpo
 ```
 
 ESLint の初期化コマンドを実行します:
@@ -626,6 +630,7 @@ import nullpo from "eslint-plugin-nullpo";
 export default [
   {languageOptions: { globals: globals.node }},
   pluginJs.configs.recommended,
+  // 以下を追加
   {
     plugins: {
       nullpo,
@@ -637,7 +642,7 @@ export default [
 ];
 ```
 
-テスト対象のファイルを作成し、`"ぬるぽ"` を含む文字列を使用するコードを記述してください:
+テスト対象のファイルを作成し、`"ぬるぽ"` を含む文字列を使用するコードを追加してください:
 
 ```sh
 $ touch index.js
@@ -658,16 +663,10 @@ npx eslint index.js
 
 ### 推奨設定の追加
 
-ESLint のプラグインには、たとえば `@eslint/js` のように推奨設定が含まれていることがあります。推奨設定は、いわばそのプラグインのデフォルト設定であり、ユーザーがそのプラグインを利用する際に、設定の手間を省いたり、そのプラグインの最適な使い方を知るための手助けとなります。`src/index.ts` の `plugin` オブジェクトに `configs` というキーを追加し、その中に上で設定した設定を記述しましょう:
+ESLint のプラグインには、たとえば `@eslint/js` のように推奨設定が含まれていることがあります。推奨設定は、いわばそのプラグインのデフォルトの設定であり、ユーザーがプラグインを利用する際の設定の手間を省いたり、プラグインの最適な使い方を知るための手助けとなります。`src/index.ts` のプラグインオブジェクトに `configs` キーを追加し、そこに上で設定した内容を記述しましょう:
 
 ```ts:src/index.ts
-import fs from "node:fs";
-
-import { rule as noNullpo } from "./rules/no-nullpo.js";
-
-const pkg = JSON.parse(
-  fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
-);
+// ...
 
 const plugin = {
   configs: {
@@ -696,7 +695,7 @@ const recommended = {
 export default plugin;
 ```
 
-これにより、ユーザー側の設定ファイルでこの推奨設定 `recommended` を参照できるようになりました。プラグインを再度ビルドした上で、以下のように `eslint.config.mjs` を書き換えましょう:
+これにより、ユーザー側の設定ファイルから推奨設定 `recommended` を参照できるようになりました。プラグインを再度ビルドした上で、テスト用プロジェクトにおいて `eslint.config.mjs` を以下のように書き換えます:
 
 ```js:eslint.config.mjs
 import nullpo from "eslint-plugin-nullpo";
@@ -707,7 +706,7 @@ export default [
 ]
 ```
 
-再度 ESLint を実行し、以前と同様にルールが適用されていれば完了です。お疲れ様でした！
+再度 ESLint を実行し、以前と同様にルールが適用されていればプラグインの作成も完了です。お疲れ様でした！
 
 ```sh
 $ npx eslint index.js
