@@ -718,7 +718,65 @@ $ npx eslint index.js
 ✖ 2 problems (2 errors, 0 warnings)
 ```
 
-## Biome と GritQL
+
+## 補論: Biome と GritQL
+
+ESLint は現在のフロントエンド開発におけるデファクトスタンダードの一つです。同様の地位にあるツールとしては、その他にもコードフォーマッターの [Prettier](https://prettier.io/) などが挙げられるでしょう。両者ともに大変優れたソフトウェアですが、近年の開発ツールの Rust 化の波の中から台頭してきた、両者を代替する可能性をもつ新たなツール [Biome](https://biomejs.dev/) について最後に紹介しておきます。
+
+Biome は、Rust 製のコードフォーマッター兼リンターです。その特徴は、なんといってもそのパフォーマンスの高さです。Biome の公式サイトには、
+
+> Format, lint, and more in a fraction of a second.
+
+という標語が掲げられており、その言葉通り、実際に Biome を使用してみるとその動作速度に驚くはずです。もともとは JavaScript と TypeScript のための開発ツールを統合することを目指した [Rome](https://github.com/rome/tools) というプロジェクトが存在していたのですが、開発の主体であった Rome Tools Inc. の資金ショートに伴うレイオフを受け、その開発は停滞していました。そんな中、Rome の開発メンバーであった [Emanuele Stoppa](https://x.com/ematipico) 氏が中心となってプロジェクトを引き継ぎ、2023 年に Rome をフォークして新たに開始したプロジェクトが Biome です。
+
+AST との関連では、Biome のパーサーが Red-Green Tree というデータ構造を使用している点が特徴的です。Biome のコアコントリビューターである [unvalley](https://twitter.com/unvalley_) 氏の[スライド](https://speakerdeck.com/unvalley/behind-biome)によると、Biome のパーサーは AST を生成する前段において
+
+- Green Tree: （スペースやタブ、コメントなど）コード内のトリビアを含むすべての情報をもつ、不変なデータ構造
+- Red Tree: Green Tree から計算される、親子関係の情報をもつ可変なデータ構造
+
+という二種類の木構造を生成し、その結果 Biome のパース処理は
+
+- Lossless: コードが不正な場合でも、パーサーはツリーを正確に表現する
+- Resillient: コードが不正な場合でも、パーサーは入力に含まれる構文の断片を可能な限りみようとする
+
+という性質を備えているとのことです。詳細に説明することは筆者の手に余るため、興味のある方は上の unvalley 氏の資料や、同じくコアコントリビューターである [nissy-dev](https://x.com/nissy_dev) 氏の [JSConf 2023](https://jsconf.jp/2023/) での[トーク](https://www.youtube.com/watch?v=aJsxEL2z8ds)などを参照してみてください。
+
+さらに、2024 年現在 Biome はプラグイン機構の実装を[予定](https://biomejs.dev/blog/roadmap-2024/)しており、これを ESLiint のプラグインと比較することも面白いでしょう。プラグインに関する議論は
+
+https://github.com/biomejs/biome/discussions/1649
+
+にてまずおこなわれ、これをもとに以下においてより具体的なプラグインの仕様が提案されました:
+
+https://github.com/biomejs/biome/discussions/1762
+
+これを読んで興味深いことは、Biome のプラグイン の記述に [GritQL](https://docs.grit.io/) というクエリ言語の使用が検討されていることです。GritQL は、ソースコードを検索・変換するためのクエリ言語であり、SQL に似た宣言的な構文をもつことが特徴です。GritQL のチュートリアルからいくつか例を抜粋すると、まず `"Hello world!"` という文字列をコンソールに出力するコードを検索するクエリは、以下のようになります:
+
+```
+`console.log("Hello world!")`
+```
+
+一見すると単なる文字列のようですが、GritQL はこのクエリをまず AST へと変換し、それをもとに検索する構造的マッチング（structural matching）をおこないます。これにより、完全一致する文字列がマッチするだけでなく、たとえば
+
+```js
+console.log('Hello world!')
+console.log(
+  "Hello world!",
+)
+```
+
+などのコードもマッチします。また、メタ変数（metavariable）を使用し、コード内の特定のパターンをキャプチャーすることも可能です。たとえば、`console.log` に渡される文字列をキャプチャーするには、`$` を使用した以下のようなクエリを書きます:
+
+```
+`console.log($my_message)`
+```
+
+このパターンにより検索した結果キャプチャーされた内容を使用して、もとのコードを置き換えることも可能です。そのためには `=>` という記号を使用します:
+
+```
+`console.log($my_message)` => `winston.info($my_message)`
+```
+
+このクエリを使用し、
 
 
 ## 参考
@@ -735,5 +793,9 @@ $ npx eslint index.js
 - [rule-tester](https://typescript-eslint.io/packages/rule-tester): `@typescript-eslint/rule-tester` のドキュメント
 - [eslint-plugin-example-typed-linting](https://github.com/typescript-eslint/examples/tree/main/packages/eslint-plugin-example-typed-linting): `@typescript-eslint/utils` を使用してプラグインを作成する公式のサンプル
 - [Biome](https://biomejs.dev/): Biome の公式サイト
+- [Announcing Biome](https://biomejs.dev/blog/annoucing-biome/): Biome の公式発表
+- [Deep dive into Biome](https://speakerdeck.com/nissydev/deep-dive-into-biome-in-jsconf-2023): JSConf 2023 にて nissy-dev 氏がおこなったトーク Deep dive into Biome のスライド
+  - 動画版: https://www.youtube.com/watch?v=aJsxEL2z8ds
+- [Behind Biome](https://speakerdeck.com/unvalley/behind-biome): [BuriKaigi 2024](https://burikaigi.dev/) にて unvalley 氏がおこなったトーク Behind Biome のスライド
 - [RFC: Biome plugins](https://github.com/biomejs/biome/discussions/1649): Biome のプラグインに関するディスカッション
 - [RFC: Biome Plugins Proposal](https://github.com/biomejs/biome/discussions/1762): 上のディスカッションを受けて提案された Biome プラグインの仕様
