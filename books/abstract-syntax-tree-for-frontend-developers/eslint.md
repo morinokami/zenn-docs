@@ -743,9 +743,9 @@ AST との関連では、Biome のパーサーが Red-Green Tree というデー
 
 という性質を備えているとのことです。詳細に説明することは筆者の手に余るため、興味のある方は上の unvalley 氏の資料や、同じくコアコントリビューターである [nissy-dev](https://x.com/nissy_dev) 氏の [JSConf 2023](https://jsconf.jp/2023/) での[トーク](https://www.youtube.com/watch?v=aJsxEL2z8ds)などを参照してみてください。
 
-### Biome プラグインと GritQL
+### GritQL について
 
-さらに、2024 年現在 Biome はプラグイン機構の実装を[予定](https://biomejs.dev/blog/roadmap-2024/)しており、これを ESLiint のプラグインと比較することも面白いでしょう。プラグインに関する議論は
+さらに、2024 年現在 Biome はプラグイン機構の実装を[予定](https://biomejs.dev/blog/roadmap-2024/)しており、これを ESLint のプラグインと比較することも面白いでしょう。プラグインに関する議論は
 
 https://github.com/biomejs/biome/discussions/1649
 
@@ -774,13 +774,13 @@ console.log(
 `console.log($my_message)`
 ```
 
-このパターンによりキャプチャーされた内容を使用して、もとのコードを置き換えることも可能です。そのためには `=>` という記号を使用します。以下は、`console.log` を [winston](https://github.com/winstonjs/winston) のロガーに置き換えるクエリの例です:
+このパターンによりキャプチャーされた内容を使用して、もとのコードを置き換えることも可能です。そのためには [`=>`](https://docs.grit.io/language/patterns#rewrite-operator) というオペレーターを使用します。以下は、`console.log` を [winston](https://github.com/winstonjs/winston) のロガーに置き換えるクエリの例です:
 
 ```
 `console.log($my_message)` => `winston.info($my_message)`
 ```
 
-クエリを実際に適用するには [`grit` コマンド](https://docs.grit.io/cli/quickstart)を使用します。たとえば以下のような JavaScript ファイルがあるとします:
+クエリを実際に適用するには [`grit`](https://docs.grit.io/cli/quickstart) コマンドを使用します。たとえば以下のような JavaScript ファイルがあるとします:
 
 ```js:index.js
 console.log("This message is different");
@@ -806,7 +806,7 @@ console.log(
 console.log("This is a user-facing message")
 ```
 
-このファイルに対して先ほどのクエリを適用します。その際、`apply` サブコマンドを指定し、クエリを引数として渡します^[インラインでクエリを渡す以外に、[標準ライブラリ](https://docs.grit.io/patterns)や YAML ファイルに定義されたパターンを渡すことも可能です。]:
+このファイルに対して先ほどのクエリを適用します。その際、[`apply`](https://docs.grit.io/cli/reference#grit-apply) サブコマンドを指定し、クエリを引数として渡します^[インラインでクエリを渡す以外に、[標準ライブラリ](https://docs.grit.io/patterns)や YAML ファイルに定義されたパターンを渡すことも可能です。]:
 
 ```sh
 $ grit apply '`console.log($my_message)` => `winston.info($my_message)`'
@@ -869,7 +869,7 @@ winston.info('Hello world!');
 winston.info("This is a user-facing message")
 ```
 
-さらに、上の変換のパターンに対し、`where` 句を付加して変換対象を絞り込むことも可能です。たとえば `$my_message` が `"This is a user-facing message"` である場合のみ変換をおこなうクエリを書くには、`<:` という左右のパターンが等価であるかどうかを評価するオペレーターを使用します:
+さらに、上の変換のパターンに対し、`where` 句を付加して変換対象を絞り込むことも可能です。たとえば `$my_message` が `"This is a user-facing message"` である場合のみ変換をおこなうクエリを書くには、[`<:`](https://docs.grit.io/language/conditions#match-condition) という左右のパターンが等価であるかどうかを評価するオペレーターを使用します:
 
 ```
 `console.log($my_message)` => `alert($my_message)` where {
@@ -877,28 +877,30 @@ winston.info("This is a user-facing message")
 }
 ```
 
-以上のように、GritQL ではコードの検索や置換をするために、簡単なパターンから徐々に複雑なパターンへとクエリをインクリメンタルに構築していくことが可能です。ここで紹介した内容以外にも様々な機能が用意されていますので、興味のある方は公式ドキュメントを参照してみてください。
+以上のように、GritQL ではコードの検索や置換をするために、簡単なパターンから徐々に複雑なパターンへとクエリをインクリメンタルに構築していくことが可能です。ここで紹介した内容以外にも様々な言語機能が用意されていますので、興味のある方は公式ドキュメントを参照してみてください。公式サイトには [Studio](https://app.grit.io/studio) というプレイグラウンド機能も用意されており、インストール不要ですぐに GritQL を試すことができますので、こちらも参照してみてください。
 
-このようにしてコードの検索や置換をおこなう GritQL ですが、Biome のプラグインを記述するためにどのようにして使用されるのかについては、上述した Biome Plugins Proposal にイメージが紹介されています。Biome には [`noImplicitBoolean`](https://biomejs.dev/linter/rules/no-implicit-boolean/) という、 `<input disabled />` のように JSX において暗黙に `true` を渡すことを禁止するルールが存在しますが、これを GritQL を使ってプラグインとして表現すると以下のようになると説明されています:
+### Biome プラグインと GritQL
+
+さて、ここまで GritQL について簡単に紹介してきましたが、Biome のプラグインを記述するためにどのようにして使用されるのかについては、上述した Biome Plugins Proposal にイメージが提示されています。たとえば Biome には [`noImplicitBoolean`](https://biomejs.dev/linter/rules/no-implicit-boolean/) という、 `<input disabled />` のように JSX において暗黙に `true` を渡すことを禁止するルールが存在しますが、これを GritQL を使ってプラグインとして表現すると以下のようになるとのことです^[インデントのみ修正して引用しています。]:
 
 ```
 or {
-    `<$component $attrs />`,
-    `<$component $attrs>$...</$component>`
+  `<$component $attrs />`,
+  `<$component $attrs>$...</$component>`
 } where {
-    $attrs <: some $attr => diagnostic(
-      message = "Use explicit boolean values for boolean JSX props.",
-      fixer = `$attr={true}`,
-      fixerDescription = "Add explicit `true` literal for this attribute",
-      category = "quickFix",
-      applicability = "always"
-    ) where $attr <: r"[\w-]+"
+  $attrs <: some $attr => diagnostic(
+    message = "Use explicit boolean values for boolean JSX props.",
+    fixer = `$attr={true}`,
+    fixerDescription = "Add explicit `true` literal for this attribute",
+    category = "quickFix",
+    applicability = "always"
+  ) where $attr <: r"[\w-]+"
 }`
 ```
 
-ほげ
+まだ説明していない [`or`](https://docs.grit.io/language/conditions#or-condition) オペレーターやカスタム関数（`diagnostic`）などが出てきていますが、大まかな意図は理解できるのではないのでしょうか。上のクエリを簡単に言い換えると、「JSX において属性 $attrs が指定されており、その一部（`some`）が `[\w-]+` というパターンに当てはまる場合、`diagnostic` 関数により Biome に通知する」といった意味になるでしょう。`diagnostic` 関数は Biome 側で実装する関数であり、これは ESLint の `context.report` メソッドに相当します。特定のパターンを GritQL により記述し、問題点を Biome に通知するという、ESLint と共通する流れをおさえておけば良いでしょう。
 
-ところで、上の変換をする際に、パターンを記述する人間が AST をまったく意識する必要がない点に注目してください。ESLint や後述する jscodeshit などのツールを使って同様のことをおこなう場合、対象となるコードの AST 表現（この場合 `CallExpression`）を意識する必要があります。そのために AST Explorer などのツールを行き来するわけですが、GridQL は
+ところで、GritQL によりパターンを記述する際に、表面上は AST をまったく意識する必要がない点に注目してください。ESLint や後述する jscodeshit などのツールを使って同様のことをおこなう場合、対象となるコードの AST 表現（この場合 `CallExpression`）を意識する必要があります。そのために AST Explorer などのツールを行き来してツリー構造を辿っていくわけですが、GridQL では「`console.log($my_message)` というパターンをまず見つけて、...」というように、コードの見た目をそのまま記述することができます。GritQL のドキュメントにおいてこうした特徴は宣言的 (declarative) という言葉によって表現されていますが、こうした宣言的なパターンによるコードの検索・変換という特徴は、類似のツールである [ast-grep](https://ast-grep.github.io/) などでも見られます。こうした新しいツールが徐々に広まることで、React が宣言的な UI 表現を普及させたように、AST の操作においても宣言的な仕組みが普及していくのかもしれません。
 
 
 ## 参考
@@ -921,3 +923,4 @@ or {
 - [Behind Biome](https://speakerdeck.com/unvalley/behind-biome): [BuriKaigi 2024](https://burikaigi.dev/) にて unvalley 氏がおこなったトーク Behind Biome のスライド
 - [RFC: Biome plugins](https://github.com/biomejs/biome/discussions/1649): Biome のプラグインに関するディスカッション
 - [RFC: Biome Plugins Proposal](https://github.com/biomejs/biome/discussions/1762): 上のディスカッションを受けて提案された Biome プラグインの仕様
+- [ast-grep](https://ast-grep.github.io/): ast-grep の公式サイト
