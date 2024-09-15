@@ -721,6 +721,8 @@ $ npx eslint index.js
 
 ## 補論: Biome と GritQL
 
+### Biome について
+
 ESLint は現在のフロントエンド開発におけるデファクトスタンダードの一つです。同様の地位にあるツールとしては、その他にもコードフォーマッターの [Prettier](https://prettier.io/) などが挙げられるでしょう。両者ともに大変優れたソフトウェアですが、近年の開発ツールの Rust 化の波の中から台頭してきた、両者を代替する可能性をもつ新たなツール [Biome](https://biomejs.dev/) について最後に紹介しておきます。
 
 Biome は、Rust 製のコードフォーマッター兼リンターです。その特徴は、なんといってもそのパフォーマンスの高さです。Biome の公式サイトには、
@@ -741,15 +743,17 @@ AST との関連では、Biome のパーサーが Red-Green Tree というデー
 
 という性質を備えているとのことです。詳細に説明することは筆者の手に余るため、興味のある方は上の unvalley 氏の資料や、同じくコアコントリビューターである [nissy-dev](https://x.com/nissy_dev) 氏の [JSConf 2023](https://jsconf.jp/2023/) での[トーク](https://www.youtube.com/watch?v=aJsxEL2z8ds)などを参照してみてください。
 
+### Biome プラグインと GritQL
+
 さらに、2024 年現在 Biome はプラグイン機構の実装を[予定](https://biomejs.dev/blog/roadmap-2024/)しており、これを ESLiint のプラグインと比較することも面白いでしょう。プラグインに関する議論は
 
 https://github.com/biomejs/biome/discussions/1649
 
-にてまずおこなわれ、これをもとに以下においてより具体的なプラグインの仕様が提案されました:
+にてまず開始され、これをもとに以下においてより具体的なプラグインの仕様が提案されました:
 
 https://github.com/biomejs/biome/discussions/1762
 
-これを読んで興味深いことは、Biome のプラグイン の記述に [GritQL](https://docs.grit.io/) というクエリ言語の使用が検討されていることです。GritQL は、ソースコードを検索・変換するためのクエリ言語であり、SQL に似た宣言的な構文をもつことが特徴です。GritQL のチュートリアルからいくつか例を抜粋すると、まず `"Hello world!"` という文字列をコンソールに出力するコードを検索するクエリは、以下のようになります:
+これを読んで興味深いことは、Biome のプラグイン の記述に [GritQL](https://docs.grit.io/) というクエリ言語の使用が検討されていることです。GritQL は、ソースコードを検索・変換するためのクエリ言語であり、SQL に似た宣言的な構文をもつことが特徴です。GritQL のチュートリアルからいくつか例を抜粋すると、まず「`"Hello world!"` という文字列をコンソールに出力するコード」を検索するクエリは、以下のようになります:
 
 ```
 `console.log("Hello world!")`
@@ -764,19 +768,137 @@ console.log(
 )
 ```
 
-などのコードもマッチします。また、メタ変数（metavariable）を使用し、コード内の特定のパターンをキャプチャーすることも可能です。たとえば、`console.log` に渡される文字列をキャプチャーするには、`$` を使用した以下のようなクエリを書きます:
+などのコードにもマッチします。また、メタ変数（metavariable）を使用し、コード内の特定のパターンをキャプチャーすることも可能です。たとえば `console.log` に渡される文字列をキャプチャーするには、`$` を使用した以下のようなクエリを書きます:
 
 ```
 `console.log($my_message)`
 ```
 
-このパターンにより検索した結果キャプチャーされた内容を使用して、もとのコードを置き換えることも可能です。そのためには `=>` という記号を使用します:
+このパターンによりキャプチャーされた内容を使用して、もとのコードを置き換えることも可能です。そのためには `=>` という記号を使用します。以下は、`console.log` を [winston](https://github.com/winstonjs/winston) のロガーに置き換えるクエリの例です:
 
 ```
 `console.log($my_message)` => `winston.info($my_message)`
 ```
 
-このクエリを使用し、
+クエリを実際に適用するには [`grit` コマンド](https://docs.grit.io/cli/quickstart)を使用します。たとえば以下のような JavaScript ファイルがあるとします:
+
+```js:index.js
+console.log("This message is different");
+
+// Comment with console.log("Hello world!") in it
+
+function main(me) {
+  console.log(42)
+  console.log("Hello world!")
+  console.log("42")
+
+  console.log({
+    name: "John Doe",
+    age: 42,
+  })
+  return me
+};
+
+console.error("This is an error message")
+console.log(
+  'Hello world!'
+);
+console.log("This is a user-facing message")
+```
+
+このファイルに対して先ほどのクエリを適用します。その際、`apply` サブコマンドを指定し、クエリを引数として渡します^[インラインでクエリを渡す以外に、[標準ライブラリ](https://docs.grit.io/patterns)や YAML ファイルに定義されたパターンを渡すことも可能です。]:
+
+```sh
+$ grit apply '`console.log($my_message)` => `winston.info($my_message)`'
+./index.js
+    -console.log("This message is different");
+    +winston.info("This message is different");
+
+     // Comment with console.log("Hello world!") in it
+
+     function main(me) {
+    -  console.log(42)
+    -  console.log("Hello world!")
+    -  console.log("42")
+    +  winston.info(42)
+    +  winston.info("Hello world!")
+    +  winston.info("42")
+
+    -  console.log({
+    +  winston.info({
+         name: "John Doe",
+         age: 42,
+       })
+       return me
+    -};
+    +}
+
+     console.error("This is an error message")
+    -console.log(
+    -  'Hello world!'
+    -);
+    -console.log("This is a user-facing message")
+    +winston.info('Hello world!');
+    +winston.info("This is a user-facing message")
+
+
+Processed 1 files and found 7 matches
+```
+
+変換された index.js は以下のようになります。全体的に `console.log` が `winston.info` に置き換えられていますが、コメント内の `console.log` は変換されていないことに注意してください。これは、GritQL が単純な文字列のマッチングではなく、AST を使った構造的なマッチングをおこなっているためです:
+
+```js:index.js
+winston.info("This message is different");
+
+// Comment with console.log("Hello world!") in it
+
+function main(me) {
+  winston.info(42)
+  winston.info("Hello world!")
+  winston.info("42")
+
+  winston.info({
+    name: "John Doe",
+    age: 42,
+  })
+  return me
+}
+
+console.error("This is an error message")
+winston.info('Hello world!');
+winston.info("This is a user-facing message")
+```
+
+さらに、上の変換のパターンに対し、`where` 句を付加して変換対象を絞り込むことも可能です。たとえば `$my_message` が `"This is a user-facing message"` である場合のみ変換をおこなうクエリを書くには、`<:` という左右のパターンが等価であるかどうかを評価するオペレーターを使用します:
+
+```
+`console.log($my_message)` => `alert($my_message)` where {
+  $my_message <: `"This is a user-facing message"`
+}
+```
+
+以上のように、GritQL ではコードの検索や置換をするために、簡単なパターンから徐々に複雑なパターンへとクエリをインクリメンタルに構築していくことが可能です。ここで紹介した内容以外にも様々な機能が用意されていますので、興味のある方は公式ドキュメントを参照してみてください。
+
+このようにしてコードの検索や置換をおこなう GritQL ですが、Biome のプラグインを記述するためにどのようにして使用されるのかについては、上述した Biome Plugins Proposal にイメージが紹介されています。Biome には [`noImplicitBoolean`](https://biomejs.dev/linter/rules/no-implicit-boolean/) という、 `<input disabled />` のように JSX において暗黙に `true` を渡すことを禁止するルールが存在しますが、これを GritQL を使ってプラグインとして表現すると以下のようになると説明されています:
+
+```
+or {
+    `<$component $attrs />`,
+    `<$component $attrs>$...</$component>`
+} where {
+    $attrs <: some $attr => diagnostic(
+      message = "Use explicit boolean values for boolean JSX props.",
+      fixer = `$attr={true}`,
+      fixerDescription = "Add explicit `true` literal for this attribute",
+      category = "quickFix",
+      applicability = "always"
+    ) where $attr <: r"[\w-]+"
+}`
+```
+
+ほげ
+
+ところで、上の変換をする際に、パターンを記述する人間が AST をまったく意識する必要がない点に注目してください。ESLint や後述する jscodeshit などのツールを使って同様のことをおこなう場合、対象となるコードの AST 表現（この場合 `CallExpression`）を意識する必要があります。そのために AST Explorer などのツールを行き来するわけですが、GridQL は
 
 
 ## 参考
