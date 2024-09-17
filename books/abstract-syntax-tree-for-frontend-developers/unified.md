@@ -29,10 +29,10 @@ title: "unified によるコンテンツ処理"
 [unified](https://unifiedjs.com/) は、AST を通じてコンテンツを処理するためのインターフェースです。ここで「コンテンツ」とは、HTML や Markdown、自然言語などの形式のデータを指します。「処理」という言葉には、以下の要素が含まれます:
 
 - 構文解析（parse）: コンテンツを AST へと変換する
-- 変換（transform）: AST に対する操作や、ある AST から別の AST への変換をおこなう。複数の変換を組み合わせることができる
+- 変換（transform）: AST に対する操作・検査や、ある AST から別の AST への変換をおこなう。複数の変換処理を組み合わせることができる
 - 文字列化（stringify）: AST を特定の形式のデータへと戻す
 
-以上をまとめた図を unified の GitHub リポジトリの README から引用します:
+以上をまとめた図を [unified の GitHub リポジトリ](https://github.com/unifiedjs/unified)の README から引用します:
 
 ```
 | ........................ process ........................... |
@@ -96,7 +96,7 @@ unified の大まかなイメージがつかめたところで、続いて詳細
 - 変換
 - 文字列化
 
-という流れを指定しますが、各ステップに対応するパッケージが数多く提供されていますので、ここでその一部を紹介します。
+という要素を指定しますが、各ステップに対応するパッケージが数多く提供されていますので、ここでその一部を紹介します。
 
 #### 構文解析
 
@@ -118,7 +118,27 @@ unified の大まかなイメージがつかめたところで、続いて詳細
 - [mdast](https://github.com/syntax-tree/mdast): Markdown
 - [nlcst](https://github.com/syntax-tree/nlcst): 自然言語
 
-各 AST は、[unist](https://github.com/syntax-tree/unist) という構文木の仕様をもとに標準化されています。これにより、ほげ
+各 AST は [unist](https://github.com/syntax-tree/unist) という構文木の仕様をベースに拡張されており、「unist により規定された共通部分 + コンテンツの形式ごとの拡張部分」という構成になっています。
+
+#### 変換
+
+unified の目的は AST を通じたコンテンツの処理であるため、変換用のパッケージの数は最も多くなっています。大まかには、たとえば mdast から hast への変換のように AST の種類を変換するタイプと、AST の内容を改変あるいは検査するタイプに分類できます。以下は代表的な変換用パッケージの例です:
+
+- AST の種類を変換する
+  - [remark-rehype](https://unifiedjs.com/explore/package/remark-rehype/): mdast から hast への変換
+  - [rehype-remark](https://unifiedjs.com/explore/package/rehype-remark/): hast から mdast への変換
+  - [remark-retext](https://unifiedjs.com/explore/package/remark-retext/): mdast から nlcst への変換
+  - [rehype-retext](https://unifiedjs.com/explore/package/rehype-retext/): hast から nlcst への変換
+- AST の内容を改変・検査する
+  - hoge
+
+#### 文字列化
+
+文字列化に関するパッケージとしては、以下のようなものがあります:
+
+- [rehype-stringify](https://unifiedjs.com/explore/package/rehype-stringify/): HTML の文字列化
+- [remark-stringify](https://unifiedjs.com/explore/package/remark-stringify/): Markdown の文字列化
+- [retext-stringify](https://unifiedjs.com/explore/package/retext-stringify/): 自然言語の文字列化
 
 
 ## rehype プラグインの作成
