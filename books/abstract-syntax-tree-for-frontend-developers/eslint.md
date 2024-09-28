@@ -88,7 +88,7 @@ ESLint はソースコードが与えられると、まずそれをパースし 
 
 ## カスタムルール作成のための準備
 
-### プロジェクトの準備
+### プロジェクトの作成
 
 まずはカスタムルールを実装するためのプロジェクトを準備しましょう。以下のコマンドにより、npm プロジェクトを初期化してください:
 
@@ -113,7 +113,7 @@ $ touch src/index.ts src/rules/no-nullpo.ts src/rules/no-nullpo.test.ts
 
 なお、`rules` ディレクトリにルールの実装とテストを置いていますが、これは必須ではありません。複数のカスタムルールを作成する場合には `rules` ディレクトリのような場所を用意して管理することが一般的^[たとえば [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint/tree/main/packages/eslint-plugin) や [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) などはこの構成となっています。]であるためそれに従っていますが、今回のようにルールの数が少ない場合は各ファイルをフラットに配置しても問題ないでしょう。
 
-### TypeScript 環境の構築
+### TypeScript 環境のセットアップ
 
 カスタムルールを作成するにあたり、JavaScript を使うことも可能ですが、補完などの恩恵を受けるために TypeScript を使用することとします。以下のコマンドにより、必要なパッケージをインストールします:
 
@@ -254,11 +254,11 @@ const ruleTester = new RuleTester();
 
 ```json:package.json
 {
-  ...
+  // ...
   "scripts": {
     "test": "vitest"
   },
-  ...
+  // ...
 }
 ```
 
@@ -334,7 +334,7 @@ AssertionError: Should have 1 error but had 0: []
 これでルールを実装するための準備が整いました！あとはこのテストを通すことがゴールとなります。
 
 
-## カスタムルールの作成
+## カスタムルールの実装
 
 ### `create` 関数について
 
@@ -545,7 +545,7 @@ export default {
 
 ```json:package.json
 {
-  ...
+  // ...
   "files": [
     "dist"
   ],
@@ -554,7 +554,7 @@ export default {
     "build": "tsc",
     "test": "vitest"
   },
-  ...
+  // ...
   "peerDependencies": {
     "eslint": "^9.0.0"
   }
