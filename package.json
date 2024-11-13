@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "zenn-docs",
   "description": "https://zenn.dev/morinokami",
   "author": "Shinya Fujino <shf0811@gmail.com>",
