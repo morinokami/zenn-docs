@@ -8,9 +8,13 @@ published: false
 
 ## はじめに
 
-[Astro Actions](https://docs.astro.build/en/guides/actions/)（以下、基本的にアクションと呼びます）は、2024 年に Astro に追加された^[[v4.8](https://astro.build/blog/astro-480/#experimental-astro-actions) において実験的な機能として導入され、[v4.15](https://astro.build/blog/astro-4150/#stable-astro-actions) において安定版となりました。]、型安全にサーバーと通信をおこなうための新しい機能です。Astro では従来も[エンドポイント](https://docs.astro.build/en/guides/endpoints/)を定義してサーバーと通信することは可能でしたが、サーバーから返されるデータの型の扱いやサーバーサイドでのバリデーションなどをしっかりとおこなうためには、多くのボイラープレートコードを書く必要がありました。アクションにより、こうしたボイラープレートコードが削減され、サーバーサイドのコードを型安全かつ手軽に実行できるようになりました^[ここまでの議論により Next.js の Route Handlers と Server Actions の関係を想起された方も多いと思いますが、実際 Server Actions と Astro Actions が解決する問題には共通点が少なくありません。]。
+[Astro Actions](https://docs.astro.build/en/guides/actions/)（以下、基本的にアクションと呼びます）は、2024 年に Astro に追加された^[[v4.8](https://astro.build/blog/astro-480/#experimental-astro-actions) において実験的な機能として導入され、[v4.15](https://astro.build/blog/astro-4150/#stable-astro-actions) において安定版となりました。]、型安全にサーバーと通信をおこなうための新しい機能です。2024 年の Astro は、[DB](https://docs.astro.build/en/guides/astro-db/) の導入などサーバーサイドの機能を積極的に拡充してきた印象ですが、そうしたコンテクストにおいてサーバーと通信するための要としてアクションが追加されました。Astro では従来も[エンドポイント](https://docs.astro.build/en/guides/endpoints/)を定義してサーバーと通信することは可能でしたが、サーバーから返されるデータの型の扱いやサーバーサイドでのバリデーションなどをしっかりとおこなうためには、多くのボイラープレートコードを書く必要があります。アクションにより、こうしたボイラープレートコードが削減され、サーバーサイドのコードを型安全かつ手軽に実行できるようになりました^[ここまでの議論により Next.js の Route Handlers と Server Actions の関係を想起された方も多いと思いますが、実際 Server Actions と Astro Actions が解決する問題には共通点が少なくありません。]。
 
 この記事では、アクションの基本についてまず紹介した上で、アクションを実際に作成して Astro コンポーネントや React コンポーネントなどから呼び出す方法について解説します。
+
+なお、動画により概要を知りたいという方は、アクションの開発の中心を担ってきた Ben Holmes による、[Astro Together 2024](https://astro.build/blog/astro-together-montreal/) での解説動画を参照することをおすすめします。アクションを導入した動機や基本的な使い方、機能のデモに至るまで、アクションの全体像がコンパクトにまとめられています:
+
+https://www.youtube.com/watch?v=VkYQMhit_04
 
 ## Astro Actions の基礎
 
@@ -67,7 +71,7 @@ button?.addEventListener("click", async () => {
 </script>
 ```
 
-まず `actions` オブジェクトをインポートしていますが、ここには `src/actions/index.ts` で定義した `getGreeting` アクションが含まれています。続いてボタンのクリックイベントに対してイベントリスナーを登録し、その内部で `actions.getGreeting` を呼び出しています。アクションの定義時に用いた `input` によりこの関数には型が自動的に付与されているため、引数が誤っていれば警告が表示されますし、エディター上で関数をホバーすればその型を確認することも可能です:
+まず `actions` オブジェクトをインポートしていますが、ここには `src/actions/index.ts` で定義した `getGreeting` アクションが自動的に含まれます。コード生成のためのコマンドの実行などのステップは必要ありません。続いてボタンのクリックイベントに対してイベントリスナーを登録し、その内部で `actions.getGreeting` を呼び出しています。アクションの定義時に用いた `input` によりこの関数には型が自動的に付与されているため、引数が誤っていれば警告が表示されます。さらに、エディター上で関数を `cmd + click` して定義にジャンプしたり、ホバーしてインプットの型を確認したりすることも可能です:
 
 ![型付けされた Action](/images/astro-actions-in-action/typed-action.png)
 
@@ -124,7 +128,7 @@ const rawResult = await fetch(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/_a
 });
 ```
 
-このように具体的なソースコードからも、アクションの呼び出し時に `fetch` を使ってシンプルに POST リクエストを送信していることがわかります。ここで抜粋したコード自体は今後変更される可能性があるため細かく追う必要はありませんが、アクションが実際には単なる API エンドポイントであるという点は留意しておいたほうがよいでしょう。
+このように具体的なソースコードからも、アクションの呼び出し時に `fetch` を使ってシンプルに POST リクエストを送信していることがわかります。よって、特別な配慮をせずとも、アクションの実装に含まれる環境変数などの秘匿すべき情報がクライアントに漏れることはありません。ここで抜粋したコード自体は今後変更される可能性があるため細かく追う必要はありませんが、アクションが実際には単なるサーバーサイドの API エンドポイントであるという点は留意しておいたほうがよいでしょう。
 
 以上により、アクションの基本的な使い方や内部の仕組みについて理解できたと思います。次に、上の例よりも少しだけ複雑なアクションを作成し、エラーハンドリングやアクションを呼び出す複数の方法などについて見ていきましょう。
 
@@ -444,3 +448,9 @@ if (result) {
 ## まとめ
 
 以上見てきたように、Astro Actions により、従来のエンドポイントを使用する場合よりもより型安全かつ手軽にサーバーサイドのコードを呼び出すことが可能となりました。まだまだ発展途上の機能ではありますが、Zod による自動バリデーションやエラーハンドリングの標準化など、実際にサーバーサイドのコードを実行するために必要な抽象化が最低限整備されており、また素の JavaScript や Astro コンポーネントなど様々な方法でアクションを呼び出せるようになっているため、この記事で興味をもった方はぜひ自分のプロジェクトにアクションを取り入れてみてください。
+
+## 参考
+
+https://docs.astro.build/en/guides/actions/
+https://docs.astro.build/en/reference/modules/astro-actions/
+https://github.com/withastro/roadmap/blob/main/proposals/0046-actions.md
