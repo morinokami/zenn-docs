@@ -83,7 +83,7 @@ export default function Static() {
 }
 ```
 
-Next.js では、[Full Route Cache](https://nextjs.org/docs/app/building-your-application/caching#full-route-cache) によりデフォルトでページがキャッシュされますが、[`cookies`](https://nextjs.org/docs/app/api-reference/functions/cookies) や [`headers`](https://nextjs.org/docs/app/api-reference/functions/headers) などの [Dynamic API](https://nextjs.org/docs/app/building-your-application/caching#dynamic-apis) を使用するとその挙動がオプトアウトされます。上のコード例では、他のページと表示内容を揃えるために `SlowComponent` コンポーネントをレンダリングしていますが、これが `headers` を使用しているため、このページはそのままでは Static Rendering されません:
+Next.js では、[Full Route Cache](https://nextjs.org/docs/app/building-your-application/caching#full-route-cache) によりデフォルトでページがキャッシュされますが、[`cookies`](https://nextjs.org/docs/app/api-reference/functions/cookies) や [`headers`](https://nextjs.org/docs/app/api-reference/functions/headers) などの [Dynamic API](https://nextjs.org/docs/app/building-your-application/caching#dynamic-apis) を使用するとその挙動がオプトアウトされます。上のコード例では、他のページと表示内容を揃えるために `SlowComponent` というコンポーネントをレンダリングしていますが、これが `headers` を使用しているため、このページはそのままでは Static Rendering されません:
 
 ```tsx:components/slow-component.tsx
 import { headers } from "next/headers";
@@ -96,25 +96,275 @@ export async function SlowComponent() {
 }
 ```
 
-そこで、このページのレンダリング方式を Static Rendering に変更するために [`dynamic`](https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic) 変数を `force-static` に設定しています。これにより、Dynamic API はこのページでは空の値を返すように変更され、その結果このページはキャッシュされるようになります。
+そこで、このページのレンダリング方式を Static Rendering に変更するために [`dynamic`](https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic) 変数を `force-static` に設定して `export` しています。これにより、Dynamic API はこのページでは空の値を返すように変更され、その結果このページはキャッシュされるようになります。実際にこのページをビルドすると、ビルドログは
+
+```
+Route (app)                              Size     First Load JS
+┌ ○ /                                    152 B           105 kB
+├ ○ /_not-found                          982 B           106 kB
+├ ƒ /dynamic                             152 B           105 kB
+├ ◐ /partial-prerendering                152 B           105 kB
+├ ○ /static                              152 B           105 kB
+└ ƒ /streaming                           152 B           105 kB
++ First Load JS shared by all            105 kB
+  ├ chunks/3603c99f-b72c53a851b2a54d.js  53.4 kB
+  ├ chunks/654-4173a65ade0d6094.js       49.5 kB
+  └ other shared chunks (total)          1.85 kB
+
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+```
+
+のようになっており、`/static` が Static Rendering されていることがわかります。
 
 このページは https://nextjs-ppr-demo.vercel.app/static からアクセスできますが、筆者の環境では概ね 50 ms 以下の時間で複数の静的ファイルがそれぞれダウンロードされます。ブラウザ上の見た目は以下のようになります:
 
 ![](/images/astro-server-islands-vs-nextjs-ppr/nextjs-ppr-static.png =110x)
 
-上で述べたように、このページのビルド時には `headers` が呼ばれますが、`export const dynamic = "force-static";` の設定により空のオブジェクトが変えるため、SlowComponent の `userAgent` の値は `unknown` となります。上の画像においても「🐢 (unknown)」と表示されていることが確認でき、何度アクセスしても結果は変わらず、ビルド時に作成したキャッシュが返却され続けていることがわかります。
+上で述べたように、このページのビルド時には `headers` が呼ばれますが、`export const dynamic = "force-static";` の設定により空のオブジェクトが返るため、SlowComponent の `userAgent` の値は `unknown` となります。上の画像においても「🐢 (unknown)」と表示されていることが確認でき、何度アクセスしても結果は変わらず、ビルド時に作成したキャッシュが返却され続けていることがわかります。
 
 また、開発者ツールからもこのページが Edge Cache から返ってきていることを確認できます。Chrome の開発者ツールを開き、Network タブから `static` へのリクエストを選択すると、レスポンスヘッダーの `X-Vercel-Cache` が `HIT` に設定されているはずです:
 
 ![](/images/astro-server-islands-vs-nextjs-ppr/static-response.png)
 
-同様の事実は Vercel の管理画面のログからも確認できます:
-
-![](/images/astro-server-islands-vs-nextjs-ppr/static-vercel.png =395x)
-
 #### Dynamic Rendering
 
+Dynamic Rendering は、リクエスト時にページを動的に生成する方式です。ページの内容がユーザーごとに異なる場合や、Cookie などリクエスト時の情報に基づいてコンテンツを生成する必要がある場合に適しています。Dynamic Rendering は Vercel Functions においてリクエスト時に都度実行されるため、ページ内で使われるデータをキャッシュして高速化を図ることは可能ではありますが、Static Rendering に比べて一般に遅くなります。
+
+Dynamic Rendering によるレンダリングの全体像は以下のようになります^[https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming#what-is-streaming]:
+
+1. サーバー上で必要なデータを取得する
+2. サーバーが HTML をレンダリングする
+3. サーバーが静的ファイルをクライアントに送信する
+4. ブラウザが非インタラクティブな UI を表示する
+5. ブラウザ上で React が [Hydration](https://react.dev/reference/react-dom/client/hydrateRoot#hydrating-server-rendered-html) を実行し、UI がインタラクティブとなる
+
+これらのステップは逐次的におこなわれ、後続の処理をブロックします。したがって、たとえばステップ 1 において特定のデータの取得に非常に時間が掛かるような場合、ページ全体のレンダリングが遅くなってしまうことが特徴です。このことは Next.js のドキュメントにおいて以下のような図により示されています:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/server-rendering-without-streaming-chart.png)
+*https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming#what-is-streaming より*
+
+以上の理解をもとに、具体的なコードを確認していきましょう。Dynamic Rendering されるページのコード例は以下となります:
+
+```tsx:app/dynamic/page.tsx
+import { SlowComponent } from "@/components/slow-component";
+
+export default function Dynamic() {
+  return (
+    <>
+      <h1>Dynamic</h1>
+      <SlowComponent />
+    </>
+  );
+}
+```
+
+Static Rendering のコードと異なる点は、`dynamic` 変数が設定されていないことだけです。SlowComponent の内部で Dynamic API が呼ばれているため、このページは自動的に Dynamic Rendering されます。上で示したビルドログから関係のある箇所を抜粋すると
+
+```
+Route (app)                              Size     First Load JS
+...
+├ ƒ /dynamic                             152 B           105 kB
+...
+
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+```
+
+のようになりますが、ログからも Dynamic に設定されていることがわかります。
+
+https://nextjs-ppr-demo.vercel.app/dynamic にアクセスしてみると、まず画面には何も表示されず、少なくとも 1 秒経過してからページ全体が一気に表示されるはずです。これは、SlowComponent がレンダリングされる際に 1 秒間の待ち時間が設定されており、これがレンダリングをブロックし、それが終わってから初めてページ全体の内容を返却しているためです。その代わり、動的なコンテンツである User-Agent の値が表示されていることが確認できます:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/nextjs-ppr-dynamic.png =603x)
+
+また開発者ツールを確認すると、`X-Vercel-Cache` が `MISS` となっているはずです。これは Edge Cache からキャッシュが返却されたわけではなく、Vercel Functions によってレンダリングされたことを示しています:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/dynamic-response.png)
+
+実際、Vercel のダッシュボード上のログからも、Function Invocation が発生して 1 秒程度実行されたのちレスポンスを返却していることが確認できます:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/dynamic-vercel.png =396x)
+
 #### Streaming
+
+Static Rendering により静的なコンテンツを高速に返却し、Dynamic Rendering により動的なコンテンツを都度生成できることを確認しました。ページ全体を静的にするか動的にするかという選択はシンプルでわかりやすく、また両者を駆使すれば基本的にアプリケーションは作成できますが、Next.js はここで思考を停止せず、Streaming というレンダリング方式も提供しています。
+
+Streaming は、いわば Dynamic Rendering の発展形であり、レンダリングを複数のパーツに分け、処理の並列性によるパフォーマンス最適化を図る方式といえます。より具体的には、Suspense により通信などの非同期処理をおこなうコンポーネントとの境界を設定することで、Suspense 境界の外側と内側を並列にレンダリングします。Suspense 境界外部の HTML のレンダリングが済むと、その結果は Suspense 境界内部の処理を待たずにクライアントへと送信され、その後内部のコンポーネントのうち処理が完了したものから順にクライアントにストリーミングにより送信されます。Dynamic Rendering は特定の非同期処理が遅延するとレンダリング全体をブロックしていましたが、Streaming は非同期処理を並列処理へと逃がすことにより、レンダリングのブロックという問題を解消します。
+
+以下の図では、左側の Suspense 境界の外部が先にブラウザにレンダリングされ、青枠で囲まれた内部のコンポーネントが順次レンダリングされていく様子が示されています:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/server-rendering-with-streaming.png)
+*https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming#what-is-streaming より*
+
+また、以下の時系列図を Dynamic Rendering のものと比較することで、Streaming が TTFB や FCP などの指標を大幅に改善する可能性があることを直観的に理解できるはずです:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/server-rendering-with-streaming-chart.png)
+*https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming#what-is-streaming より*
+
+Suspense 境界を設定してコンポーネントを分割することでレンダリングパフォーマンスを改善する、という Streaming の意図が理解できたところで、具体的なコードを見ていきましょう。以下は、これまでと同様のページを Streaming に変更したコード例です:
+
+```tsx:app/streaming/page.tsx
+import { Suspense } from "react";
+
+import { SlowComponent } from "@/components/slow-component";
+
+export default function Streaming() {
+  return (
+    <>
+      <h1>Streaming</h1>
+      <Suspense fallback={<div>Loading...</div>}>
+        <SlowComponent />
+      </Suspense>
+    </>
+  );
+}
+```
+
+Dynamic Rendering との差分は、`Suspense` で `SlowComponent` をラップしている点です。これにより、`SlowComponent` のレンダリング速度に依存することなく、アプリケーションは迅速に Suspense 境界の外部をまずレンダリングして返却できます。また、`Suspense` には `fallback` というプロパティがあり、非同期処理が完了するまでの間に一時的に表示されるコンポーネントを指定できます。この例では `Loading...` という文字列が表示されますが、実際にはスケルトンやスピナーなどを表示することが一般的です。
+
+Streaming は Dynamic Rendering の発展形であると上で述べましたが、Next.js はこれを Dynamic、すなわち Vercel Functions により実行されるページとしてビルドします:
+
+```
+Route (app)                              Size     First Load JS
+...
+└ ƒ /streaming                           152 B           105 kB
+
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+```
+
+実際に https://nextjs-ppr-demo.vercel.app/streaming にアクセスしてみると、次のように Suspense 境界の外部とフォールバック用コンテンツが表示されます。環境にもよりますが、Dynamic Rendering よりも格段に初期表示が速くなっているはずです:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/nextjs-ppr-streaming-1.png)
+
+これに続き、約 1 秒後に SlowComponent がレンダリングされ、User-Agent の値が表示されます:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/nextjs-ppr-streaming-2.png)
+
+ところで、これまでと同様に開発者ツールを確認すると、予想通り `X-Vercel-Cache` の値が `MISS` となっており、Vercel Functions 上で結果がレンダリングされていることがわかりますが、一方でレスポンスの返却までに 1 秒以上の時間が掛かっていると表示されているはずです。一見すると Dynamic Rendering と同じだけの時間が掛かっているように感じられますが、これは「初期表示 + ストリームによる差分表示」のトータルに掛かった時間であり、たとえば以下のように Screenshots を表示することで、初期表示自体が高速化された事実を確認できます:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/streaming-dev-tools.png)
+
+この画像では非常にわかりにくいのですが、トータルで 1.07 s の時間が掛かっているものの、103 ms のタイミングで初期表示が完了していることが中断のスクリーンショットにより示されています。
+
+さらに、より詳しく通信の内訳を知りたければ、たとえば `curl -N https://nextjs-ppr-demo.vercel.app/streaming` のようにバッファーを無効化して curl によりリクエストを送信することで、受信した内容が即座にコンソールに出力されるため、前段と後段において送信されているデータを確認しやすくなります。筆者が手元で実行した結果は以下のようになりました（結果は見やすさのためフォーマットしてあります）:
+
+```html:前段の内容をフォーマットしたもの
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="preload"
+      as="script"
+      fetchpriority="low"
+      href="/_next/static/chunks/webpack-5adebf9f62dc3001.js"
+    />
+    <script
+      src="/_next/static/chunks/3603c99f-b72c53a851b2a54d.js"
+      async=""
+    ></script>
+    <script
+      src="/_next/static/chunks/654-4173a65ade0d6094.js"
+      async=""
+    ></script>
+    <script
+      src="/_next/static/chunks/main-app-52b0c0ee38d74aa0.js"
+      async=""
+    ></script>
+    <title>Create Next App</title>
+    <meta name="description" content="Generated by create next app" />
+    <script
+      src="/_next/static/chunks/polyfills-42372ed130431b0a.js"
+      nomodule=""
+    ></script>
+  </head>
+  <body>
+    <h1>Streaming</h1>
+    <!--$?--><template id="B:0"></template>
+    <div>Loading...</div>
+    <!--/$-->
+    <script
+      src="/_next/static/chunks/webpack-5adebf9f62dc3001.js"
+      async=""
+    ></script>
+    <script>
+      (self.__next_f = self.__next_f || []).push([0]);
+    </script>
+    <script>
+      self.__next_f.push([
+        1,
+        '1:"$Sreact.fragment"\n2:I[6719,[],""]\n3:I[1347,[],""]\n4:"$Sreact.suspense"\n6:I[1468,[],"OutletBoundary"]\n8:I[1468,[],"MetadataBoundary"]\na:I[1468,[],"ViewportBoundary"]\nc:I[7722,[],""]\n',
+      ]);
+    </script>
+    <script>
+      self.__next_f.push([
+        1,
+        '0:{"P":null,"b":"DrOu9YeKrraQcSjHkSx6U","p":"","c":["","streaming"],"i":false,"f":[[["",{"children":["streaming",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[null,["$","html",null,{"lang":"en","children":["$","body",null,{"children":["$","$L2",null,{"parallelRouterKey":"children","segmentPath":["children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[],[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\\"Segoe UI\\",Roboto,Helvetica,Arial,sans-serif,\\"Apple Color Emoji\\",\\"Segoe UI Emoji\\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]}]]}],{"children":["streaming",["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","segmentPath":["children","streaming","children"],"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":["__PAGE__",["$","$1","c",{"children":[[["$","h1",null,{"children":"Streaming"}],["$","$4",null,{"fallback":["$","div",null,{"children":"Loading..."}],"children":"$L5"}]],null,["$","$L6",null,{"children":"$L7"}]]}],{},null]},null]},null],["$","$1","h",{"children":[null,["$","$1","6d9pwYeX8wEhirqrghQSR",{"children":[["$","$L8",null,{"children":"$L9"}],["$","$La",null,{"children":"$Lb"}],null]}]]}]]],"m":"$undefined","G":["$c","$undefined"],"s":false,"S":false}\n',
+      ]);
+    </script>
+    <script>
+      self.__next_f.push([
+        1,
+        'b:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]\n9:[["$","meta","0",{"charSet":"utf-8"}],["$","title","1",{"children":"Create Next App"}],["$","meta","2",{"name":"description","content":"Generated by create next app"}]]\n7:null\n',
+      ]);
+    </script>
+```
+
+```html:後段の内容をフォーマットしたもの
+    <script>
+      self.__next_f.push([
+        1,
+        '5:["$","div",null,{"children":["🐢 (","curl/7.88.1",")"]}]\n',
+      ]);
+    </script>
+    <div hidden id="S:0">
+      <div>🐢 (<!-- -->curl/7.88.1<!-- -->)</div>
+    </div>
+    <script>
+      $RC = function (b, c, e) {
+        c = document.getElementById(c);
+        c.parentNode.removeChild(c);
+        var a = document.getElementById(b);
+        if (a) {
+          b = a.previousSibling;
+          if (e) (b.data = "$!"), a.setAttribute("data-dgst", e);
+          else {
+            e = b.parentNode;
+            a = b.nextSibling;
+            var f = 0;
+            do {
+              if (a && 8 === a.nodeType) {
+                var d = a.data;
+                if ("/$" === d)
+                  if (0 === f) break;
+                  else f--;
+                else ("$" !== d && "$?" !== d && "$!" !== d) || f++;
+              }
+              d = a.nextSibling;
+              e.removeChild(a);
+              a = d;
+            } while (a);
+            for (; c.firstChild; ) e.insertBefore(c.firstChild, a);
+            b.data = "$";
+          }
+          b._reactRetry && b._reactRetry();
+        }
+      };
+      $RC("B:0", "S:0");
+    </script>
+  </body>
+</html>
+```
+
+この内容について細かく述べることはここではしませんが、確かに前段の内容にタイトルやフォールバックコンテンツが含まれていること、そして後段の内容にフォールバックコンテンツとサーバーサイドの処理結果をスワップするようなコードが含まれていることがわかるはずです。
 
 #### Partial Prerendering
 
