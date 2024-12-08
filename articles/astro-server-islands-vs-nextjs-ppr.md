@@ -370,6 +370,67 @@ Route (app)                              Size     First Load JS
 
 https://nextjs.org/docs/app/building-your-application/rendering/partial-prerendering
 
+Streaming により動的なコンテンツの表示が劇的に改善されることを上で確認しましたが、ここでさらなる改善の余地が残されていることに気付くはずです。上の例における処理の流れをもう一度振り返ってみると、Suspense 境界の外部はリクエストごとに固定であるにも関わらず、毎回サーバーサイドにおいてレンダリングしています。これは明らかに無駄な処理であり、この部分を事前にレンダリングしておき、リクエスト時にはそのキャッシュを返却すれば、さらなるパフォーマンス向上が期待できるはずです。このような考え方に基づき、Next.js v14 において Partial Prerendering という新しい機能が導入されました。以下の図のように、PPR では Suspense 境界の外部を事前にレンダリングしておき、リクエスト時にはそのキャッシュを返却することで、Streaming において必要であった初期表示におけるレンダリング処理をスキップでき、ブラウザでの表示速度がより向上します:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/thinking-in-ppr.png)
+
+PPR は Next.js v15 時点においてはまだ実験的な機能であり、Canary リリースでしか使用できない点に注意してください。PPR を有効化するためには `next.config.ts` に以下の設定を追加します:
+
+```ts:next.config.ts
+const nextConfig: NextConfig = {
+  experimental: {
+    ppr: "incremental",
+  },
+}
+```
+
+PPR を有効化したページのコードを見てみましょう:
+
+```tsx:app/partial-prerendering/page.tsx
+import { Suspense } from "react";
+
+import { SlowComponent } from "@/components/slow-component";
+
+export const experimental_ppr = true;
+
+export default function PartialPrerendering() {
+  return (
+    <>
+      <h1>Partial Prerendering</h1>
+      <Suspense fallback={<div>Loading...</div>}>
+        <SlowComponent />
+      </Suspense>
+    </>
+  );
+}
+```
+
+Streaming のコードとの差分は、`experimental_ppr` を `true` に設定して `export` している点です。これだけで、Suspense 境界の外部が事前にレンダリングされ、リクエスト時にはそのキャッシュが返却されるようになります。一方、境界の内部はこれまでと同様にリクエスト時にレンダリングされます。ビルドログの内容もこれまでとは異なっています:
+
+```
+Route (app)                              Size     First Load JS
+...
+├ ◐ /partial-prerendering                152 B           105 kB
+...
+
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+```
+
+このコードが動いている https://nextjs-ppr-demo.vercel.app/partial-prerendering に実際にアクセスしてみると、初期表示速度がさらに向上していることがわかりますが、これは Static Rendering と同様に Edge Cache からキャッシュが返却されているためです（下の画像では、Waiting for server response に 17.68 ms しか掛かっていません）:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/ppr-dev-tools.png)
+
+![](/images/astro-server-islands-vs-nextjs-ppr/ppr-response.png)
+
+一方、Vercel 側のログを確認すると、これまでと同様に SlowComponent をレンダリングするための Function Invocation が発生していることがわかります:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/ppr-vercel.png =395x)
+
+このように、PPR はページ内の静的な領域と動的な領域を Suspense 境界により区切り、前者を事前にレンダリングしておくことで初期表示速度を向上させつつ、後者を並列にレンダリングしてストリーミングすることにより全体のパフォーマンスを底上げします。いまだ実験的な機能ではありますが、Streaming から PPR へとオプトインするための方法も非常にシンプルであり、TODO:
+
 
 ## Server Islands
 
