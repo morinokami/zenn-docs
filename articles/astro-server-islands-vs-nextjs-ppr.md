@@ -141,7 +141,7 @@ Route (app)                              Size     First Load JS
 
 Dynamic Rendering は、リクエスト時にページを動的に生成する方式です。ページの内容がユーザーごとに異なる場合や、Cookie などリクエスト時の情報に基づいてコンテンツを生成する必要がある場合などに適しています。Dynamic Rendering は Vercel Functions においてリクエスト時に都度実行されるため、ページ内で使われるデータをキャッシュして高速化を図ることは可能ではありますが、Static Rendering に比べて一般に遅くなります。
 
-Dynamic Rendering によるレンダリングの全体像は以下のようになります^[https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming#what-is-streaming]:
+Dynamic Rendering によるレンダリングの全体像は以下のようになります^[https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming#what-is-streaming を参考にしました。]:
 
 1. サーバーで必要なデータが取得される
 2. サーバーで HTML がレンダリングされる
@@ -378,8 +378,6 @@ Route (app)                              Size     First Load JS
 
 #### Partial Prerendering
 
-https://nextjs.org/docs/app/building-your-application/rendering/partial-prerendering
-
 Streaming により動的なコンテンツの表示が劇的に改善されることを上で確認しましたが、ここでさらなる改善の余地が残されていることに気付くはずです。上の例における処理の流れをもう一度振り返ってみると、Suspense 境界の外部はリクエストごとに固定であるにも関わらず、毎回サーバーサイドにおいてレンダリングされています。これは明らかに無駄な処理であるため、この部分を事前にレンダリングしておき、リクエスト時にはそのキャッシュを返却すれば、Streaming において必要であった初期表示におけるレンダリング処理の分だけ実行時間が短縮されるため、追加のパフォーマンス向上が期待できるはずです。
 
 このようなアイデアに基づき、Next.js v14 において Partial Prerendering という新しい機能が導入されました。以下の図のように、PPR では Suspense 境界の外部を事前にレンダリングしておき、リクエスト時にはそのキャッシュを返却することで、ブラウザでの表示速度がより向上します:
@@ -447,27 +445,278 @@ Route (app)                              Size     First Load JS
 
 ![](/images/astro-server-islands-vs-nextjs-ppr/ppr-vercel.png =395x)
 
-このように、PPR はページ内の静的な領域と動的な領域を Suspense 境界により区切り、前者を事前にレンダリングしておくことで初期表示速度を向上させつつ、後者を並列にレンダリングしてストリーミングすることにより全体のパフォーマンスを底上げします。いまだ実験的な機能ではありますが、Streaming から PPR へとオプトインするための方法も非常にシンプルであり、Static Rendering と Streaming（Dynamic）Rendering を混在させた中間的なレンダリング方式として、多くの場面で活躍することが期待されます。
+このように、PPR はページ内の静的な領域と動的な領域を Suspense 境界により区切り、前者を事前にレンダリングしておくことで初期表示速度を向上させつつ、後者を並列にレンダリングしてストリーミングすることにより全体のパフォーマンスを底上げします。いまだ実験的な機能ではありますが、Streaming から PPR へとオプトインするための方法も非常にシンプルであり、Static Rendering と Streaming（Dynamic）Rendering を混在させた中間的なレンダリング方式としてよりバランスが取れており、多くの場面で活躍することが期待されます。
 
 
 ## Server Islands
 
 ここまで、Next.js の次世代のレンダリングモデルである PPR についておさらいしてきました。いよいよここからは、本題である Astro の Server Islands について見ていきます。
 
+こちらについても、サンプルプロジェクトを
+
+https://astro-server-islands-demo.vercel.app/
+
+にデプロイし、そのコードを
+
+https://github.com/morinokami/astro-server-islands
+
+にて公開しているため、ぜひ実際に動作を確認しながら読み進めてみてください。
+
+### Astro v5 における変更点
+
+Server Islands など Astro のレンダリング方式について見ていく前に、v5 においてレンダリング方式に関する設定方法が変更されたため、まずはその点について確認しておきましょう。
+
+Astro では、プロジェクトのルートに配置する [`astro.config.mjs`](https://docs.astro.build/en/guides/configuring-astro/) においてプロジェクトの設定をおこないます。このファイルでは様々な設定をおこなうことができますが、その中の一つに、プロジェクトのレンダリング方式を定める [`output`](https://docs.astro.build/en/reference/configuration-reference/#output) があります。v4 までの Astro では、`output` に設定可能な値は以下の 3 つでした:
+
+- `static`（デフォルト）: 全ページを事前レンダリングし静的サイトをビルドする
+- `server`: 基本的に各ページにおいてサーバーサイドレンダリング（SSR）をおこなうが、一部のページにおいて事前レンダリングにオプトインできる
+- `hybrid`: 基本的に各ページを事前レンダリングするが、一部のページにおいて SSR にオプトインできる
+
+これらの値を設定するには以下のように記述します:
+
+```js:astro.config.mjs
+import { defineConfig } from "astro/config";
+import vercel from "@astrojs/vercel";
+
+export default defineConfig({
+  output: "server",
+  adapter: vercel(),
+});
+```
+
+上の設定例では、`output` を `server` に設定し、デフォルトでページを SSR するようにしています。また、SSR する際には実行環境向けの[アダプター](https://docs.astro.build/en/guides/on-demand-rendering/#server-adapters)が必要となるため、ここでは Vercel 用のアダプターを例として指定しています。
+
+`server` モードにおいて事前レンダリングにオプトインする、また `hybrid` モードにおいて SSR にオプトインするには、特定のページにおいて `prerender` 変数を `export` する必要がありました。たとえば、`server` モードのもとで事前レンダリングをおこなうページは以下のようになります:
+
+```tsx
+---
+export const prerender = true;
+// ...
+---
+
+<html>
+  <!-- 事前レンダリングされる -->
+</html>
+```
+
+以上が v4 までの Astro のレンダリング方式の設定に関する概要ですが、v5 においてこの設定方法が[変更](https://docs.astro.build/en/guides/upgrade-to/v5/#removed-hybrid-rendering-mode)されました。具体的には、`hybrid` モードが `static` モードに吸収され、設定値としては廃止されることとなりました。つまり、`output` に設定可能な値は `static` と `server` の 2 つとなり、それぞれの意味が以下のように変更されました:
+
+- `static`（デフォルト）: 基本的に各ページを事前レンダリングするが、一部のページにおいて SSR にオプトインできる
+- `server`: 基本的に各ページにおいてサーバーサイドレンダリング（SSR）をおこなうが、一部のページにおいて事前レンダリングにオプトインできる
+
+オプトイン方式は変わらず `prerender` 変数を使用します。たとえば `static` モードのもとで特定のページにおいて SSR をおこなう場合、以下のように記述します:
+
+```tsx
+---
+export const prerender = false;
+// ...
+---
+
+<html>
+  <!-- SSR される -->
+</html>
+```
+
+注意点として、上のように一部のページで SSR にオプトインしたい場合、`static` はデフォルトであるため指定不要であり、単に SSR したいページで `prerender` を `false` に設定するだけで開発環境では意図通りに動作するのですが、そのままビルドしようとすると
+
+```
+[NoAdapterInstalled] Cannot use server-rendered pages without an adapter. Please install and configure the appropriate server adapter for your final deployment.
+```
+
+というエラーが発生します。これは、実行環境ごとにビルドされるコードを調整する必要があり、環境を指定しなければビルドができないためです（逆に開発環境では Node.js 環境を前提としているためエラーが起こらないものと思われます）。よって、サーバーサイドの処理をおこなう場合、エラーメッセージにあるようにアダプターを指定する必要があります。以下の議論においても、`static` モードを基本とし必要に応じて `prerender` によりモードを切り替えますが、Next.js の場合と同様に Vercel 環境を想定するため、Vercel 用のアダプターを指定することを前提とします:
+
+```ts:astro.config.mjs
+import { defineConfig } from "astro/config";
+import vercel from "@astrojs/vercel";
+
+export default defineConfig({
+  adapter: vercel(),
+});
+```
+
 ### Astro におけるレンダリング方式
 
-https://docs.astro.build/en/guides/on-demand-rendering/
-https://docs.astro.build/en/concepts/islands/
-https://docs.astro.build/en/guides/server-islands/
+以上の `output` 設定の議論からもわかるように、Astro ではページ単位でレンダリング方式を切り替えられ、以下の 2 つの方式が基本となります:
+
+- Prerendering
+- On-demand Rendering^[Astro では、SSR をこのように呼ぶことが多いため、以降はこちらの言葉を使用します。]
+
+これらはページレベルの設定ですが、Server Islands を用いることで、ページ内の一部をオンデマンドレンダリングするよう切り替えることができます。各レンダリング方式について、Next.js との比較を交えながら以下で詳しく見ていきましょう。
 
 #### Prerendering
 
+Prerendering は、Astro のデフォルトのレンダリング方式であり、ページをビルド時に静的に生成します。Vercel 環境にデプロイした場合、生成されたファイルは Edge Cache に置かれるため、高速な初期表示が可能です。名前こそ異なるものの、実質的には Next.js の Static Rendering に相当すると考えてよいでしょう。
+
+Next.js のサンプルプロジェクトの app/static/page.tsx に対応する、Astro 版のコードを見てみましょう:
+
+```tsx:src/pages/static.astro
+---
+import Layout from "../layouts/Layout.astro";
+import SlowComponent from "../components/SlowComponent.astro";
+---
+
+<Layout>
+  <h1>Static</h1>
+  <SlowComponent />
+</Layout>
+```
+
+Astro には App Router のようにレイアウトファイルを階層ごとに指定する機能はないため、`Layout` コンポーネントでページをラップしていますが、それ以外は Next.js 版のコードと違いはありません。SlowComponent では、以下のようにコードフェンス（`---`）内において User-Agent の取得や遅延処理をおこなっており、こちらも Next.js とほぼ同等のコンポーネントであることがわかります:
+
+```tsx:src/components/SlowComponent.astro
+---
+const { headers } = Astro.request;
+const userAgent = headers.get("user-agent") || "unknown";
+await new Promise((resolve) => setTimeout(resolve, 1000));
+---
+
+<div>🐢 ({userAgent})</div>
+```
+
+このコードをビルドすると、以下のようなログが表示され、事前レンダリングされていることが確認できます^[Prerendering であるにも関わらず `Astro.request.headers` を使用しているため警告が表示されていますが、ここでは意図的にこうしているため無視してください。]:
+
+```
+ prerendering static routes 
+22:27:36 ▶ src/pages/prerendering.astro
+22:27:36   └─ /prerendering/index.html22:27:36 [WARN] `Astro.request.headers` was used when rendering the route `src/pages/prerendering.astro'`. `Astro.request.headers` is not available on prerendered pages. If you need access to request headers, make sure that the page is server-rendered using `export const prerender = false;` or by setting `output` to `"server"` in your Astro config to make all your pages server-rendered by default.
+```
+
+Vercel 用のアダプターを指定しているため、ビルド結果はルートの `.vercel` ディレクトリに置かれますが、`.vercel/output/static/prerendering/index.html` にこのページに対応する HTML が生成されていることがわかります^[ここでは見やすさのためコードをフォーマットしていることに注意してください。]:
+
+```html:.vercel/output/static/prerendering/index.html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content="Astro v5.0.3" />
+    <title>Astro Server Islands</title>
+  </head>
+  <body>
+    <h1>Prerendering</h1>
+    <div>🐢 (unknown)</div>
+  </body>
+</html>
+```
+
+このコードをデプロイしたものは https://astro-server-islands-demo.vercel.app/static にありますが、実際にアクセスしてみると、https://nextjs-ppr-demo.vercel.app/static と同じ画面が表示され、Edge Cache からファイルが返却されていることを確認できます:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/astro-server-islands-prerendering.png =202x)
+
+![](/images/astro-server-islands-vs-nextjs-ppr/prerendering-response.png)
+
+また、返却された HTML は、上で示した内容と完全に一致していることも確認できます:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/prerendering-html.png)
+
 #### On-demand Rendering
+
+On-demand Rendering は、Prerendering のように事前にページを生成せず、リクエスト時にサーバーサイドでページを動的にレンダリングします。Vercel 環境では Vercel Functions においてレンダリング処理が実行され、その結果が返却されます。ほぼ Next.js の Dynamic Rendering に対応しますが、以下で述べるように多少の相違点が存在します。
+
+On-demand Rendering をおこなうコードは以下となります:
+
+```tsx:src/pages/on-demand.astro
+---
+import Layout from "../layouts/Layout.astro";
+import SlowComponent from "../components/SlowComponent.astro";
+
+export const prerender = false;
+---
+
+<Layout>
+  <h1>On Demand</h1>
+  <SlowComponent />
+</Layout>
+```
+
+上述のように、プロジェクトの `output` 設定値はデフォルトの `static` のままであるため、ここではそれをオプトアウトするために `prerender` 変数を `false` に設定しています。
+
+Next.js の Dynamic Rendering では、ページ全体がレンダリングされてから結果が返却されていましたが、上のコードがデプロイされている https://astro-server-islands-demo.vercel.app/on-demand にアクセスすると、アクセス直後に
+
+![](/images/astro-server-islands-vs-nextjs-ppr/astro-server-islands-on-demand-1.png =181x)
+
+とだけ表示され、約 1 秒後に SlowComponent が表示されます:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/astro-server-islands-on-demand-2.png)
+
+`curl -N https://astro-server-islands-demo.vercel.app/on-demand` によりレスポンスを確認すると、二段階に分けて HTML の内容が返却されていることがわかります:
+
+```html:前段の内容
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content="Astro v5.0.3" />
+    <title>Astro Server Islands</title>
+  </head>
+  <body>
+    <h1>On Demand</h1>
+```
+
+```html:後段の内容
+    <div>🐢 (curl/7.88.1)</div>
+  </body>
+</html>
+```
+
+これは、Astro が On-demand Rendering においてレスポンスを[ストリーミングにより送信](https://docs.astro.build/en/recipes/streaming-improve-page-performance/)しているためです。Astro は初期表示を最適化するために、一部の HTML のレンダリングが完了した段階で即座にレスポンスを返却し、残りの HTML に関しても上から順に準備ができた段階でストリーミングしていきます。これにより、Next.js の Dynamic Rendering のようにレンダリング全体をブロックすることがなくなるため、初期表示速度が向上します。上から順に準備ができた部分からストリーミングしていくため、以下のように SlowComponent 内で 1 秒待機しているコードをページ側に移動、つまりレンダリングをブロックする処理を一番手前に移動することで、https://nextjs-ppr-demo.vercel.app/dynamic と同様の挙動を再現することも可能です:
+
+```tsx:src/pages/on-demand.astro
+---
+import Layout from "../layouts/Layout.astro";
+import SlowComponent from "../components/SlowComponent.astro";
+
+export const prerender = false;
+
+await new Promise((resolve) => setTimeout(resolve, 1000)); // SlowComponent の中からここに移動
+---
+
+<Layout>
+  <h1>On Demand</h1>
+  <SlowComponent />
+</Layout>
+```
+
+以上により、Astro の On-demand Rendering は Next.js の Dynamic Rendering と「リクエスト時にサーバーサイドでページを動的にレンダリングする」という点では共通しているものの、「ページ全体をストリーミングにより返却する」という点で異なることがわかりました。Astro の On-demand Rendering では、レンダリングをブロックする処理の場所を検討することで初期表示の最適化をおこなうことができるという点は、データ取得などの処理をどこでおこなうかといった設計に関わる重要なポイントとなるため、留意しておいたほうがいいでしょう。
 
 #### Server Islands
 
-<!-- 従来の Client Island はレンダリングではなくインタラクションに関わるものであり、軸が異なるという考察 -->
+:::message
+従来の Client Island はレンダリングではなくインタラクションに関わるものであり、軸が異なるという考察
+:::
 
 
 ## おわりに
 
+
+## 参考
+
+### Partial Prerendering について
+
+https://vercel.com/blog/life-of-a-vercel-request-what-happens-when-a-user-presses-enter
+https://nextjs.org/blog/next-14
+https://nextjs.org/docs/app/building-your-application/rendering/server-components
+https://nextjs.org/docs/app/building-your-application/rendering/partial-prerendering
+https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming
+https://www.partialprerendering.com/
+https://www.youtube.com/watch?v=w2lKYy-9EJE
+https://www.youtube.com/watch?v=MTcPrTIBkpA
+https://zenn.dev/akfm/articles/nextjs-partial-pre-rendering
+https://zenn.dev/sumiren/articles/8156bab8c95fcf
+
+### Server Islands について
+
+https://astro.build/blog/future-of-astro-server-islands/
+https://astro.build/blog/astro-4120/
+https://astro.build/blog/astro-5/
+https://docs.astro.build/en/concepts/islands/
+https://docs.astro.build/en/guides/on-demand-rendering/
+https://docs.astro.build/en/guides/server-islands/
+https://server-islands.com/
+https://zenn.dev/akfm/articles/ppr-vs-islands-architecture
+https://www.youtube.com/watch?v=AaCMvEXM-HQ
+https://www.youtube.com/watch?v=uBxehYwQox4
+https://www.youtube.com/watch?v=rCkhCG7n8sA
