@@ -62,7 +62,7 @@ Edge Network のなかでは、[Vercel Firewall](https://vercel.com/docs/securit
 
 これらに加え、Experimental な機能として Partial Prerendering が Next.js v14 において追加されました。PPR が本記事での主眼となりますが、その理解を深めるために、各方式について以下で順を追って説明していきます。その際、上でも述べたサンプルプロジェクトのコードを参照しますので、必要に応じて[ソースコード](https://github.com/morinokami/nextjs-ppr)を確認しながら読み進めてください。
 
-#### Static Rendering
+### Static Rendering
 
 Static Rendering は、ビルド時または revalidate 後にページを静的に生成しておき、その結果を CDN へとキャッシュしておく方式です。Vercel にアプリケーションをデプロイした場合、Vercel Functions を経由せず Edge Cache から静的なファイルが直接返却されるため、最も高速なレンダリング方式であるといえます。ブログ記事や商品のマーケティングページなど、ユーザーごとに異なる動的なコンテンツを生成する必要がない場合に適しています。
 
@@ -137,7 +137,7 @@ Route (app)                              Size     First Load JS
 
 このように、Static Rendering を用いると、ビルド時に生成された静的なコンテンツが Edge Cache にキャッシュされ、それがユーザーに返却されるため、高速なページ表示が可能となります。
 
-#### Dynamic Rendering
+### Dynamic Rendering
 
 Dynamic Rendering は、リクエスト時にページを動的に生成する方式です。ページの内容がユーザーごとに異なる場合や、Cookie などリクエスト時の情報に基づいてコンテンツを生成する必要がある場合などに適しています。Dynamic Rendering は Vercel Functions においてリクエスト時に都度実行されるため、ページ内で使われるデータをキャッシュして高速化を図ることは可能ではありますが、Static Rendering に比べて一般に遅くなります。
 
@@ -199,7 +199,7 @@ https://nextjs-ppr-demo.vercel.app/dynamic にアクセスしてみると、ま�
 
 以上から、Dynamic Rendering によりページを都度動的に生成することができる一方で、コンポーネントツリーのどこかで遅い処理が走るとレンダリング全体がブロックされてしまうという問題があることがわかりました。
 
-#### Streaming
+### Streaming
 
 ここまでで、Static Rendering により静的なコンテンツを高速に返却し、Dynamic Rendering により動的なコンテンツを都度生成できることを確認できました。ページ全体を静的にするか動的にするかという選択はシンプルでわかりやすく、また両者を駆使すれば基本的にアプリケーションは作成できますが、Next.js はここで思考を停止せず、Streaming というレンダリング方式も提供しています。
 
@@ -376,7 +376,7 @@ Route (app)                              Size     First Load JS
 
 この内容について細かく述べることはここではしませんが、確かに前段の内容に見出しやフォールバックコンテンツが含まれていること、そして後段の内容にフォールバックコンテンツとサーバーサイドの処理結果をスワップするようなコードが含まれていることがわかるはずです。
 
-#### Partial Prerendering
+### Partial Prerendering
 
 Streaming により動的なコンテンツの表示が劇的に改善されることを上で確認しましたが、ここでさらなる改善の余地が残されていることに気付くはずです。上の例における処理の流れをもう一度振り返ってみると、Suspense 境界の外部はリクエストごとに固定であるにも関わらず、毎回サーバーサイドにおいてレンダリングされています。これは明らかに無駄な処理であるため、この部分を事前にレンダリングしておき、リクエスト時にはそのキャッシュを返却すれば、Streaming において必要であった初期表示におけるレンダリング処理の分だけ実行時間が短縮されるため、追加のパフォーマンス向上が期待できるはずです。
 
@@ -464,15 +464,15 @@ https://github.com/morinokami/astro-server-islands
 
 ### Astro v5 における変更点
 
-Server Islands など Astro のレンダリング方式について見ていく前に、v5 においてレンダリング方式に関する設定方法が変更されたため、まずはその点について確認しておきましょう。
+Server Islands など個別のレンダリング方式について見ていく前に、v5 においてレンダリング方式に関する設定方法が変更されたため、まずはその点について確認しておきましょう。
 
-Astro では、プロジェクトのルートに配置する [`astro.config.mjs`](https://docs.astro.build/en/guides/configuring-astro/) においてプロジェクトの設定をおこないます。このファイルでは様々な設定をおこなうことができますが、その中の一つに、プロジェクトのレンダリング方式を定める [`output`](https://docs.astro.build/en/reference/configuration-reference/#output) があります。v4 までの Astro では、`output` に設定可能な値は以下の 3 つでした:
+Astro では、プロジェクトのルートに配置する [`astro.config.mjs`](https://docs.astro.build/en/guides/configuring-astro/) でプロジェクトの設定をおこないます。このファイルでは様々な設定をおこなうことができますが、その中の一つに、プロジェクトのレンダリング方式を定める [`output`](https://docs.astro.build/en/reference/configuration-reference/#output) があります。v4 までの Astro では、`output` に設定可能な値は以下の 3 つでした:
 
 - `static`（デフォルト）: 全ページを事前レンダリングし静的サイトをビルドする
 - `server`: 基本的に各ページにおいてサーバーサイドレンダリング（SSR）をおこなうが、一部のページにおいて事前レンダリングにオプトインできる
 - `hybrid`: 基本的に各ページを事前レンダリングするが、一部のページにおいて SSR にオプトインできる
 
-これらの値を設定するには以下のように記述します:
+以下は `output` の設定例です:
 
 ```js:astro.config.mjs
 import { defineConfig } from "astro/config";
@@ -499,12 +499,12 @@ export const prerender = true;
 </html>
 ```
 
-以上が v4 までの Astro のレンダリング方式の設定に関する概要ですが、v5 においてこの設定方法が[変更](https://docs.astro.build/en/guides/upgrade-to/v5/#removed-hybrid-rendering-mode)されました。具体的には、`hybrid` モードが `static` モードに吸収され、設定値としては廃止されることとなりました。つまり、`output` に設定可能な値は `static` と `server` の 2 つとなり、それぞれの意味が以下のように変更されました:
+以上が Astro v4 までのレンダリング方式の設定に関する概要ですが、v5 においてこの設定方法が[変更](https://docs.astro.build/en/guides/upgrade-to/v5/#removed-hybrid-rendering-mode)されました。具体的には、`hybrid` モードが `static` モードに吸収され、設定値としては廃止されることとなりました。つまり、`output` に設定可能な値は `static` と `server` の 2 つとなり、それぞれの意味が以下のように変更されました:
 
 - `static`（デフォルト）: 基本的に各ページを事前レンダリングするが、一部のページにおいて SSR にオプトインできる
-- `server`: 基本的に各ページにおいてサーバーサイドレンダリング（SSR）をおこなうが、一部のページにおいて事前レンダリングにオプトインできる
+- `server`: 基本的に各ページにおいて SSR をおこなうが、一部のページにおいて事前レンダリングにオプトインできる
 
-オプトイン方式は変わらず `prerender` 変数を使用します。たとえば `static` モードのもとで特定のページにおいて SSR をおこなう場合、以下のように記述します:
+オプトイン方式は変わらず `prerender` 変数を使用します。たとえば `static` モードのもとで特定のページで SSR をおこなう場合、以下のように記述します:
 
 ```tsx
 ---
@@ -517,13 +517,13 @@ export const prerender = false;
 </html>
 ```
 
-注意点として、上のように一部のページで SSR にオプトインしたい場合、`static` はデフォルトであるため指定不要であり、単に SSR したいページで `prerender` を `false` に設定するだけで開発環境では意図通りに動作するのですが、そのままビルドしようとすると
+注意点として、上のように一部のページで SSR にオプトインしたいという場合、`output: "static"` はデフォルトであるため指定不要であり、よって単に SSR したいページで `prerender` を `false` に設定するだけで開発環境では意図通りに動作するのですが、そのままビルドしようとすると
 
 ```
 [NoAdapterInstalled] Cannot use server-rendered pages without an adapter. Please install and configure the appropriate server adapter for your final deployment.
 ```
 
-というエラーが発生します。これは、実行環境ごとにビルドされるコードを調整する必要があり、環境を指定しなければビルドができないためです（逆に開発環境では Node.js 環境を前提としているためエラーが起こらないものと思われます）。よって、サーバーサイドの処理をおこなう場合、エラーメッセージにあるようにアダプターを指定する必要があります。以下の議論においても、`static` モードを基本とし必要に応じて `prerender` によりモードを切り替えますが、Next.js の場合と同様に Vercel 環境を想定するため、Vercel 用のアダプターを指定することを前提とします:
+というエラーが発生します。これは、デプロイ先の実行環境ごとにビルドされるコードを調整する必要があり、環境を指定しなければビルドができないためです（開発環境では Node.js 環境が暗黙に仮定されているためエラーは起こりません）。よって、サーバーサイドの処理をオプトインしたい場合、`output` の値にかかわらずエラーメッセージにあるようにアダプターを指定する必要があります。以下の議論でも `static` モードを基本とし必要に応じて `prerender` によりモードを切り替えますが、Next.js の場合と同様に Vercel 環境にデプロイするため、Vercel 用のアダプターを指定していることに注意してください:
 
 ```ts:astro.config.mjs
 import { defineConfig } from "astro/config";
@@ -543,9 +543,9 @@ export default defineConfig({
 
 これらはページレベルの設定ですが、Server Islands を用いることで、ページ内の一部をオンデマンドレンダリングするよう切り替えることができます。各レンダリング方式について、Next.js との比較を交えながら以下で詳しく見ていきましょう。
 
-#### Prerendering
+### Prerendering
 
-Prerendering は、Astro のデフォルトのレンダリング方式であり、ページをビルド時に静的に生成します。Vercel 環境にデプロイした場合、生成されたファイルは Edge Cache に置かれるため、高速な初期表示が可能です。名前こそ異なるものの、実質的には Next.js の Static Rendering に相当すると考えてよいでしょう。
+Prerendering は Astro のデフォルトのレンダリング方式であり、ページをビルド時に静的に生成します。Vercel 環境にデプロイした場合、生成されたファイルは Edge Cache に置かれるため、高速な初期表示が可能です。生成されるファイルは異なるものの、静的なキャッシュの返却のみでページの表示が完結するという意味で、これは Next.js の Static Rendering に相当すると考えてよいでしょう。
 
 Next.js のサンプルプロジェクトの app/static/page.tsx に対応する、Astro 版のコードを見てみましょう:
 
@@ -561,7 +561,7 @@ import SlowComponent from "../components/SlowComponent.astro";
 </Layout>
 ```
 
-Astro には App Router のようにレイアウトファイルを階層ごとに指定する機能はないため、`Layout` コンポーネントでページをラップしていますが、それ以外は Next.js 版のコードと違いはありません。SlowComponent では、以下のようにコードフェンス（`---`）内において User-Agent の取得や遅延処理をおこなっており、こちらも Next.js とほぼ同等のコンポーネントであることがわかります:
+Astro には App Router のようにレイアウトファイルを階層ごとに指定する機能はないため、ここでは `Layout` コンポーネントでページをラップしていますが、それ以外は Next.js 版のコードと違いはありません。SlowComponent では、以下のようにコードフェンス（`---`）内において User-Agent の取得や遅延処理をおこなっており、こちらも Next.js とほぼ同等のコンポーネントであることがわかります:
 
 ```tsx:src/components/SlowComponent.astro
 ---
@@ -573,7 +573,7 @@ await new Promise((resolve) => setTimeout(resolve, 1000));
 <div>🐢 ({userAgent})</div>
 ```
 
-このコードをビルドすると、以下のようなログが表示され、事前レンダリングされていることが確認できます^[Prerendering であるにも関わらず `Astro.request.headers` を使用しているため警告が表示されていますが、ここでは意図的にこうしているため無視してください。]:
+このコードをビルドすると、以下のようなログが表示され、ページが事前レンダリングされていることが確認できます^[Prerendering であるにも関わらず `Astro.request.headers` を使用しているため警告が表示されていますが、ここでは意図的にこうしているため無視してください。]:
 
 ```
  prerendering static routes 
@@ -581,7 +581,7 @@ await new Promise((resolve) => setTimeout(resolve, 1000));
 22:27:36   └─ /prerendering/index.html22:27:36 [WARN] `Astro.request.headers` was used when rendering the route `src/pages/prerendering.astro'`. `Astro.request.headers` is not available on prerendered pages. If you need access to request headers, make sure that the page is server-rendered using `export const prerender = false;` or by setting `output` to `"server"` in your Astro config to make all your pages server-rendered by default.
 ```
 
-Vercel 用のアダプターを指定しているため、ビルド結果はルートの `.vercel` ディレクトリに置かれますが、`.vercel/output/static/prerendering/index.html` にこのページに対応する HTML が生成されていることがわかります^[ここでは見やすさのためコードをフォーマットしていることに注意してください。]:
+Vercel 用のアダプターを指定しているため、ビルド結果はルートの `.vercel` ディレクトリに置かれます。このページに対応する以下の HTML は`.vercel/output/static/prerendering/index.html` に置かれます^[ここでは見やすさのためコードをフォーマットしていることに注意してください。]:
 
 ```html:.vercel/output/static/prerendering/index.html
 <!doctype html>
@@ -600,17 +600,19 @@ Vercel 用のアダプターを指定しているため、ビルド結果はル�
 </html>
 ```
 
-このコードをデプロイしたものは https://astro-server-islands-demo.vercel.app/static にありますが、実際にアクセスしてみると、https://nextjs-ppr-demo.vercel.app/static と同じ画面が表示され、Edge Cache からファイルが返却されていることを確認できます:
+このページは https://astro-server-islands-demo.vercel.app/static にデプロイされていますが、実際にアクセスしてみると、https://nextjs-ppr-demo.vercel.app/static とほぼ同じ画面が表示され、Edge Cache からファイルが返却されていることを確認できます:
 
 ![](/images/astro-server-islands-vs-nextjs-ppr/astro-server-islands-prerendering.png =202x)
 
-![](/images/astro-server-islands-vs-nextjs-ppr/prerendering-response.png)
+![](/images/astro-server-islands-vs-nextjs-ppr/prerendering-response.png =483x)
 
-また、返却された HTML は、上で示した内容と完全に一致していることも確認できます:
+また、返却された HTML が上で示した内容と完全に一致していることも確認できます:
 
-![](/images/astro-server-islands-vs-nextjs-ppr/prerendering-html.png)
+![](/images/astro-server-islands-vs-nextjs-ppr/prerendering-html.png =708x)
 
-#### On-demand Rendering
+Prerendering はページ全体をビルド時にレンダリングするためシンプルでわかりやすく、また表示速度の観点からも優れているため、Astro のデフォルトのレンダリング方式として選択されています。特に動的なコンテンツがないページであれば、積極的に Prerendering を使用することが好ましいでしょう。
+
+### On-demand Rendering
 
 On-demand Rendering は、Prerendering のように事前にページを生成せず、リクエスト時にサーバーサイドでページを動的にレンダリングします。Vercel 環境では Vercel Functions においてレンダリング処理が実行され、その結果が返却されます。ほぼ Next.js の Dynamic Rendering に対応しますが、以下で述べるように多少の相違点が存在します。
 
@@ -630,15 +632,15 @@ export const prerender = false;
 </Layout>
 ```
 
-上述のように、プロジェクトの `output` 設定値はデフォルトの `static` のままであるため、ここではそれをオプトアウトするために `prerender` 変数を `false` に設定しています。
+上述のように、このプロジェクトの `output` 設定値はデフォルトの `static` のままとしてあるため、ここではそれをオプトアウトするために `prerender` 変数を `false` に設定しています。
 
-Next.js の Dynamic Rendering では、ページ全体がレンダリングされてから結果が返却されていましたが、上のコードがデプロイされている https://astro-server-islands-demo.vercel.app/on-demand にアクセスすると、アクセス直後に
+ところで、Next.js の Dynamic Rendering では、ページ全体がレンダリングされてから結果が返却されていましたが、上のコードがデプロイされている https://astro-server-islands-demo.vercel.app/on-demand にアクセスすると、アクセス直後に
 
 ![](/images/astro-server-islands-vs-nextjs-ppr/astro-server-islands-on-demand-1.png =181x)
 
 とだけ表示され、約 1 秒後に SlowComponent が表示されます:
 
-![](/images/astro-server-islands-vs-nextjs-ppr/astro-server-islands-on-demand-2.png)
+![](/images/astro-server-islands-vs-nextjs-ppr/astro-server-islands-on-demand-2.png =604x)
 
 `curl -N https://astro-server-islands-demo.vercel.app/on-demand` によりレスポンスを確認すると、二段階に分けて HTML の内容が返却されていることがわかります:
 
@@ -682,11 +684,288 @@ await new Promise((resolve) => setTimeout(resolve, 1000)); // SlowComponent の�
 
 以上により、Astro の On-demand Rendering は Next.js の Dynamic Rendering と「リクエスト時にサーバーサイドでページを動的にレンダリングする」という点では共通しているものの、「ページ全体をストリーミングにより返却する」という点で異なることがわかりました。Astro の On-demand Rendering では、レンダリングをブロックする処理の場所を検討することで初期表示の最適化をおこなうことができるという点は、データ取得などの処理をどこでおこなうかといった設計に関わる重要なポイントとなるため、留意しておいたほうがいいでしょう。
 
-#### Server Islands
+### Server Islands
+
+誤解を恐れずに表現すれば、[Server Islands](https://docs.astro.build/en/guides/server-islands/) は Astro 版の PPR といえるでしょう。実際、Astro が実験的な機能として Server Islands を発表した [v4.12 のアナウンス記事](https://astro.build/blog/astro-4120/)では、Next.js の PPR のデモサイト
+
+https://www.partialprerendering.com/
+
+に対抗し
+
+https://server-islands.com/
+
+という Server Islands のデモサイトを公開したこと、また PPR と同等のパフォーマンスを Server Islands により達成可能であることなどが述べられています。同記事のなかで示されている Server Islands の概念図も、PPR のイメージとかなり似通っています:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/dark-mode-server-islands-diag.png)
+
+それでは、Server Islands は実際にはどのような機能なのでしょうか？Astro はこれまで [Islands Architecture](https://docs.astro.build/en/concepts/islands/) のもと、静的な HTML の中にインタラクティブなコンポーネントである Islands を配置することを可能としていました（以降はこの意味での Islands を、Server Islands と区別するために Client Islands と呼びます）。Astro v5 はこの Islands Architecture を拡張し、静的な HTML の中にサーバーサイドでレンダリングされる領域である Server Islands を指定できるようにし、静的なコンテンツのパフォーマンスと動的なコンテンツの柔軟性を両立させることを目指しています。
+
+Server Islands を使用するには、Client Islands において `client:load` などの [Client Directives](https://docs.astro.build/en/reference/directives-reference/#client-directives) を指定したのと同様に、`server:defer` という [Server Directives](https://docs.astro.build/en/reference/directives-reference/#server-directives) を指定するだけです。たとえば以下のように記述すれば、Avator コンポーネントは Server Island となります:
+
+```tsx
+<Avatar server:defer />
+```
+
+`server:defer` を指定することにより、このコンポーネントのレンダリングはリクエスト時まで遅延され、準備ができた段階でブラウザに送信されレンダリングされます。Server Islands の外部の領域はビルド時に静的にレンダリングされキャッシュ可能なため、初期表示速度がそこで担保される一方、Server Islands はリクエスト時にサーバーサイドでレンダリングされるため、リクエストごとに異なる動的なコンテンツを差し込むことが可能となるのです。
+
+具体的なコードを見てみましょう。以下は、これまで見てきたサンプルプロジェクトの Server Islands 版のコードです:
+
+```tsx:src/pages/server-islands.astro
+---
+import Layout from "../layouts/Layout.astro";
+import SlowComponent from "../components/SlowComponent.astro";
+---
+
+<Layout>
+  <h1>Server Islands</h1>
+  <SlowComponent server:defer>
+    <div slot="fallback">Loading...</div>
+  </SlowComponent>
+</Layout>
+```
+
+Prerendering 版のコードとは SlowComponent に `server:defer` を指定している点が異なります。これにより SlowComponent は Server Island であると認識されるため、ビルド時のレンダリングはスキップされ、リクエスト時にサーバーサイドでレンダリングされます。また、`<div slot="fallback">Loading...</div>` により、SlowComponent がレンダリングされるまでの間に表示されるフォールバックコンテンツを指定していますが、これは Suspense の `fallback` に相当するものと考えて問題ありません。
+
+続いてビルドログを確認してみると、このページがビルド時にレンダリングされていることがわかります:
+
+```
+ prerendering static routes 
+...
+22:31:26 ▶ src/pages/server-islands.astro
+22:31:26   └─ /server-islands/index.html (+3ms)
+```
+
+ここからが面白いところです。ビルドされたファイルをフォーマットした内容を見てみましょう:
+
+```html:.vercel/output/static/server-islands/index.html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content="Astro v5.0.3" />
+    <title>Astro Server Islands</title>
+  </head>
+  <body>
+    <h1>Server Islands</h1>
+    <!--[if astro]>server-island-start<![endif]-->
+    <div>Loading...</div>
+    <link
+      rel="preload"
+      as="fetch"
+      href="/_server-islands/SlowComponent?e=default&p=4715656EFC8F9ABA8394A7E66tVTwkwbW2qKx4C249Od5xBj&s=%7B%7D"
+      crossorigin="anonymous"
+    />
+    <script
+      async
+      type="module"
+      data-island-id="d0d13724-d8cd-4670-9cfd-4940b7188eff"
+    >
+      let script = document.querySelector(
+        'script[data-island-id="d0d13724-d8cd-4670-9cfd-4940b7188eff"]',
+      );
+
+      let response = await fetch(
+        "/_server-islands/SlowComponent?e=default&p=4715656EFC8F9ABA8394A7E66tVTwkwbW2qKx4C249Od5xBj&s=%7B%7D",
+      );
+
+      if (script) {
+        if (
+          response.status === 200 &&
+          response.headers.get("content-type") === "text/html"
+        ) {
+          let html = await response.text();
+
+          // Swap!
+          while (
+            script.previousSibling &&
+            script.previousSibling.nodeType !== 8 &&
+            script.previousSibling.data !==
+              "[if astro]>server-island-start<![endif]"
+          ) {
+            script.previousSibling.remove();
+          }
+          script.previousSibling?.remove();
+
+          let frag = document.createRange().createContextualFragment(html);
+          script.before(frag);
+        }
+        script.remove();
+      }
+    </script>
+  </body>
+</html>
+```
+
+まず、想定通り `<h1>` やフォールバックコンポーネントがレンダリングされていることがわかります。これにより、Edge Cache からこのファイルが返却された時点で、ブラウザにこれらの要素が描画されます:
+
+```html
+    <h1>Server Islands</h1>
+    <!--[if astro]>server-island-start<![endif]-->
+    <div>Loading...</div>
+```
+
+続いて以下の `<link>` により、SlowComponent に対応する Server Island を [`preload`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel/preload) していることがわかります。これにより、直後に Server Islands をリクエストするための準備をおこなっています:
+
+```html
+    <link
+      rel="preload"
+      as="fetch"
+      href="/_server-islands/SlowComponent?e=default&p=4715656EFC8F9ABA8394A7E66tVTwkwbW2qKx4C249Od5xBj&s=%7B%7D"
+      crossorigin="anonymous"
+    />
+```
+
+もっとも重要な `<script>` の中身を見てみましょう。このスクリプトは、上で `preload` した Server Island のレンダリング結果を受け取り（`let html = await response.text();`）、フォールバックコンテンツと置き換える処理（`script.previousSibling.remove();` や `script.before(frag);`）をおこなっています。簡単に言えば、フォールバックコンテンツを `<!--[if astro]>server-island-start<![endif]-->` と `<link>` に挟んでおいた上で、その間にある要素を削除し、代わりに Server Island のレンダリング結果を挿入するような処理をおこなっているようです:
+
+```html
+    <script
+      async
+      type="module"
+      data-island-id="d0d13724-d8cd-4670-9cfd-4940b7188eff"
+    >
+      let script = document.querySelector(
+        'script[data-island-id="d0d13724-d8cd-4670-9cfd-4940b7188eff"]',
+      );
+
+      let response = await fetch(
+        "/_server-islands/SlowComponent?e=default&p=4715656EFC8F9ABA8394A7E66tVTwkwbW2qKx4C249Od5xBj&s=%7B%7D",
+      );
+
+      if (script) {
+        if (
+          response.status === 200 &&
+          response.headers.get("content-type") === "text/html"
+        ) {
+          let html = await response.text();
+
+          // Swap!
+          while (
+            script.previousSibling &&
+            script.previousSibling.nodeType !== 8 &&
+            script.previousSibling.data !==
+              "[if astro]>server-island-start<![endif]"
+          ) {
+            script.previousSibling.remove();
+          }
+          script.previousSibling?.remove();
+
+          let frag = document.createRange().createContextualFragment(html);
+          script.before(frag);
+        }
+        script.remove();
+      }
+    </script>
+```
+
+PPR と比較して興味深い点は、Server Islands が初期表示とは別のリクエストにより再度取得されているということです。PPR では Streaming により初期表示用コンテンツと動的コンテンツを一度のリクエストで取得していましたが、Server Islands ではリクエストを分割しています。あとで再度述べますが、この点が PPR と Server Islands の決定的な違いとなります。
+
+さて、Server Islands に関するイメージが膨らんできたところで、実際にデプロイされたページ https://astro-server-islands-demo.vercel.app/server-islands にアクセスしてみましょう。アクセス直後は以下のような画面が表示されます:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/astro-server-islands-1.png =216x)
+
+この時点で、上に示した HTML がレンダリングされ、同時に SlowComponent とフォールバックコンポーネントを置き換えるためのスクリプトが実行されます。そして想定通り、約 1 秒後に SlowComponent が表示されます:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/astro-server-islands-2.png =603x)
+
+開発者ツールを確認すると、Edge Cache から HTML が高速に返却され、SlowComponent へのリクエストが別途発生していることがわかります:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/server-islands-response.png =679x)
+
+以上により、Server Islands は PPR と同様に静的なコンテンツを事前レンダリングしておき、動的なコンテンツを事前にマークしておいた箇所と差し替えるレンダリング方式であることが理解できたと思います。一方で、両者は動的なコンテンツのレンダリングを開始するタイミングが異なっているという点も確認しました。これらの共通点や相違点について、以下で再度整理していきましょう。
+
+### Server Islands vs Partial Prerendering
+
+これまでの議論のまとめとして、Server Islands と PPR を対比させて考察します。PPR の挙動についてまず振り返っておくと、レンダリングの流れは以下のようなものでした:
+
+1. Suspense 境界外部を事前にレンダリングし、Edge Cache に配置しておく
+2. リクエスト時に Edge Cache からキャッシュを返却し、同時に Suspense 境界内部のレンダリングを開始する
+3. レンダリングが完了したコンポーネントをクライアントにストリーミングする
+4. ストリーミングで返却されたコンポーネントを、フォールバックコンテンツと置き換える
+
+一方、Server Islands のレンダリングの流れを記述すると以下のようになります:
+
+1. Server Islands の外部を事前にレンダリングし、Edge Cache に配置しておく
+2. リクエスト時に Edge Cache からキャッシュを返却する
+3. キャッシュがブラウザにレンダリングされ、同時に Server Islands に対するリクエストを新規に送信する
+4. レンダリングが完了したコンポーネントを受け取り、フォールバックコンテンツと置き換える
+
+以下はこれらを図にしてまとめたものです:
+
+```mermaid
+---
+title: Partial Prerendering
+---
+graph RL
+    A[Client] -->|① ページアクセス| B[Edge]
+    B -->|② キャッシュ要求| C[Cache]
+    B -->|② レンダリング要求| D[Runtime]
+    C -->|③ キャッシュ返却| B
+    D -->|⑤ レンダリング結果返却| B
+    B -->|④⑥ ストリーム| A
+```
+
+```mermaid
+---
+title: Server Islands
+---
+graph RL
+    A[Client] -->|① ページアクセス| B[Edge]
+    B -->|② キャッシュ要求| C[Cache]
+    C -->|③ キャッシュ返却| B
+    B -->|④ キャッシュ返却| A
+    A -->|⑤ Island 要求| B
+    B -->|⑥ Island レンダリング要求| D[Runtime]
+    D -->|⑦ Island 返却| B
+    B -->|⑧ Island 返却| A
+```
+
+以上の説明から、Server Islands と PPR は以下のような共通点と相違点をもつことがわかります:
+
+- 共通点
+  - 事前に静的なコンテンツを生成し、それをキャッシュしておく
+  - 静的なコンテンツには、動的なコンテンツを表示するための領域がマークされている
+  - サーバーサイドで生成されたコンテンツを、マークしておいた領域と最終的に置き換える
+- 相違点
+  - PPR では、キャッシュを返すと同時に動的なコンテンツのレンダリングを開始し、ストリーミングで返却する
+  - Server Islands では、返却されたコンテンツをレンダリングしたのち、再度別のリクエストを送信して動的なコンテンツを取得する
+
+このように Server Islands は、動的なコンテンツを取得する主体がブラウザであるという点が PPR と決定的に異なっています。このことは、Server Islands が
+
+- 動的なコンテンツのレンダリング開始タイミングが遅れる
+- サーバーへのリクエスト数が増加する
+
+といった点において PPR に劣るということを意味するでしょう。しかし一方、PPR の「キャッシュを返しつつ動的なコンテンツのレンダリングを開始する」という挙動を実現可能なデプロイ環境は限定的であるのに対し、Server Islands は単に連続してリクエストを送信しているだけであり、複雑なインフラの整備は不要であるため、よりポータビリティに優れているといえるでしょう。こうした議論から、PPR と Server Islands という両レンダリングモデルは「パフォーマンスとポータビリティのトレードオフの関係」にあり、似た技術ではあるもののどちらが優れているとは単純には結論できないことがわかります。
 
 :::message
-従来の Client Island はレンダリングではなくインタラクションに関わるものであり、軸が異なるという考察
+従来の Client Islands を議論の俎上に載せていないことを不思議に思う人もいるかも知れませんが、Client Islands はレンダリングというよりもインタラクションに関わるものであり、不要な JS の読み込みを避けることを主目的としているため、Server Islands とは異なる軸で議論されるべきものであると考えられます。この点については、[akfm_sato](https://zenn.dev/akfm) 氏の『[PPRはアイランドアーキテクチャなのか](https://zenn.dev/akfm/articles/ppr-vs-islands-architecture)』に詳しい説明があるため、興味のある方はそちらも参照してみてください。
 :::
+
+### おまけ: On-demand Rendering + Server Islands
+
+Server Islands は静的なコンテンツをキャッシュするものであると上で述べましたが、実は Server Islands を乗せるページを動的にレンダリングすることも不可能ではありません。以下がそれをおこなうコードです:
+
+```tsx:src/pages/on-demand-server-islands.astro
+---
+import Layout from "../layouts/Layout.astro";
+import SlowComponent from "../components/SlowComponent.astro";
+
+export const prerender = false;
+---
+
+<Layout>
+  <h1>On Demand + Server Islands</h1>
+  <SlowComponent server:defer />
+</Layout>
+```
+
+`prerender` を `false` に設定し、かつ SlowComponent に `server:defer` を設定しています。このようにすれば、まず Server Islands の外部をリクエスト時にレンダリングし、さらに Server Islands をサーバーサイドでレンダリングすることが可能となります。このページは https://astro-server-islands-demo.vercel.app/on-demand-server-islands にデプロイされていますが、ここにアクセスすると実際に二段階のレンダリングがサーバーサイドでおこなわれます:
+
+![](/images/astro-server-islands-vs-nextjs-ppr/on-demand-server-islands-vercel-1.png =396x)
+![](/images/astro-server-islands-vs-nextjs-ppr/on-demand-server-islands-vercel-2.png =396x)
+
+Prerendering と On-demand Rendering のいずれにおいても Server Islands を使用できることを示すためここで触れましたが、メインの用途ではないと思われるため、ここでは簡単な紹介に留めておきます。エスケープハッチとしてこういった使い方も可能であることを覚えておくとよいでしょう。
 
 
 ## おわりに
