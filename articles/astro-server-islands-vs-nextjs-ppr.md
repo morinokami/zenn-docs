@@ -3,7 +3,7 @@ title: "Next.js PPR と比較して理解する Astro Server Islands"
 emoji: "🎛️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["astro", "nextjs", "react"]
-published: false
+published: true
 ---
 
 ## はじめに
