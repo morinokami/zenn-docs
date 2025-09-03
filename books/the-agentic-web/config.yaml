@@ -1,17 +1,19 @@
 title: "[wip] AI と Web"
 summary: |
   ここ数年の AI の進化により、Web はそのかたちを大きく変え始めています。Web 上での主体は人間からエージェントへと置き換わり、タスクは人間の手によってではなく自律的な複数のエージェントの共同作業によって遂行され、Web において消費されるコンテンツもまた LLM による動的な生成物の比重が高まっています。Tim O'Reilly の言葉を言い換えれば、この状況を The End of the Web as We Know It と呼ぶことができるかもしれません。
-  この書籍は、こうして現在進行形で変化しつづける Web のすがたを観察するなかで、特に重要であると筆者が感じたトピックについてまとめたものです。この変化の終わりがいつ訪れるかわからないため、あえて未完成な状態のまま公開し、少しずつ記事を追加していくことを目指します。
+  本書は、こうして現在進行形で変化しつづける Web のすがたを観察するなかで、特に重要であると筆者が感じたトピックについてまとめたものです。この変化の終わりがいつ訪れるかわからないため、あえて未完成な状態のまま公開し、少しずつ記事を追加していくことを目指します。
 topics: ["ai", "web"]
 published: false
-price: 0 
+price: 0
 chapters:
   - llms-txt
   - ai-robots-txt
+  - nlweb
+  - webmcp
   - pay-per-crawl
   - mcp
   - a2a
-  - nlweb
+  - agent-as-user
   - built-in-ai
   - ai-powered-web-browser
   - lightpanda
