@@ -1,0 +1,23 @@
+{
+  "name": "chibivoid",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./kv": "./src/runtime/kv.ts",
+    "./client": "./src/runtime/fetch.ts",
+    "./routes": "./src/runtime/routes.ts",
+    "./pages": "./src/pages/index.ts",
+    "./pages-protocol": "./src/pages/protocol.ts",
+    "./pages-client": "./src/pages/client.ts",
+    "./runtime/*": "./src/runtime/*.ts"
+  },
+  "dependencies": {
+    "@cloudflare/vite-plugin": "^1.67.0",
+    "hono": "^4.13.16"
+  },
+  "peerDependencies": {
+    "vite": "^8.0.0"
+  }
+}

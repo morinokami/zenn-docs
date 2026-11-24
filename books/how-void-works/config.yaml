@@ -1,0 +1,20 @@
+title: "作って学ぶ Void のしくみ"
+summary: "Void は、Vite を土台にした Cloudflare Workers 向けのフルスタックフレームワークです。本書では、Void のコアとなるしくみだけをもつ小さなクローン chibivoid を、手を動かしながらゼロから作り、Void の便利さの裏側で何が起きているのかについて学びます。"
+topics: [void, vite, cloudflare, cloudflareworkers, hono]
+published: false
+price: 0
+chapters:
+  - 00-introduction
+  - 01-vite-basics
+  - 02-cloudflare-workers
+  - 03-skeleton
+  - 04-server-routing
+  - 05-dev-server
+  - 06-resource-inference
+  - 07-pages-ssr
+  - 08-hydration-navigation
+  - 09-actions-forms
+  - 10-type-safety
+  - 11-build-deploy
+  - 12-conclusion
+  - glossary

@@ -1,0 +1,100 @@
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { normalizePath, type Plugin } from 'vite';
+import { compileRouteTable } from './router/compile.ts';
+import { scanApp, type ProjectPaths, type ScanResult } from './router/scan.ts';
+
+const VIRTUAL_ROUTES_ID = 'virtual:chibivoid-routes';
+const RESOLVED_VIRTUAL_ROUTES_ID = '\0' + VIRTUAL_ROUTES_ID;
+
+/** Worker で使う軽量なランタイム（defineHandler など）の実ファイル */
+const HANDLER_PATH = fileURLToPath(new URL('./runtime/handler.ts', import.meta.url));
+
+/**
+ * ファイルベースルーティングを担当するプラグイン。
+ * - routes/、middleware/ をスキャンする
+ * - スキャン結果から仮想モジュール `virtual:chibivoid-routes`（Hono アプリ）を生成する
+ * - ファイルの変更を監視して、スキャン結果が変わった場合は仮想モジュールを作り直す
+ */
+export function routingPlugin(root: string): Plugin {
+  const paths: ProjectPaths = {
+    routesDir: normalizePath(join(root, 'routes')),
+    middlewareDir: normalizePath(join(root, 'middleware')),
+  };
+  let scan: ScanResult | undefined;
+  let dev = false;
+
+  function rescan(): ScanResult {
+    scan = scanApp(paths);
+    return scan;
+  }
+
+  return {
+    name: 'chibivoid:routing',
+    // Vite 本体の解決処理より先に動いてほしいため 'pre'
+    enforce: 'pre',
+
+    config(_config, env) {
+      // `vite dev` の場合だけ true（`vite preview` は本番ビルドを動かすため false）
+      dev = env.command === 'serve' && !env.isPreview;
+    },
+
+    buildStart() {
+      rescan();
+    },
+
+    resolveId(id) {
+      if (id === VIRTUAL_ROUTES_ID) {
+        return RESOLVED_VIRTUAL_ROUTES_ID;
+      }
+      // `import { defineHandler } from 'chibivoid'` は Vite プラグイン本体（index.ts）を指す。
+      // そのまま Worker にバンドルすると vite や wrangler まで引き込んでしまうため、
+      // サーバー側の環境では軽量な runtime/handler.ts に差し替える。
+      if (id === 'chibivoid' && this.environment.config.consumer === 'server') {
+        return HANDLER_PATH;
+      }
+    },
+
+    load(id) {
+      if (id !== RESOLVED_VIRTUAL_ROUTES_ID) {
+        return;
+      }
+      if (this.environment.config.consumer === 'client') {
+        throw new Error(`${VIRTUAL_ROUTES_ID} はサーバー専用のモジュールです`);
+      }
+      return compileRouteTable(scan ?? rescan(), { ...paths, dev });
+    },
+
+    configureServer(server) {
+      const watched = [paths.routesDir, paths.middlewareDir];
+      const isWatched = (file: string) => watched.some((dir) => file.startsWith(dir + '/'));
+
+      const onFileEvent = (rawFile: string) => {
+        const file = normalizePath(rawFile);
+        if (!isWatched(file)) {
+          return;
+        }
+        // スキャン結果が変わった場合だけ仮想モジュールを作り直す。
+        // （ハンドラーの中身を書き換えただけなら、Vite の通常の HMR に任せる）
+        const before = JSON.stringify(scan);
+        const after = JSON.stringify(rescan());
+        if (before === after) {
+          return;
+        }
+        for (const environment of Object.values(server.environments)) {
+          const mod = environment.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ROUTES_ID);
+          if (mod) {
+            environment.moduleGraph.invalidateModule(mod);
+          }
+          // Worker 側のモジュールランナーとブラウザの両方に「全部読み直して」と伝える
+          environment.hot.send({ type: 'full-reload' });
+        }
+        server.config.logger.info(`[chibivoid] ルートを再生成しました`, { timestamp: true });
+      };
+
+      server.watcher.on('add', onFileEvent);
+      server.watcher.on('unlink', onFileEvent);
+      server.watcher.on('change', onFileEvent);
+    },
+  };
+}
