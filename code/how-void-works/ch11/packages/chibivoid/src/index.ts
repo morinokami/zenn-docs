@@ -2,7 +2,6 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { cloudflare } from '@cloudflare/vite-plugin';
 import type { Plugin } from 'vite';
-import { readLockFile } from './cli/lock.ts';
 import { inferProjectBindings } from './inference/walk.ts';
 import { routingPlugin } from './plugin-routing.ts';
 import { compileWorkerEntry } from './router/compile.ts';
@@ -26,8 +25,6 @@ export function chibivoidPlugin(): Plugin[] {
 
   // ソースコードを静的解析して、必要な Cloudflare リソースを推論する
   const bindings = inferProjectBindings(root);
-  // `chibivoid deploy` が作成したリソースの ID
-  const lock = readLockFile(root);
 
   return [
     routingPlugin(root),
@@ -39,10 +36,8 @@ export function chibivoidPlugin(): Plugin[] {
         name: readWorkerName(root),
         main: entryPath,
         compatibility_date: '2026-10-01',
-        // Worker から静的アセット（マニフェストなど）を読むための ASSETS バインディング
-        assets: { binding: 'ASSETS' },
         // `chibivoid/kv` が使われていれば KV バインディングを追加する
-        kv_namespaces: bindings.needsKV ? [{ binding: 'KV', id: lock.kv?.id ?? 'local' }] : [],
+        kv_namespaces: bindings.needsKV ? [{ binding: 'KV', id: 'local' }] : [],
       },
     }),
   ];

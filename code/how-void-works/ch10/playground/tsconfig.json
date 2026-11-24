@@ -13,5 +13,5 @@
     "erasableSyntaxOnly": true,
     "types": ["node"]
   },
-  "include": ["routes", "middleware", "pages", "src", "vite.config.ts", "../packages", ".chibivoid/*.d.ts"]
+  "include": ["routes", "middleware", "pages", "src", "vite.config.ts", "../packages"]
 }

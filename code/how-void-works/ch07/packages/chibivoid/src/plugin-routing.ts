@@ -12,7 +12,7 @@ const HANDLER_PATH = fileURLToPath(new URL('./runtime/handler.ts', import.meta.u
 
 /**
  * ファイルベースルーティングを担当するプラグイン。
- * - routes/、middleware/、pages/ をスキャンする
+ * - routes/、middleware/ をスキャンする
  * - スキャン結果から仮想モジュール `virtual:chibivoid-routes`（Hono アプリ）を生成する
  * - ファイルの変更を監視して、スキャン結果が変わった場合は仮想モジュールを作り直す
  */
@@ -20,7 +20,6 @@ export function routingPlugin(root: string): Plugin {
   const paths: ProjectPaths = {
     routesDir: normalizePath(join(root, 'routes')),
     middlewareDir: normalizePath(join(root, 'middleware')),
-    pagesDir: normalizePath(join(root, 'pages')),
   };
   let scan: ScanResult | undefined;
   let dev = false;
@@ -67,7 +66,7 @@ export function routingPlugin(root: string): Plugin {
     },
 
     configureServer(server) {
-      const watched = [paths.routesDir, paths.middlewareDir, paths.pagesDir];
+      const watched = [paths.routesDir, paths.middlewareDir];
       const isWatched = (file: string) => watched.some((dir) => file.startsWith(dir + '/'));
 
       const onFileEvent = (rawFile: string) => {
@@ -76,7 +75,7 @@ export function routingPlugin(root: string): Plugin {
           return;
         }
         // スキャン結果が変わった場合だけ仮想モジュールを作り直す。
-        // （コンポーネントやハンドラーの中身を書き換えただけなら、Vite の通常の HMR に任せる）
+        // （ハンドラーの中身を書き換えただけなら、Vite の通常の HMR に任せる）
         const before = JSON.stringify(scan);
         const after = JSON.stringify(rescan());
         if (before === after) {

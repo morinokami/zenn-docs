@@ -6,8 +6,6 @@
   "exports": {
     ".": "./src/index.ts",
     "./kv": "./src/runtime/kv.ts",
-    "./client": "./src/runtime/fetch.ts",
-    "./routes": "./src/runtime/routes.ts",
     "./pages": "./src/pages/index.ts",
     "./pages-protocol": "./src/pages/protocol.ts",
     "./pages-client": "./src/pages/client.ts",

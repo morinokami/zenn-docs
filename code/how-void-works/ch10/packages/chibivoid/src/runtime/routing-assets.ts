@@ -10,7 +10,7 @@ const CLIENT_ENTRY_ID = 'virtual:chibivoid-pages-client';
 export function createPagesAssetTags(options: { dev: boolean }) {
   return async (_request: Request, _env: unknown): Promise<AssetTags> => {
     if (!options.dev) {
-      // 本番ビルドへの対応は第 11 章でおこなう
+      // 本番ビルドへの対応は第 12 章でおこなう
       return { head: '', body: '' };
     }
     return {

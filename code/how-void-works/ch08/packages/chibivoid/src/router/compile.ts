@@ -32,7 +32,7 @@ export default {
 export function compileRouteTable(scan: ScanResult, options: CompileOptions): string {
   const imports: string[] = [
     `import { Hono } from "hono";`,
-    `import { createModuleLoader, createHttpRouteHandler, createPageGetHandler, createPagesAssetTags } from "chibivoid/runtime/routing";`,
+    `import { createModuleLoader, createHttpRouteHandler, createPageGetHandler } from "chibivoid/runtime/routing";`,
   ];
   const body: string[] = ['const app = new Hono();'];
   // 本番ではロードしたモジュールをキャッシュし、開発中は毎回インポートし直す
@@ -72,8 +72,8 @@ function compilePageRoutes(
 ): void {
   // ページの描画方法はフレームワークアダプター（@chibivoid/react など）が提供する
   imports.push(`import { renderPage } from "virtual:chibivoid-pages-renderer";`);
-  // HTML に差し込むタグ（クライアントの JavaScript など）
-  body.push(`const getAssetTags = createPagesAssetTags({ dev: ${options.dev} });`);
+  // HTML に差し込むタグ（クライアントの JavaScript など）。今はまだ空（第 9 章で埋める）
+  body.push(`const getAssetTags = async () => ({ head: "", body: "" });`);
 
   pages.pages.forEach((page, i) => {
     let load = 'undefined';

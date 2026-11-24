@@ -1,5 +1,4 @@
 import { join } from 'node:path';
-import { scanPages, type PageScanResult } from '../pages/scan.ts';
 import { listFiles } from '../shared/list-files.ts';
 import { detectHttpExports } from './detect-exports.ts';
 import { parseRouteFilename, ROUTE_FILE_RE, type RouteDefinition } from './parse-filename.ts';
@@ -8,7 +7,6 @@ import { compareRouteSpecificity } from './route-order.ts';
 export type ProjectPaths = {
   routesDir: string;
   middlewareDir: string;
-  pagesDir: string;
 };
 
 export type MiddlewareDefinition = {
@@ -19,7 +17,6 @@ export type MiddlewareDefinition = {
 export type ScanResult = {
   routes: RouteDefinition[];
   middleware: MiddlewareDefinition[];
-  pages: PageScanResult;
 };
 
 /** routes/ をスキャンして、ルート定義の一覧を、より具体的なルートが先に来るように並べて返す */
@@ -44,6 +41,5 @@ export function scanApp(paths: ProjectPaths): ScanResult {
   return {
     routes: scanRoutes(paths.routesDir),
     middleware: scanMiddleware(paths.middlewareDir),
-    pages: scanPages(paths.pagesDir),
   };
 }

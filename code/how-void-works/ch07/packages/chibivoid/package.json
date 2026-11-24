@@ -6,8 +6,6 @@
   "exports": {
     ".": "./src/index.ts",
     "./kv": "./src/runtime/kv.ts",
-    "./pages": "./src/pages/index.ts",
-    "./pages-protocol": "./src/pages/protocol.ts",
     "./runtime/*": "./src/runtime/*.ts"
   },
   "dependencies": {

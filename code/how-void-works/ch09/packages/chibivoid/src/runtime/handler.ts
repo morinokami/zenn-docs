@@ -25,7 +25,7 @@ export type CloudContext = Context<{ Bindings: CloudBindings }>;
 export type TypedHandler<R> = ((c: CloudContext) => unknown) & { readonly __output: R };
 
 /**
- * ルートハンドラー、loader、action を定義する。
+ * ルートハンドラー・loader を定義する。
  * 実行時は何もしない恒等関数で、型を付けるためだけに存在する。
  */
 export function defineHandler<R>(
@@ -43,14 +43,3 @@ export function defineMiddleware(
 
 /** loader の戻り値の型を取り出す: `type Props = InferProps<typeof loader>` */
 export type InferProps<T> = T extends { readonly __output: infer R } ? R : never;
-
-/** action から投げると、フォームにフィールドごとのエラーを返すことができる */
-export class ValidationError extends Error {
-  readonly errors: Record<string, string>;
-
-  constructor(errors: Record<string, string>) {
-    super('Validation failed');
-    this.name = 'ValidationError';
-    this.errors = errors;
-  }
-}

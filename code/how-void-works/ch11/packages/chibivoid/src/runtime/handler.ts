@@ -12,7 +12,6 @@ export type KVNamespaceLike = {
 /** Worker に渡される `env`（バインディング）の型 */
 export type CloudBindings = {
   KV: KVNamespaceLike;
-  ASSETS: { fetch(request: Request | string): Promise<Response> };
   [key: string]: unknown;
 };
 

@@ -2,15 +2,12 @@ import { normalizePath, type Plugin, type UserConfig } from 'vite';
 import { scanPages, type PageScanResult } from './scan.ts';
 
 export const RENDERER_ID = 'virtual:chibivoid-pages-renderer';
-export const CLIENT_ENTRY_ID = 'virtual:chibivoid-pages-client';
 
 type CreatePagesPluginOptions = {
   /** プラグイン名。例: "chibivoid-react:pages" */
   name: string;
   /** サーバーで HTML を描画する仮想モジュールのコードを返す */
   generateRenderer: (scan: PageScanResult, isDev: boolean) => string;
-  /** ブラウザ用のエントリのコードを返す */
-  generateClient: (scan: PageScanResult) => string;
   /** フレームワークごとの Vite 設定 */
   config?: (context: { isDev: boolean }) => UserConfig | undefined;
 };
@@ -38,7 +35,7 @@ export function createPagesPlugin(pagesDir: string, options: CreatePagesPluginOp
     },
 
     resolveId(id) {
-      if (id === RENDERER_ID || id === CLIENT_ENTRY_ID) {
+      if (id === RENDERER_ID) {
         return '\0' + id;
       }
     },
@@ -47,24 +44,19 @@ export function createPagesPlugin(pagesDir: string, options: CreatePagesPluginOp
       if (id === '\0' + RENDERER_ID) {
         return options.generateRenderer(scan, isDev);
       }
-      if (id === '\0' + CLIENT_ENTRY_ID) {
-        return options.generateClient(scan);
-      }
     },
 
     configureServer(server) {
-      // ページが追加・削除された場合は、2 つの仮想モジュールを作り直してもらう
+      // ページが追加・削除された場合は、仮想モジュールを作り直してもらう
       const onStructureChange = (file: string) => {
         if (!normalizePath(file).startsWith(normalizedPagesDir + '/')) {
           return;
         }
         scan = scanPages(pagesDir);
         for (const environment of Object.values(server.environments)) {
-          for (const id of ['\0' + RENDERER_ID, '\0' + CLIENT_ENTRY_ID]) {
-            const mod = environment.moduleGraph.getModuleById(id);
-            if (mod) {
-              environment.moduleGraph.invalidateModule(mod);
-            }
+          const mod = environment.moduleGraph.getModuleById('\0' + RENDERER_ID);
+          if (mod) {
+            environment.moduleGraph.invalidateModule(mod);
           }
         }
       };

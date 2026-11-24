@@ -1,7 +1,7 @@
-// サーバーでの描画とブラウザでのハイドレーションの両方で使う、ページの組み立て部分。
+// ページの組み立て部分。第 9 章ではブラウザでのハイドレーションにも使う。
 import type { ComponentType, ReactNode } from 'react';
-import type { PageObject, Router } from 'chibivoid/pages-client';
-import { PageContext, RouterContext } from './context.ts';
+import type { PageObject } from 'chibivoid/pages-protocol';
+import { PageContext } from './context.ts';
 
 type ComponentModule = { default: ComponentType<any> };
 export type ComponentMap = Record<string, () => Promise<ComponentModule>>;
@@ -34,16 +34,12 @@ export async function loadPageModules(
 }
 
 /** <Layout><Layout><Page {...props} /></Layout></Layout> を組み立てる */
-export function PageView(props: { page: PageObject; modules: PageModules; router: Router | null }) {
-  const { page, modules, router } = props;
+export function PageView(props: { page: PageObject; modules: PageModules }) {
+  const { page, modules } = props;
   let element: ReactNode = <modules.Page {...page.props} />;
   // 内側のレイアウトから順に包んでいく
   for (const Layout of [...modules.layouts].reverse()) {
     element = <Layout>{element}</Layout>;
   }
-  return (
-    <RouterContext value={router}>
-      <PageContext value={page}>{element}</PageContext>
-    </RouterContext>
-  );
+  return <PageContext value={page}>{element}</PageContext>;
 }

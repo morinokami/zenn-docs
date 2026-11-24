@@ -1,5 +1,4 @@
 import type { Context } from 'hono';
-import { ValidationError } from '../runtime/handler.ts';
 
 /**
  * サーバーからクライアントへ渡す「ページオブジェクト」。
@@ -14,8 +13,6 @@ export type PageObject = {
   params: Record<string, string>;
   /** このページの URL（パス + クエリ） */
   url: string;
-  /** action のバリデーションエラー（フィールド名 → メッセージ） */
-  errors: Record<string, string> | null;
 };
 
 /** HTML に差し込む <script> などのタグ */
@@ -87,7 +84,6 @@ function createPageObject(
   c: Context,
   componentId: string,
   props: Record<string, unknown>,
-  errors: Record<string, string> | null,
 ): PageObject {
   const url = new URL(c.req.url);
   return {
@@ -95,7 +91,6 @@ function createPageObject(
     props,
     params: c.req.param(),
     url: url.pathname + url.search,
-    errors,
   };
 }
 
@@ -109,50 +104,5 @@ export async function handlePageGet(
   if (props instanceof Response) {
     return props;
   }
-  return respondWithPage(c, createPageObject(c, options.componentId, props, null), options);
-}
-
-/**
- * POST などの変更リクエスト: action を実行し、
- * - Response（リダイレクトなど）が返された場合はそれを返す
- * - ValidationError が投げられた場合は、loader をもう一度実行して、エラー付きでページを返す
- * - それ以外は loader をもう一度実行して、最新の props でページを返す
- */
-export async function handlePageMutation(
-  action: PageHandler,
-  loader: PageHandler | undefined,
-  c: Context,
-  options: PageRouteOptions,
-): Promise<Response> {
-  if (!isSameOrigin(c.req.raw)) {
-    return new Response('Cross-origin page actions are not allowed.', { status: 403 });
-  }
-  let errors: Record<string, string> | null = null;
-  try {
-    const result = await action(c);
-    if (result instanceof Response) {
-      return result;
-    }
-  } catch (error) {
-    if (!(error instanceof ValidationError)) {
-      throw error;
-    }
-    errors = error.errors;
-  }
-  const props = await runLoader(loader, c);
-  if (props instanceof Response) {
-    return props;
-  }
-  const pageObj = createPageObject(c, options.componentId, props, errors);
-  return respondWithPage(c, pageObj, options);
-}
-
-/** 別サイトのページから勝手にフォームを送信させる攻撃（CSRF）を防ぐ */
-function isSameOrigin(request: Request): boolean {
-  const origin = request.headers.get('Origin');
-  if (origin !== null) {
-    return origin === new URL(request.url).origin;
-  }
-  const site = request.headers.get('Sec-Fetch-Site');
-  return !site || site === 'same-origin' || site === 'none';
+  return respondWithPage(c, createPageObject(c, options.componentId, props), options);
 }

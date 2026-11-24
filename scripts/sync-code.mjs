@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // books/*/*.md の中のマーカーに、code/ 以下の実ファイルの内容（または差分）を流し込む。
 //
-//   <!-- file: code/how-void-works/ch04/packages/chibivoid/src/router/parse-filename.ts -->
+//   <!-- file: code/how-void-works/ch05/packages/chibivoid/src/router/parse-filename.ts -->
 //   <!-- /file -->
 //     → ファイル全体をコードブロックとして埋め込む（#L10-L20 で行範囲も指定できる）
 //
-//   <!-- diff: code/how-void-works/ch04/playground/vite.config.ts code/how-void-works/ch07/playground/vite.config.ts -->
+//   <!-- diff: code/how-void-works/ch05/playground/vite.config.ts code/how-void-works/ch08/playground/vite.config.ts -->
 //   <!-- /diff -->
 //     → 2 つのファイルの差分を diff コードブロックとして埋め込む
 //
@@ -34,7 +34,7 @@ const LANGUAGES = {
   '.txt': 'text',
 };
 
-/** "code/how-void-works/ch04/packages/chibivoid/src/x.ts" → "packages/chibivoid/src/x.ts" */
+/** "code/how-void-works/ch05/packages/chibivoid/src/x.ts" → "packages/chibivoid/src/x.ts" */
 function displayPath(path) {
   return path.replace(/^code\/[^/]+\/ch\d+\//, '');
 }

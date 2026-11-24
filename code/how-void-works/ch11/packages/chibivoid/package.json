@@ -3,9 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "bin": {
-    "chibivoid": "./src/cli/cli.ts"
-  },
   "exports": {
     ".": "./src/index.ts",
     "./kv": "./src/runtime/kv.ts",

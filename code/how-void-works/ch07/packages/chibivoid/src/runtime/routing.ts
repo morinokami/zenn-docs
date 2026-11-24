@@ -1,6 +1,5 @@
 // 生成されたルートテーブル（virtual:chibivoid-routes）と Worker エントリから呼ばれる実行時の関数。
 import type { Context, ExecutionContext, Hono } from 'hono';
-import { handlePageGet, type PageHandler, type PageRouteOptions } from '../pages/protocol.ts';
 import { withRuntimeEnv } from './env.ts';
 import { convertReturnValue } from './response.ts';
 
@@ -30,21 +29,6 @@ export function createHttpRouteHandler(load: () => Promise<RouteModule>, method:
       return c.text('Method Not Allowed', 405);
     }
     return convertReturnValue(await handler(c));
-  };
-}
-
-type PageServerModule = { loader?: PageHandler };
-
-type PageRouteConfig = PageRouteOptions & {
-  /** `.server.ts` を読み込む関数（なければ undefined） */
-  load?: () => Promise<PageServerModule>;
-};
-
-/** ページの GET ハンドラー */
-export function createPageGetHandler(config: PageRouteConfig) {
-  return async (c: Context): Promise<Response> => {
-    const mod = config.load ? await config.load() : {};
-    return handlePageGet(mod.loader, c, config);
   };
 }
 

@@ -37,13 +37,7 @@ export function compileRouteTable(scan: ScanResult, options: CompileOptions): st
   // 本番ではロードしたモジュールをキャッシュし、開発中は毎回インポートし直す
   const cache = !options.dev;
 
-  // 1. グローバルミドルウェア: すべてのリクエストで動くため、最初に読み込んで登録する
-  scan.middleware.forEach((middleware, i) => {
-    imports.push(`import middleware${i} from ${str(`${options.middlewareDir}/${middleware.filePath}`)};`);
-    body.push(`app.use(middleware${i});`);
-  });
-
-  // 2. サーバールート: ファイルは「最初にリクエストが来た際」に読み込む（遅延ロード）
+  // サーバールート: ファイルは「最初にリクエストが来た際」に読み込む（遅延ロード）
   scan.routes.forEach((route, i) => {
     const loader = `loadRoute${i}`;
     const file = `${options.routesDir}/${route.filePath}`;

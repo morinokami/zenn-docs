@@ -2,7 +2,6 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { cloudflare } from '@cloudflare/vite-plugin';
 import type { Plugin } from 'vite';
-import { inferProjectBindings } from './inference/walk.ts';
 import { routingPlugin } from './plugin-routing.ts';
 import { compileWorkerEntry } from './router/compile.ts';
 
@@ -23,9 +22,6 @@ export function chibivoidPlugin(): Plugin[] {
   const entryPath = join(outDir, 'entry.ts');
   writeFileSync(entryPath, compileWorkerEntry());
 
-  // ソースコードを静的解析して、必要な Cloudflare リソースを推論する
-  const bindings = inferProjectBindings(root);
-
   return [
     routingPlugin(root),
     ...cloudflare({
@@ -36,8 +32,6 @@ export function chibivoidPlugin(): Plugin[] {
         name: readWorkerName(root),
         main: entryPath,
         compatibility_date: '2026-10-01',
-        // `chibivoid/kv` が使われていれば KV バインディングを追加する
-        kv_namespaces: bindings.needsKV ? [{ binding: 'KV', id: 'local' }] : [],
       },
     }),
   ];

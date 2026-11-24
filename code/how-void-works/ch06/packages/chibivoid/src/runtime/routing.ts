@@ -1,6 +1,5 @@
 // 生成されたルートテーブル（virtual:chibivoid-routes）と Worker エントリから呼ばれる実行時の関数。
 import type { Context, ExecutionContext, Hono } from 'hono';
-import { withRuntimeEnv } from './env.ts';
 import { convertReturnValue } from './response.ts';
 
 type RouteModule = Record<string, ((c: Context) => unknown) | undefined>;
@@ -34,13 +33,9 @@ export function createHttpRouteHandler(load: () => Promise<RouteModule>, method:
 
 type WorkerEnv = Record<string, unknown>;
 
-/**
- * Hono アプリを Workers の `fetch` ハンドラーに変換する。
- * リクエストの処理全体を withRuntimeEnv で包むことで、
- * `chibivoid/kv` などがどこからでも今のリクエストの env を読むことができるようになる。
- */
+/** Hono アプリを Workers の `fetch` ハンドラーに変換する */
 export function createWorkerFetch(app: Hono) {
   return (request: Request, env: WorkerEnv, ctx: ExecutionContext): Promise<Response> => {
-    return withRuntimeEnv(env, async () => app.fetch(request, env, ctx));
+    return Promise.resolve(app.fetch(request, env, ctx));
   };
 }

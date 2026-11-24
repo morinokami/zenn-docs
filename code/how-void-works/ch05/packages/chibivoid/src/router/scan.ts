@@ -6,17 +6,10 @@ import { compareRouteSpecificity } from './route-order.ts';
 
 export type ProjectPaths = {
   routesDir: string;
-  middlewareDir: string;
-};
-
-export type MiddlewareDefinition = {
-  /** middleware/ からの相対パス。例: "01.logger.ts" */
-  filePath: string;
 };
 
 export type ScanResult = {
   routes: RouteDefinition[];
-  middleware: MiddlewareDefinition[];
 };
 
 /** routes/ をスキャンして、ルート定義の一覧を、より具体的なルートが先に来るように並べて返す */
@@ -30,16 +23,8 @@ export function scanRoutes(routesDir: string): RouteDefinition[] {
     .sort(compareRouteSpecificity);
 }
 
-/** middleware/ をスキャンする。`01.logger.ts` のような数字の接頭辞の順に並べる */
-export function scanMiddleware(middlewareDir: string): MiddlewareDefinition[] {
-  return listFiles(middlewareDir)
-    .filter((file) => ROUTE_FILE_RE.test(file) && !file.includes('/'))
-    .map((filePath) => ({ filePath }));
-}
-
 export function scanApp(paths: ProjectPaths): ScanResult {
   return {
     routes: scanRoutes(paths.routesDir),
-    middleware: scanMiddleware(paths.middlewareDir),
   };
 }

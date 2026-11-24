@@ -49,5 +49,5 @@ export function readWorkerName(root: string): string {
 
 // アプリのコードから `import { defineHandler } from 'chibivoid'` と記述することができるように再エクスポートする。
 // （Worker の中ではこの index.ts ではなく runtime/handler.ts に差し替えられる）
-export { defineHandler, defineMiddleware } from './runtime/handler.ts';
+export { defineHandler } from './runtime/handler.ts';
 export type { CloudContext } from './runtime/handler.ts';

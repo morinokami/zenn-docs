@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
@@ -9,7 +9,7 @@
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
-    "types": ["@cloudflare/workers-types"]
+    "types": ["node"]
   },
-  "include": ["src"]
+  "include": ["src", "notes-plugin.ts", "vite.config.ts"]
 }

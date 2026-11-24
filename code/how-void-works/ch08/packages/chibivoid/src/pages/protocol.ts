@@ -2,7 +2,7 @@ import type { Context } from 'hono';
 
 /**
  * サーバーからクライアントへ渡す「ページオブジェクト」。
- * 初回は HTML に埋め込まれ、クライアント遷移では JSON として返される。
+ * HTML に埋め込まれ、ブラウザ側でも同じものを使って描画する（第 9 章）。
  */
 export type PageObject = {
   /** 描画するページコンポーネントの ID。例: "users/[id]" */
@@ -41,30 +41,6 @@ export function serializePageData(pageObj: PageObject): string {
   });
 }
 
-/** クライアント遷移（fetch）からのリクエストかどうか */
-function isPagesRequest(c: Context): boolean {
-  return c.req.header('X-ChibivoidPages') === 'true';
-}
-
-/**
- * ページオブジェクトを、リクエストに応じて JSON か HTML で返す。
- * 同じ URL でも中身が変わるため、キャッシュのために `Vary: X-ChibivoidPages` を付ける。
- */
-async function respondWithPage(
-  c: Context,
-  pageObj: PageObject,
-  options: PageRouteOptions,
-): Promise<Response> {
-  const headers = new Headers({ Vary: 'X-ChibivoidPages' });
-  if (isPagesRequest(c)) {
-    headers.set('X-ChibivoidPages', 'true');
-    return Response.json(pageObj, { headers });
-  }
-  const html = await options.render(pageObj, await options.assets(c.req.raw, c.env));
-  headers.set('Content-Type', 'text/html; charset=utf-8');
-  return new Response(html, { headers });
-}
-
 /** loader を実行して props を得る。Response（リダイレクトなど）が返された場合はそのまま返す */
 async function runLoader(
   loader: PageHandler | undefined,
@@ -94,7 +70,7 @@ function createPageObject(
   };
 }
 
-/** GET: loader を実行し、ページを返す */
+/** GET: loader を実行し、ページを HTML で返す */
 export async function handlePageGet(
   loader: PageHandler | undefined,
   c: Context,
@@ -104,5 +80,7 @@ export async function handlePageGet(
   if (props instanceof Response) {
     return props;
   }
-  return respondWithPage(c, createPageObject(c, options.componentId, props), options);
+  const pageObj = createPageObject(c, options.componentId, props);
+  const html = await options.render(pageObj, await options.assets(c.req.raw, c.env));
+  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }

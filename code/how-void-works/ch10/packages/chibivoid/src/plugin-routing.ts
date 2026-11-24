@@ -1,8 +1,6 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizePath, type Plugin } from 'vite';
-import { generateRouteTypes } from './codegen/route-types.ts';
-import { writeFileIfChanged } from './codegen/write-if-changed.ts';
 import { compileRouteTable } from './router/compile.ts';
 import { scanApp, type ProjectPaths, type ScanResult } from './router/scan.ts';
 
@@ -24,14 +22,11 @@ export function routingPlugin(root: string): Plugin {
     middlewareDir: normalizePath(join(root, 'middleware')),
     pagesDir: normalizePath(join(root, 'pages')),
   };
-  const outDir = join(root, '.chibivoid');
   let scan: ScanResult | undefined;
   let dev = false;
 
   function rescan(): ScanResult {
     scan = scanApp(paths);
-    // ルートの型定義 `.chibivoid/routes.d.ts` も一緒に更新する
-    writeFileIfChanged(join(outDir, 'routes.d.ts'), generateRouteTypes(scan, paths, outDir));
     return scan;
   }
 

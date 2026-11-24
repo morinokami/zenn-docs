@@ -5,8 +5,6 @@ import type { PageObject } from './protocol.ts';
 export type { PageObject };
 
 export type VisitOptions = {
-  method?: string;
-  body?: FormData;
   /** false の場合は履歴を操作しない（戻る・進むボタンの場合） */
   history?: boolean;
 };
@@ -37,13 +35,11 @@ export function createRouter(options: {
   let latestVisit = 0;
 
   async function visit(url: string, visitOptions: VisitOptions = {}) {
-    const { method = 'GET', body, history: updateHistory = true } = visitOptions;
+    const { history: updateHistory = true } = visitOptions;
     const visitId = ++latestVisit;
 
     // 「HTML ではなくページオブジェクト（JSON）をください」という合図のヘッダー
     const response = await fetch(url, {
-      method,
-      body,
       headers: { 'X-ChibivoidPages': 'true', Accept: 'application/json' },
     });
     if (visitId !== latestVisit) {
@@ -60,15 +56,12 @@ export function createRouter(options: {
     await options.onPage(page);
 
     if (updateHistory) {
-      // fetch がリダイレクトをたどった場合は page.url が変わっている
       if (page.url !== currentUrl()) {
         history.pushState({ chibivoidPage: true }, '', page.url);
       } else {
         history.replaceState({ chibivoidPage: true }, '', page.url);
       }
-      if (method === 'GET') {
-        window.scrollTo(0, 0);
-      }
+      window.scrollTo(0, 0);
     }
     return page;
   }

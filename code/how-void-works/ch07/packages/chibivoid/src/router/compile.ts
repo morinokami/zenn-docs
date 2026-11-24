@@ -1,4 +1,3 @@
-import type { PageScanResult } from '../pages/scan.ts';
 import type { ProjectPaths, ScanResult } from './scan.ts';
 
 export type CompileOptions = ProjectPaths & {
@@ -32,7 +31,7 @@ export default {
 export function compileRouteTable(scan: ScanResult, options: CompileOptions): string {
   const imports: string[] = [
     `import { Hono } from "hono";`,
-    `import { createModuleLoader, createHttpRouteHandler, createPageGetHandler } from "chibivoid/runtime/routing";`,
+    `import { createModuleLoader, createHttpRouteHandler } from "chibivoid/runtime/routing";`,
   ];
   const body: string[] = ['const app = new Hono();'];
   // 本番ではロードしたモジュールをキャッシュし、開発中は毎回インポートし直す
@@ -56,33 +55,5 @@ export function compileRouteTable(scan: ScanResult, options: CompileOptions): st
     }
   });
 
-  // 3. ページ
-  if (scan.pages.pages.length > 0) {
-    compilePageRoutes(imports, body, scan.pages, options);
-  }
-
   return [...imports, '', ...body, '', 'export default app;', ''].join('\n');
-}
-
-function compilePageRoutes(
-  imports: string[],
-  body: string[],
-  pages: PageScanResult,
-  options: CompileOptions,
-): void {
-  // ページの描画方法はフレームワークアダプター（@chibivoid/react など）が提供する
-  imports.push(`import { renderPage } from "virtual:chibivoid-pages-renderer";`);
-  // HTML に差し込むタグ（クライアントの JavaScript など）。今はまだ空（第 8 章で埋める）
-  body.push(`const getAssetTags = async () => ({ head: "", body: "" });`);
-
-  pages.pages.forEach((page, i) => {
-    let load = 'undefined';
-    if (page.serverPath) {
-      load = `loadPage${i}`;
-      const file = `${options.pagesDir}/${page.serverPath}`;
-      body.push(`const ${load} = createModuleLoader(() => import(${str(file)}), ${!options.dev});`);
-    }
-    const routeOptions = `{ componentId: ${str(page.componentId)}, load: ${load}, render: renderPage, assets: getAssetTags }`;
-    body.push(`app.get(${str(page.pattern)}, createPageGetHandler(${routeOptions}));`);
-  });
 }

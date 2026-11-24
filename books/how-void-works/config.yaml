@@ -4,17 +4,17 @@ topics: [void, vite, cloudflare, cloudflareworkers, hono]
 published: false
 price: 0
 chapters:
-  - 00-introduction
-  - 01-vite-basics
-  - 02-cloudflare-workers
-  - 03-skeleton
-  - 04-server-routing
-  - 05-dev-server
-  - 06-resource-inference
-  - 07-pages-ssr
-  - 08-hydration-navigation
-  - 09-actions-forms
-  - 10-type-safety
-  - 11-build-deploy
-  - 12-conclusion
+  - 01-introduction
+  - 02-vite-basics
+  - 03-cloudflare-workers
+  - 04-skeleton
+  - 05-server-routing
+  - 06-dev-server
+  - 07-resource-inference
+  - 08-pages-ssr
+  - 09-hydration-navigation
+  - 10-actions-forms
+  - 11-type-safety
+  - 12-build-deploy
+  - 13-conclusion
   - glossary

@@ -23,7 +23,7 @@ export function chibivoidPlugin(): Plugin[] {
   writeFileSync(entryPath, compileWorkerEntry());
 
   return [
-    routingPlugin(root),
+    routingPlugin(),
     ...cloudflare({
       // Worker 用の Vite 環境に名前を付ける
       viteEnvironment: { name: WORKER_ENVIRONMENT_NAME },
@@ -46,8 +46,3 @@ export function readWorkerName(root: string): string {
     .replace(/^-+|-+$/g, '');
   return name || 'chibivoid-app';
 }
-
-// アプリのコードから `import { defineHandler } from 'chibivoid'` と記述することができるように再エクスポートする。
-// （Worker の中ではこの index.ts ではなく runtime/handler.ts に差し替えられる）
-export { defineHandler } from './runtime/handler.ts';
-export type { CloudContext } from './runtime/handler.ts';

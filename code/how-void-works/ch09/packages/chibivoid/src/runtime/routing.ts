@@ -1,11 +1,6 @@
 // 生成されたルートテーブル（virtual:chibivoid-routes）と Worker エントリから呼ばれる実行時の関数。
 import type { Context, ExecutionContext, Hono } from 'hono';
-import {
-  handlePageGet,
-  handlePageMutation,
-  type PageHandler,
-  type PageRouteOptions,
-} from '../pages/protocol.ts';
+import { handlePageGet, type PageHandler, type PageRouteOptions } from '../pages/protocol.ts';
 import { withRuntimeEnv } from './env.ts';
 import { convertReturnValue } from './response.ts';
 
@@ -40,7 +35,7 @@ export function createHttpRouteHandler(load: () => Promise<RouteModule>, method:
   };
 }
 
-type PageServerModule = { loader?: PageHandler; action?: PageHandler };
+type PageServerModule = { loader?: PageHandler };
 
 type PageRouteConfig = PageRouteOptions & {
   /** `.server.ts` を読み込む関数（なければ undefined） */
@@ -52,17 +47,6 @@ export function createPageGetHandler(config: PageRouteConfig) {
   return async (c: Context): Promise<Response> => {
     const mod = config.load ? await config.load() : {};
     return handlePageGet(mod.loader, c, config);
-  };
-}
-
-/** ページの POST/PUT/PATCH/DELETE ハンドラー（action を実行する） */
-export function createPageMutationHandler(config: PageRouteConfig) {
-  return async (c: Context): Promise<Response> => {
-    const mod = config.load ? await config.load() : {};
-    if (!mod.action) {
-      return c.text('Method Not Allowed', 405);
-    }
-    return handlePageMutation(mod.action, mod.loader, c, config);
   };
 }
 

@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import react from '@vitejs/plugin-react';
 import { WORKER_ENVIRONMENT_NAME } from 'chibivoid';
-import { CLIENT_ENTRY_ID, createPagesPlugin, generateComponentManifest } from 'chibivoid/pages';
+import { createPagesPlugin, generateComponentManifest } from 'chibivoid/pages';
 import { normalizePath, type PluginOption, type UserConfig } from 'vite';
 
 /**
@@ -58,17 +58,7 @@ startReactPages({ components, layoutTree });
             },
           };
         }
-        // 本番ビルドでは、ブラウザ用のエントリを入力に加え、マニフェストを出力させる
-        return {
-          environments: {
-            client: {
-              build: {
-                manifest: true,
-                rolldownOptions: { input: { 'pages-client': CLIENT_ENTRY_ID } },
-              },
-            },
-          },
-        };
+        return undefined;
       },
     }),
   ];

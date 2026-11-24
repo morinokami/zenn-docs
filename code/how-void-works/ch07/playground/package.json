@@ -9,16 +9,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@chibivoid/react": "*",
     "chibivoid": "*",
-    "hono": "^4.13.16",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "hono": "^4.13.16"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.6",
     "wrangler": "^4.158.0"

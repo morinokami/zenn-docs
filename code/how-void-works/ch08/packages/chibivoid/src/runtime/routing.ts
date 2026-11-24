@@ -4,8 +4,6 @@ import { handlePageGet, type PageHandler, type PageRouteOptions } from '../pages
 import { withRuntimeEnv } from './env.ts';
 import { convertReturnValue } from './response.ts';
 
-export { createPagesAssetTags } from './routing-assets.ts';
-
 type RouteModule = Record<string, ((c: Context) => unknown) | undefined>;
 
 /**

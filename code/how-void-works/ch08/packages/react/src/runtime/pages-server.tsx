@@ -8,15 +8,12 @@ export async function renderReactPage(options: {
   assetTags: AssetTags;
   components: ComponentMap;
   layoutTree: LayoutTree;
-  preamble: string;
 }): Promise<string> {
-  const { pageObj, assetTags, components, layoutTree, preamble } = options;
+  const { pageObj, assetTags, components, layoutTree } = options;
   const modules = await loadPageModules(pageObj, components, layoutTree);
 
   // Workers ではウェブ標準のストリームを返す renderToReadableStream を使う
-  const stream = await renderToReadableStream(
-    <PageView page={pageObj} modules={modules} router={null} />,
-  );
+  const stream = await renderToReadableStream(<PageView page={pageObj} modules={modules} />);
   // 簡単のため、全部描画し終わるのを待ってから文字列にする（Void はストリーミングで返す）
   await stream.allReady;
   const appHtml = await new Response(stream).text();
@@ -26,7 +23,7 @@ export async function renderReactPage(options: {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-${preamble}${assetTags.head}
+${assetTags.head}
 </head>
 <body>
 <script id="__CHIBIVOID_PAGE_DATA__" type="application/json">${serializePageData(pageObj)}</script>

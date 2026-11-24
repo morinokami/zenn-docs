@@ -32,7 +32,7 @@ export default {
 export function compileRouteTable(scan: ScanResult, options: CompileOptions): string {
   const imports: string[] = [
     `import { Hono } from "hono";`,
-    `import { createModuleLoader, createHttpRouteHandler, createPageGetHandler, createPageMutationHandler, createPagesAssetTags } from "chibivoid/runtime/routing";`,
+    `import { createModuleLoader, createHttpRouteHandler, createPageGetHandler, createPagesAssetTags } from "chibivoid/runtime/routing";`,
   ];
   const body: string[] = ['const app = new Hono();'];
   // 本番ではロードしたモジュールをキャッシュし、開発中は毎回インポートし直す
@@ -84,10 +84,5 @@ function compilePageRoutes(
     }
     const routeOptions = `{ componentId: ${str(page.componentId)}, load: ${load}, render: renderPage, assets: getAssetTags }`;
     body.push(`app.get(${str(page.pattern)}, createPageGetHandler(${routeOptions}));`);
-    if (page.methods.includes('action')) {
-      body.push(
-        `app.on(["POST", "PUT", "PATCH", "DELETE"], ${str(page.pattern)}, createPageMutationHandler(${routeOptions}));`,
-      );
-    }
   });
 }
