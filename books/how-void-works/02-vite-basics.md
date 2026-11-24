@@ -6,9 +6,9 @@ title: "Vite 入門: 開発サーバー、プラグイン、仮想モジュー�
 
 ## この章のゴール
 
-- 開発中とビルド時に、Vite がそれぞれ何をしているかを説明できる
-- プラグインのフック（`resolveId`、`load`、`configureServer` など）を使って、仮想モジュール（virtual module）を作ることができる
-- 「モジュールグラフ」（module graph）、「無効化」（invalidate）、「環境」（environment）という言葉の意味がわかる
+- 開発中とビルド時に、Vite がそれぞれ何をしているかを理解する
+- プラグインのフック（`resolveId`、`load`、`configureServer` など）を使って、仮想モジュール（virtual module）を作成する
+- 「モジュールグラフ」（module graph）、「無効化」（invalidate）、「環境」（environment）という言葉の意味を理解する
 
 ## Vite とは何か
 

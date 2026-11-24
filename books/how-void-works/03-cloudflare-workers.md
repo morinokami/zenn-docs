@@ -6,10 +6,10 @@ Void のアプリは、既定では Cloudflare Workers の上で動きます。�
 
 ## この章のゴール
 
-- Cloudflare Workers の実行モデル（`fetch` ハンドラーと `env`）がわかる
-- workerd、Miniflare、Wrangler の関係がわかる
+- Cloudflare Workers の実行モデル（`fetch` ハンドラーと `env`）を理解する
+- workerd、Miniflare、Wrangler の関係を整理する
 - `@cloudflare/vite-plugin` が、Vite の「Worker 用の環境」の中で Worker を動かしていることを確かめる
-- アプリのビルド時に出力される `index.js` と `wrangler.json` の役割がわかる
+- アプリのビルド時に出力される `index.js` と `wrangler.json` の役割を理解する
 
 ## Cloudflare Workers とは何か
 

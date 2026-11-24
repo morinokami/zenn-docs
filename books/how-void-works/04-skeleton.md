@@ -7,9 +7,9 @@ title: "chibivoid の骨組み"
 ## この章のゴール
 
 - Void と同じかたちのモノレポ（`packages/chibivoid` と `playground`）を理解する
-- TypeScript のパッケージを、ビルドせずに workspace から使う方法がわかる
+- TypeScript のパッケージを、ビルドせずに workspace から使う方法について知る
 - `chibivoidPlugin()` が Worker のエントリファイル（`.chibivoid/entry.ts`）を生成し、仮想モジュール `virtual:chibivoid-routes` を提供し、Cloudflare のプラグインを包んでいることを理解する
-- リクエストが、どのファイルをどの順番で通るかを説明できる
+- リクエストが、どのファイルをどの順番で通るかを確かめる
 
 ## これから作るもの
 
