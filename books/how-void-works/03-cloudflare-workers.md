@@ -267,11 +267,8 @@ npm run dev
 
 別のターミナルから Worker の出力を確認します:
 
-```sh
-curl http://localhost:5173/
 ```
-
-```
+$ curl http://localhost:5173/
 こんにちは！ このコードは Cloudflare-Workers の上で動いています。
 仮想モジュールを生成した Vite 環境: worker
 生成した時刻: 2026-11-06T11:04:04.636Z
@@ -279,7 +276,7 @@ curl http://localhost:5173/
 
 `Cloudflare-Workers` と表示されました。これにより、Vite の開発サーバー経由で、Worker のコードが workerd の上で動いていることがわかります。
 
-2 行目にも注目してください。第 2 章の `notes` プラグインでは `this.environment.name` が `client` でしたが、今回は `worker` になっています。`build-info` プラグインの `load` が、Worker 用の環境のために呼ばれたということです。仮想モジュールは Worker のコードからもまったく同じように使うことができます。
+出力の 2 行目にも注目してください。第 2 章の `notes` プラグインでは `this.environment.name` が `client` でしたが、今回は `worker` になっています。`build-info` プラグインの `load` が、Worker 用の環境のために呼ばれたということです。仮想モジュールは Worker のコードからもまったく同じように使うことができます。
 
 KV も試しましょう:
 
@@ -300,11 +297,8 @@ KV のデータは `.wrangler/state/v3/kv` に保存されているため、開�
 
 開発サーバーを止めて、ビルドします:
 
-```sh
-npm run build
 ```
-
-```
+$ npm run build
 vite v8.3.6 building worker environment for production...
 ✓ 5 modules transformed.
 dist/worker/.vite/manifest.json  0.15 kB │ gzip: 0.11 kB

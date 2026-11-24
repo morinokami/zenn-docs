@@ -339,11 +339,8 @@ export default defineMiddleware(async (c, next) => {
 
 `vite.config.ts` から読み込まれるプラグインのコードを変更したため、開発サーバーをいったん止めて（Ctrl+C）起動し直します。その後、別のターミナルから `curl` でリクエストを送ってみましょう:
 
-```sh
-curl -i http://localhost:5173/api/hello
 ```
-
-```
+$ curl -i http://localhost:5173/api/hello
 HTTP/1.1 200 OK
 content-type: application/json
 x-response-time: 10ms

@@ -452,11 +452,8 @@ npm run dev
 
 開発サーバーを起動したまま、別のターミナルから `curl` でリクエストを送ってみましょう:
 
-```sh
-curl -i http://localhost:5173/
 ```
-
-```
+$ curl -i http://localhost:5173/
 HTTP/1.1 200 OK
 content-type: text/plain;charset=UTF-8
 
@@ -522,11 +519,8 @@ export default app;
 
 開発サーバーを止めて、ビルドしてみましょう:
 
-```sh
-npm run build
 ```
-
-```
+$ npm run build
 vite v8.3.6 building chibivoid_worker environment for production...
 dist/chibivoid_worker/.vite/manifest.json   0.15 kB │ gzip:  0.11 kB
 dist/chibivoid_worker/wrangler.json         1.20 kB │ gzip:  0.63 kB

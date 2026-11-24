@@ -1260,11 +1260,8 @@ npm run dev
 
 開発サーバーを起動したまま、別のターミナルから `curl` でトップページを取得してみましょう:
 
-```sh
-curl http://localhost:5173/
-```
-
 ```html
+$ curl http://localhost:5173/
 <!doctype html>
 <html>
 <head>

@@ -22,11 +22,8 @@ npm run preview
 
 ブラウザで `http://localhost:4173/` を開くと、ページは表示されますが、第 11 章の「型付き `fetch()` を使ってみる」で作成した「いいね」ボタンをクリックした場合でも、何も起きないはずです。別のターミナルから、返ってくる HTML の末尾を確認してみましょう:
 
-```sh
-curl -s http://localhost:4173/ | tail -4
-```
-
 ```html
+$ curl -s http://localhost:4173/ | tail -4
 <div id="app">...<button>いいね </button>...</div>
 
 </body>
@@ -237,11 +234,8 @@ flowchart LR
 
 それでは、「ビルドしたページに JavaScript が読み込まれない」で起動したプレビューサーバーを止めて（Ctrl+C）、もう一度ビルドしてみましょう:
 
-```sh
-npm run build
 ```
-
-```
+$ npm run build
 vite v8.3.6 building chibivoid_worker environment for production...
 dist/chibivoid_worker/index.js                             538.10 kB │ gzip: 110.83 kB │ map: 944.85 kB
 ✓ built in 567ms

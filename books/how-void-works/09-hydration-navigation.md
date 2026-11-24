@@ -735,11 +735,8 @@ npm run dev
 
 開発サーバーを起動したまま、別のターミナルから `curl` でトップページを取得してみましょう:
 
-```sh
-curl http://localhost:5173/
-```
-
 ```html
+$ curl http://localhost:5173/
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -770,11 +767,8 @@ RefreshRuntime.injectIntoGlobalHook(window);
 
 このリクエストを、`curl` で再現してみましょう:
 
-```sh
-curl -i -H 'X-ChibivoidPages: true' http://localhost:5173/users
 ```
-
-```
+$ curl -i -H 'X-ChibivoidPages: true' http://localhost:5173/users
 HTTP/1.1 200 OK
 content-type: application/json
 vary: X-ChibivoidPages

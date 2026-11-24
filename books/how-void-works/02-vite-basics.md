@@ -124,11 +124,9 @@ list.innerHTML = '<li>まだメモはありません</li>';
 
 開発サーバーを起動してみましょう:
 
-```sh
-npm run dev
 ```
+$ npm run dev
 
-```
   VITE v8.3.6  ready in 281 ms
 
   ➜  Local:   http://localhost:5173/
@@ -140,11 +138,8 @@ npm run dev
 
 開発者ツールのネットワークタブを開いて再読み込みするか、別のターミナルから `curl` で確かめてみましょう:
 
-```sh
-curl http://localhost:5173/
-```
-
 ```html
+$ curl http://localhost:5173/
 <!doctype html>
 <html lang="ja">
   <head>
@@ -158,11 +153,8 @@ curl http://localhost:5173/
 
 続いて `src/main.ts` を見てみます:
 
-```sh
-curl http://localhost:5173/src/main.ts
 ```
-
-```js
+$ curl http://localhost:5173/src/main.ts
 const list = document.querySelector("#notes");
 list.innerHTML = "<li>まだメモはありません</li>";
 ```
@@ -409,11 +401,8 @@ declare module 'virtual:notes' {
 
 `src/main.ts` がどう変換されたかを見てみましょう:
 
-```sh
-curl http://localhost:5173/src/main.ts
 ```
-
-```js
+$ curl http://localhost:5173/src/main.ts
 // `virtual:notes` はディスク上には存在しない「仮想モジュール」。
 // 中身は notes-plugin.ts が notes/ ディレクトリから組み立てる。
 import notes from "/@id/__x00__virtual:notes";
@@ -428,11 +417,8 @@ const list = document.querySelector("#notes");
 
 その URL を直接開くと、`load` が返したコードが表示されます:
 
-```sh
-curl http://localhost:5173/@id/__x00__virtual:notes
 ```
-
-```js
+$ curl http://localhost:5173/@id/__x00__virtual:notes
 export default [{"title":"hello","body":"はじめてのメモ"},{"title":"vite","body":"Vite はプラグインで拡張できる"}];
 ```
 
@@ -509,11 +495,8 @@ HMR は、変更の影響を受けるモジュールだけを差し替えて、�
 
 開発サーバーを止めて（Ctrl+C）、本番ビルドを試しましょう:
 
-```sh
-npm run build
 ```
-
-```
+$ npm run build
 vite v8.3.6 building client environment for production...
 [notes] "client" 環境でモジュールを生成します
 ✓ 5 modules transformed.
