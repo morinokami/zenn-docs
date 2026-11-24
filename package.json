@@ -7,6 +7,6 @@
     "dev": "zenn preview"
   },
   "dependencies": {
-    "zenn-cli": "0.2.3"
+    "zenn-cli": "0.5.15"
   }
 }
