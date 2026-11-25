@@ -25,7 +25,7 @@ export const GET = defineHandler(() => {
 
 ## 全体の設計
 
-ファイルベースルーティングは、次の 3 段階で動きます:
+本書で作成するファイルベースルーティングは、次の 3 段階で動きます:
 
 ```mermaid
 flowchart LR
@@ -50,7 +50,7 @@ flowchart LR
 
 ## ファイル名を URL パターンに変換する
 
-`routes/` からの相対パスを、Hono の URL パターンに変換します。基本的なルールは Void と同じです:
+ここでは、`routes/` からの相対パスを、Hono の URL パターンに変換するコードを作成します。基本的な変換ルールは Void と同じです:
 
 | ファイル（`routes/` からの相対パス） | URL パターン | 説明 |
 | --- | --- | --- |
@@ -131,7 +131,7 @@ export function parseRouteFilename(relativePath: string): RouteDefinition {
 ```
 <!-- /file -->
 
-`RouteDefinition` は、1 つのルートを表わすデータです。`methods`（エクスポートされている HTTP メソッド）はファイルの中身を見ないとわからないため、ここでは空にしておき、後で「`routes/` をスキャンする」で作成するスキャナーによって埋めます。
+`RouteDefinition` は、1 つのルートを表わすデータです。`methods`（エクスポートされている HTTP メソッド）はファイルの中身を見ないとわからないため、ここでは空にしておき、後で「`routes/` をスキャンする」で作成するスキャナーによって中身を埋めます。
 
 ## ルートの優先順位
 
@@ -188,20 +188,20 @@ export function compareRouteSpecificity(
 ルールは次の通りです:
 
 1. キャッチオール（`[...slug]`）は、他のすべてのルートより後
-2. それ以外は、左から 1 セグメント（`/` で区切った 1 区間）ずつ比べ、最初に種類が違ったところで決める。固定の文字列 → `:param` → 残り全部、の順に優先する
+2. それ以外は、左から 1 セグメント（`/` で区切った 1 区間）ずつ比べ、最初に種類が異なるところで決める。固定の文字列 → `:param` → 残り全部、の順に優先する
 
-たとえば、`/api/users/me` と `/api/users/:id` は 3 番目のセグメントで初めて違い、`me`（固定）が `:id`（パラメータ）より優先されます。
+たとえば、`/api/users/me` と `/api/users/:id` は 3 番目のセグメントが異なっており、`me`（固定）が `:id`（パラメータ）より優先されます。
 
 ## エクスポートを「実行せずに」調べる
 
 次は、各ファイルがどの HTTP メソッド（`GET`、`POST` など）をエクスポートしているかについて調べます。
 
-一番簡単な方法は、ファイルをインポートして、エクスポートされているものを見ることです。しかし、次の 2 つの理由から、この方法を使うことはできません:
+一番簡単な方法は、ファイルをインポートして、エクスポートされている内容を確認することです。しかし、次の 2 つの理由から、この方法を使うことはできません:
 
 - ルートのファイルは Worker の中で動くコードです。`cloudflare:workers` のような Workers 専用のモジュールをインポートしているかもしれず、Node.js では読み込むことができない可能性があります
 - モジュールのトップレベルに、実行されては困る処理（外部への通信など）が書かれているかもしれません
 
-そこで、ソースコードをパース（構文解析）して、エクスポート文だけを調べることとします。Vite 8 は内部で Oxc（Rust 製のツール群）のパーサーを使っており、それを `parseSync()` として公開しています。`parseSync()` は抽象構文木（AST、Abstract Syntax Tree）だけでなく、インポートとエクスポートの一覧（`module`）もまとめて返してくれるため、エクスポートを簡単に検出できます。これを使って、エクスポートを調べる関数を作成します:
+そこで、ソースコードをパース（構文解析）して、エクスポート文だけを調べることとします。Vite 8 は内部で Oxc（Rust 製のツール群）のパーサーを使っており、それを `parseSync()` として公開しています。`parseSync()` は抽象構文木（AST、Abstract Syntax Tree）だけでなく、インポートとエクスポートの一覧（`module`）もまとめて返してくれるため、エクスポートを簡単に検出することができます。これを使って、エクスポートされる内容を調べる関数を作成します:
 
 <!-- file: code/how-void-works/ch05/packages/chibivoid/src/router/detect-exports.ts -->
 ```ts:packages/chibivoid/src/router/detect-exports.ts
@@ -520,7 +520,7 @@ export function compileRouteTable(scan: ScanResult, options: CompileOptions): st
 
 ファイルのパスや URL パターンは、`JSON.stringify()` により文字列リテラルにしています。`"` や `\` のように、文字列リテラルの中でエスケープが必要な文字を含むパスでも、クォートとエスケープが正しくおこなわれるためです。
 
-playground に、「ルートを作成して動かす」で作る 3 つのルート（`api/hello.ts`、`api/users/[id].ts`、`api/users/me.ts`）がある場合、開発サーバーで生成されるコードは次のようになります（パスは環境によって変わります）:
+playground に、あとで「ルートを作成して動かす」で作る 3 つのルート（`api/hello.ts`、`api/users/[id].ts`、`api/users/me.ts`）がある場合、開発サーバーで生成されるコードは次のようになります（パスは環境によって変わります）:
 
 ```js
 import { Hono } from "hono";
@@ -537,7 +537,7 @@ app.get("/api/users/:id", createHttpRouteHandler(loadRoute2, "GET"));
 export default app;
 ```
 
-`/api/users/me` が `/api/users/:id` より先に登録されていることがわかります。また、`createModuleLoader()` の 2 つ目の引数（`cache`）は `false` です。`vite build` により生成されるコードでは、これが `true` になります。
+`/api/users/me` が `/api/users/:id` より先に登録されていることに注目してください。また、`createModuleLoader()` の 2 つ目の引数（`cache`）は `false` です。`vite build` により生成されるコードでは、これが `true` になります。
 
 仮想モジュールはディスク上の場所をもたないため、`import("./routes/...")` のような相対パスには、基準になるディレクトリがありません。そのため、ルートのファイルは絶対パスでインポートしています。
 
@@ -620,7 +620,7 @@ export function routingPlugin(root: string): Plugin {
 
 ### 1. `config` フックで開発サーバーかどうかを記録する
 
-[`env.command`](https://vite.dev/config/#conditional-config) は、`vite dev` と `vite preview` の場合は `"serve"`、`vite build` の場合は `"build"` です。`vite preview` は本番ビルドを動かすため、`isPreview` も見て、開発サーバーの場合だけ `dev = true` にしています。この `dev` は、生成するコードの `cache` フラグに使います。
+[`env.command`](https://vite.dev/config/#conditional-config) は、`vite dev` と `vite preview` の場合は `"serve"`、`vite build` の場合は `"build"` になります。`vite preview` は本番ビルドを動かすため、`isPreview` も見て、開発サーバーの場合だけ `dev = true` にしています。この `dev` は、生成するコードの `cache` フラグに使います。
 
 ### 2. `buildStart` でスキャンする
 
@@ -634,7 +634,7 @@ export function routingPlugin(root: string): Plugin {
 
 ルートのファイルでは、`import { defineHandler } from "chibivoid"` と記述します。`chibivoid` の `exports` の `"."` は `src/index.ts`、つまり Vite のプラグイン本体です。`index.ts` は `@cloudflare/vite-plugin` をインポートしており、その先には Wrangler やファイルシステムを使うコードが大量につながっています。
 
-「ルートを作成して動かす」でルートのファイルを作成した後で、試しに `resolveId` の差し替えをコメントアウトしてビルドしてみると、次のようなエラーになるはずです:
+この後の「ルートを作成して動かす」でルートのファイルを作成した後で、試しに `resolveId` の差し替えをコメントアウトしてビルドしてみると、次のようなエラーになるはずです:
 
 ```
 ✓ 428 modules transformed.
@@ -695,7 +695,7 @@ TypeScript から見ると `chibivoid` は `src/index.ts` であるため、エ�
 
 ## ルートを作成して動かす
 
-playground にルートを 3 つ作成します。ルートを置くディレクトリを用意しておきましょう:
+playground にルートを 3 つ作成します。ルートを置くためのディレクトリを用意しておきましょう:
 
 ```sh
 mkdir -p playground/routes/api/users
@@ -760,7 +760,7 @@ curl -i -X POST http://localhost:5173/api/hello
 # HTTP/1.1 404 Not Found （POST はエクスポートしていないため登録されていない）
 ```
 
-`/api/users/me` には `me.ts` が応えました。優先順位の並べ替えが効いています。これで、`routes/` に置いたファイルが、そのまま API のエンドポイントとして動くようになりました。
+`/api/users/me` には `me.ts` が応えており、優先順位の並べ替えが効いていることがわかります。これで、`routes/` に置いたファイルが、そのまま API のエンドポイントとして動くようになりました。
 
 ## まとめ
 
