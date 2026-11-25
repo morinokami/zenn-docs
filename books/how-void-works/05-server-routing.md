@@ -772,15 +772,12 @@ curl -i -X POST http://localhost:5173/api/hello
 
 ## Void の実装
 
-| chibivoid | Void | 主な違い |
-| --- | --- | --- |
-| `router/parse-filename.ts` | `packages/void/src/router/parse-filename.ts` | `.dev`/`.prod` の接尾辞により、開発中だけ、または本番だけのルートを作成できる。WebSocket ルート（`.ws.ts`）の解析もある |
-| `router/route-order.ts` | `packages/void/src/router/route-order.ts` | ほぼ同じアルゴリズム。加えて「セグメントがすべて固定のルートを最優先する」 |
-| `router/detect-exports.ts` | `packages/void/src/router/detect-exports.ts` | `parseSync()` の AST（`program.body`）を自分でたどってエクスポートを調べている |
-| `router/scan.ts` | `packages/void/src/router/scan.ts`、`packages/void/src/application-analysis.ts` | ルート以外に cron、キュー、メール、WebSocket などもスキャンし、アプリ全体の解析結果として共有している |
-| `router/compile.ts` | `packages/void/src/router/compile.ts` の `compileRouteTable()` | 認証、WebSocket、キュー、cron、メール、マイグレーション、Void の内部エンドポイント（`/__void/*`）など、多くの機能のコードも生成する |
-| `runtime/routing.ts` | `packages/void/src/runtime/routing/index.ts` | `createModuleLoader()` と `createHttpRouteHandler()` はほぼ同じかたち。リライトなどのための `createRoutingRuntime()` もある |
-| `runtime/response.ts` | `packages/void/src/runtime/handler/response.ts` | 同じルール |
-| `runtime/handler.ts` | `packages/void/src/runtime/handler/index.ts` | `defineHandler.withValidator()` により入力のバリデーションもできる |
+`packages/void/src/router/` にも、`parse-filename.ts`、`route-order.ts`、`detect-exports.ts`、`scan.ts`、`compile.ts` という、chibivoid と同じ名前のファイルがあります。考え方は同じですが、それぞれ次のような違いがあります:
 
-Void のテストも見ておきましょう。`packages/void/test/unit/parse-filename.test.ts` と `route-order.test.ts` には、この章で扱った変換ルールと優先順位が、入力と期待する出力の組として並んでいます。Void のコードを読む際は、まずテストを読むと、その関数が何をするものなのかがわかりやすくなります。
+- `parse-filename.ts`: `.dev`/`.prod` の接尾辞により、開発中だけ、または本番だけのルートを作成することができます。また、WebSocket のルート（`.ws.ts`）の解析もおこなっています
+- `route-order.ts`: ほぼ同じアルゴリズムですが、「セグメントがすべて固定のルートを最優先する」というルールが加わっています
+- `detect-exports.ts`: 同じく `parseSync()` を使っていますが、`module.staticExports` ではなく、AST（`program.body`）を自分でたどってエクスポートを調べています
+- `scan.ts`: スキャン結果には、ルート以外にも cron、キュー、メール、WebSocket などが含まれます。これらのスキャンは `packages/void/src/application-analysis.ts` がまとめておこない、その結果はアプリ全体の解析結果として共有されます
+- `compile.ts`: `compileRouteTable()` は、ルートの他にも、認証、WebSocket、キュー、cron、メール、マイグレーション、Void の内部エンドポイント（`/__void/*`）など、多くの機能のコードを生成します
+
+「Worker の中で動く関数」で作成した関数は、Void では `packages/void/src/runtime/` の下にあります。`createModuleLoader()` と `createHttpRouteHandler()` は `runtime/routing/index.ts` にあり、chibivoid とほぼ同じかたちをしています。同じファイルには、リライトなどのための `createRoutingRuntime()` もあります。`defineHandler()` は `runtime/handler/index.ts` にあり、`defineHandler.withValidator()` により入力のバリデーションもできるようになっています。同じディレクトリの `response.ts` にある `convertReturnValue()` は、本文で触れた通り、chibivoid と同じルールで戻り値を変換します。

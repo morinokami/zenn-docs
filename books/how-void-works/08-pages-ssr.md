@@ -1308,16 +1308,16 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:5173/users/999
 
 ## Void の実装
 
-| chibivoid | Void | 主な違い |
-| --- | --- | --- |
-| `pages/scan.ts` | `packages/void/src/pages/scan.ts` | `.vue`、`.svelte`、`.md` にも対応。`.island.tsx` で作るアイランドのページ、名前付きレイアウト（`_layouts/`）、`export const ssr = false` や `prerender` などのページ設定も読む |
-| `pages/manifest.ts` | `packages/void/src/pages/manifest.ts` | 対応表に加えて、URL からページを探す `matchRoute()` も生成する。固定の URL は表引き、動的な URL は正規表現で探す |
-| `pages/plugin.ts` | `packages/void/src/pages/plugin.ts` | `createPagesPlugin(pagesDir, { name, generateRenderer, generateClient, config })` という、ほぼ同じ API をもつ。`generateClient` は第 9 章で chibivoid にも追加する |
-| `pages/protocol.ts` | `packages/void/src/pages/protocol.ts` | ページオブジェクトに `shared`（全ページ共通のデータ）、`head`（タイトルなど）、`deferred`（遅延 props）もある。HTML をストリーミングで返す |
-| `pages/protocol.ts` の `serializePageData()` | `packages/void/src/pages/serialize.ts` | `JSON.stringify()` ではなく devalue で文字列にするため、`Date` や `Map` などの値も型を保ったまま受け渡すことができる |
-| `runtime/routing.ts` の `createPageGetHandler()` | `packages/void/src/runtime/routing/pages.ts` | 同じ名前の関数がある |
-| `@chibivoid/react` の `plugin.ts` | `packages/react/src/plugin.ts`、`plugin-pages.ts` | `generateRendererModule()` が、chibivoid とほぼ同じ構造の `renderPage()` を生成する |
-| `@chibivoid/react` の `runtime/pages-server.tsx` | `packages/react/src/runtime/pages-server.ts` | `stream.allReady` により描画が終わるのを待たずに、HTML の前半、React のストリーム、後半をつなげてストリーミングで返す。遅延 props にも対応する |
-| `runtime/handler.ts` の `TypedHandler` | `packages/void/src/runtime/handler/index.ts` | `TypedHandler<V, R>` は `__output` に加えて、入力のバリデーションスキーマの型をもつ `__validators` も備える |
+「Pages の設計」で触れたように、Void のコアの共通部分は `packages/void/src/pages/` に置かれています。この章で作成したコアのファイルと比べると、次のような違いがあります:
 
-Void の `PageObject` の型（`pages/protocol.ts`）を見ると、chibivoid の 4 つのフィールドに加えて、第 10 章で追加する `errors` などのフィールドが並んでいます。Void の Pages は、この章で作成したものと同じ基本的なしくみの上に、遅延 props、`<head>` の管理、アイランド、事前レンダリングなどの機能を追加したものです。
+- `scan.ts`: `.vue`、`.svelte`、`.md` のページにも対応しています。また、`.island.tsx` で作るアイランドのページや名前付きレイアウト（`_layouts/`）を扱い、`export const ssr = false` や `prerender` などのページ設定も読み取ります
+- `manifest.ts`: コンポーネントの対応表に加えて、URL からページを探す `matchRoute()` も生成します。`matchRoute()` は、固定の URL であれば表から直接探し、動的な URL であれば正規表現により探します
+- `plugin.ts`: `createPagesPlugin(pagesDir, { name, generateRenderer, generateClient, config })` という、chibivoid とほぼ同じ API をもっています。`generateClient` は、第 9 章で chibivoid にも追加します
+- `protocol.ts`: ページオブジェクトの型（`PageObject`）には、chibivoid の 4 つのフィールドに加えて、`shared`（全ページ共通のデータ）、`head`（タイトルなど）、`deferred`（遅延 props）や、第 10 章で追加する `errors` などのフィールドが並んでいます。また、HTML をストリーミングで返します
+- `serialize.ts`: chibivoid では `protocol.ts` に定義した `serializePageData()` が、Void ではこのファイルにあります。`JSON.stringify()` ではなく devalue というライブラリにより文字列にするため、`Date` や `Map` などの値も型を保ったまま受け渡すことができます
+
+ページへの `GET` リクエストを処理するハンドラーは、`packages/void/src/runtime/routing/pages.ts` にある、chibivoid と同じ名前の `createPageGetHandler()` が作成します。また、`defineHandler()` の戻り値の型である `TypedHandler` は、`packages/void/src/runtime/handler/index.ts` に定義されています。Void の `TypedHandler<V, R>` は、`__output` に加えて、入力のバリデーションスキーマの型をもつ `__validators` も備えています。
+
+React のアダプターでは、`packages/react/src/plugin.ts` と `plugin-pages.ts` が、`@chibivoid/react` の `plugin.ts` にあたります。`plugin-pages.ts` の `generateRendererModule()` は、chibivoid とほぼ同じ構造の `renderPage()` を生成しています。一方、ページを HTML に描画する `packages/react/src/runtime/pages-server.ts` は、chibivoid とは異なり、`stream.allReady` により描画が終わるのを待ちません。HTML の前半、React のストリーム、後半をつなげて、ストリーミングで返しています。また、遅延 props にも対応しています。
+
+Void の Pages は、この章で作成したものと同じ基本的なしくみの上に、遅延 props、`<head>` の管理、アイランド、事前レンダリングなどの機能を追加したものです。
