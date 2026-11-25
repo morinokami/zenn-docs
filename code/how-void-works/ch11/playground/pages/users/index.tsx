@@ -1,5 +1,5 @@
-import { Form, Link, useErrors } from '@chibivoid/react';
-import type { Props } from './index.server.ts';
+import { Form, Link, useErrors } from "@chibivoid/react";
+import type { Props } from "./index.server.ts";
 
 export default function Users({ users }: Props) {
   const errors = useErrors();

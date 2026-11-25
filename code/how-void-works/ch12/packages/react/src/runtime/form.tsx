@@ -1,7 +1,7 @@
-import { useContext, type FormHTMLAttributes, type SubmitEvent } from 'react';
-import { RouterContext } from './context.ts';
+import { useContext, type FormHTMLAttributes, type SubmitEvent } from "react";
+import { RouterContext } from "./context.ts";
 
-export type FormProps = Omit<FormHTMLAttributes<HTMLFormElement>, 'method' | 'action'> & {
+export type FormProps = Omit<FormHTMLAttributes<HTMLFormElement>, "method" | "action"> & {
   /** 送信先のページ。省略すると今のページ */
   action?: string;
 };
@@ -23,7 +23,7 @@ export function Form({ action, onSubmit, ...rest }: FormProps) {
     // action を省略した場合は、普通のフォームと同じく今のページに送る
     const url = new URL(action ?? location.href, location.href);
     const page = await router.visit(url.pathname + url.search, {
-      method: 'POST',
+      method: "POST",
       // 押されたボタン（submitter）の name と value も、普通のフォーム送信と同じく含める
       body: new FormData(form, event.nativeEvent.submitter),
     });

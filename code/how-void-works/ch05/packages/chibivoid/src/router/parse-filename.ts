@@ -24,26 +24,26 @@ export const ROUTE_FILE_RE = /\.(ts|tsx|js|jsx|mts|mjs)$/;
  * 5. 先頭に / を付ける
  */
 export function parseRouteFilename(relativePath: string): RouteDefinition {
-  const path = relativePath.replaceAll('\\', '/').replace(ROUTE_FILE_RE, '');
+  const path = relativePath.replaceAll("\\", "/").replace(ROUTE_FILE_RE, "");
 
-  const segments = path.split('/');
-  if (segments.at(-1) === 'index') {
+  const segments = path.split("/");
+  if (segments.at(-1) === "index") {
     segments.pop();
   }
 
   const params: string[] = [];
   let catchAll = false;
   const converted = segments
-    .filter((segment) => !(segment.startsWith('(') && segment.endsWith(')')))
+    .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
     .map((segment) => {
-      if (segment.startsWith('[...') && segment.endsWith(']')) {
+      if (segment.startsWith("[...") && segment.endsWith("]")) {
         const name = segment.slice(4, -1);
         params.push(name);
         catchAll = true;
         // Hono では `:name{.+}` で「残りのパス全部」にマッチする
         return `:${name}{.+}`;
       }
-      if (segment.startsWith('[') && segment.endsWith(']')) {
+      if (segment.startsWith("[") && segment.endsWith("]")) {
         const name = segment.slice(1, -1);
         params.push(name);
         return `:${name}`;
@@ -52,7 +52,7 @@ export function parseRouteFilename(relativePath: string): RouteDefinition {
     });
 
   return {
-    pattern: '/' + converted.join('/'),
+    pattern: "/" + converted.join("/"),
     params,
     catchAll,
     filePath: relativePath,

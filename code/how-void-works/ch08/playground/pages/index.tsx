@@ -1,4 +1,4 @@
-import type { Props } from './index.server.ts';
+import type { Props } from "./index.server.ts";
 
 export default function Home({ title, renderedAt }: Props) {
   return (

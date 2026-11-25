@@ -1,8 +1,8 @@
-import type { Plugin } from 'vite';
-import { compileRouteTable } from './router/compile.ts';
+import type { Plugin } from "vite";
+import { compileRouteTable } from "./router/compile.ts";
 
-const VIRTUAL_ROUTES_ID = 'virtual:chibivoid-routes';
-const RESOLVED_VIRTUAL_ROUTES_ID = '\0' + VIRTUAL_ROUTES_ID;
+const VIRTUAL_ROUTES_ID = "virtual:chibivoid-routes";
+const RESOLVED_VIRTUAL_ROUTES_ID = "\0" + VIRTUAL_ROUTES_ID;
 
 /**
  * ルーティングを担当するプラグイン。
@@ -10,9 +10,9 @@ const RESOLVED_VIRTUAL_ROUTES_ID = '\0' + VIRTUAL_ROUTES_ID;
  */
 export function routingPlugin(): Plugin {
   return {
-    name: 'chibivoid:routing',
-    // Vite 本体の解決処理より先に動いてほしいため 'pre'
-    enforce: 'pre',
+    name: "chibivoid:routing",
+    // Vite 本体の解決処理より先に動いてほしいため "pre"
+    enforce: "pre",
 
     resolveId(id) {
       if (id === VIRTUAL_ROUTES_ID) {

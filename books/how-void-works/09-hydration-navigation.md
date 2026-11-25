@@ -34,10 +34,10 @@ title: "Pages (2): ハイドレーションとクライアント遷移"
 <!-- diff: code/how-void-works/ch08/packages/chibivoid/src/pages/plugin.ts code/how-void-works/ch09/packages/chibivoid/src/pages/plugin.ts -->
 ```diff ts:packages/chibivoid/src/pages/plugin.ts
 @@ -2,12 +2,15 @@
- import { scanPages, type PageScanResult } from './scan.ts';
+ import { scanPages, type PageScanResult } from "./scan.ts";
  
- export const RENDERER_ID = 'virtual:chibivoid-pages-renderer';
-+export const CLIENT_ENTRY_ID = 'virtual:chibivoid-pages-client';
+ export const RENDERER_ID = "virtual:chibivoid-pages-renderer";
++export const CLIENT_ENTRY_ID = "virtual:chibivoid-pages-client";
  
  type CreatePagesPluginOptions = {
    /** プラグイン名。例: "chibivoid-react:pages" */
@@ -55,14 +55,14 @@ title: "Pages (2): ハイドレーションとクライアント遷移"
      resolveId(id) {
 -      if (id === RENDERER_ID) {
 +      if (id === RENDERER_ID || id === CLIENT_ENTRY_ID) {
-         return '\0' + id;
+         return "\0" + id;
        }
      },
 @@ -44,19 +47,24 @@
-       if (id === '\0' + RENDERER_ID) {
+       if (id === "\0" + RENDERER_ID) {
          return options.generateRenderer(scan, isDev);
        }
-+      if (id === '\0' + CLIENT_ENTRY_ID) {
++      if (id === "\0" + CLIENT_ENTRY_ID) {
 +        return options.generateClient(scan);
 +      }
      },
@@ -71,15 +71,15 @@ title: "Pages (2): ハイドレーションとクライアント遷移"
 -      // ページが追加・削除された場合は、仮想モジュールを作り直してもらう
 +      // ページが追加・削除された場合は、2 つの仮想モジュールを作り直してもらう
        const onStructureChange = (file: string) => {
-         if (!normalizePath(file).startsWith(normalizedPagesDir + '/')) {
+         if (!normalizePath(file).startsWith(normalizedPagesDir + "/")) {
            return;
          }
          scan = scanPages(pagesDir);
          for (const environment of Object.values(server.environments)) {
--          const mod = environment.moduleGraph.getModuleById('\0' + RENDERER_ID);
+-          const mod = environment.moduleGraph.getModuleById("\0" + RENDERER_ID);
 -          if (mod) {
 -            environment.moduleGraph.invalidateModule(mod);
-+          for (const id of ['\0' + RENDERER_ID, '\0' + CLIENT_ENTRY_ID]) {
++          for (const id of ["\0" + RENDERER_ID, "\0" + CLIENT_ENTRY_ID]) {
 +            const mod = environment.moduleGraph.getModuleById(id);
 +            if (mod) {
 +              environment.moduleGraph.invalidateModule(mod);
@@ -98,11 +98,11 @@ title: "Pages (2): ハイドレーションとクライアント遷移"
 ```diff ts:packages/chibivoid/src/pages/index.ts
 @@ -1,5 +1,5 @@
  // フレームワークアダプター（@chibivoid/react など）の Vite プラグインが使う、Node.js 側の API。
--export { createPagesPlugin, RENDERER_ID } from './plugin.ts';
-+export { createPagesPlugin, CLIENT_ENTRY_ID, RENDERER_ID } from './plugin.ts';
- export { generateComponentManifest } from './manifest.ts';
- export { scanPages, resolveLayoutIds } from './scan.ts';
- export type { PageDefinition, LayoutDefinition, PageScanResult } from './scan.ts';
+-export { createPagesPlugin, RENDERER_ID } from "./plugin.ts";
++export { createPagesPlugin, CLIENT_ENTRY_ID, RENDERER_ID } from "./plugin.ts";
+ export { generateComponentManifest } from "./manifest.ts";
+ export { scanPages, resolveLayoutIds } from "./scan.ts";
+ export type { PageDefinition, LayoutDefinition, PageScanResult } from "./scan.ts";
 ```
 <!-- /diff -->
 
@@ -112,10 +112,10 @@ title: "Pages (2): ハイドレーションとクライアント遷移"
 
 <!-- file: code/how-void-works/ch09/packages/chibivoid/src/runtime/routing-assets.ts -->
 ```ts:packages/chibivoid/src/runtime/routing-assets.ts
-import type { AssetTags } from '../pages/protocol.ts';
+import type { AssetTags } from "../pages/protocol.ts";
 
 /** ブラウザ用のエントリの仮想モジュール ID（pages/plugin.ts と同じ値） */
-const CLIENT_ENTRY_ID = 'virtual:chibivoid-pages-client';
+const CLIENT_ENTRY_ID = "virtual:chibivoid-pages-client";
 
 /**
  * ページの HTML に入れる <script> タグを作る関数を返す。
@@ -125,7 +125,7 @@ export function createPagesAssetTags(options: { dev: boolean }) {
   return async (_request: Request, _env: unknown): Promise<AssetTags> => {
     if (!options.dev) {
       // 本番ビルドへの対応は第 12 章でおこなう
-      return { head: '', body: '' };
+      return { head: "", body: "" };
     }
     return {
       // HMR などを担当する Vite のクライアント
@@ -150,10 +150,10 @@ export function createPagesAssetTags(options: { dev: boolean }) {
 <!-- diff: code/how-void-works/ch08/packages/chibivoid/src/runtime/routing.ts code/how-void-works/ch09/packages/chibivoid/src/runtime/routing.ts -->
 ```diff ts:packages/chibivoid/src/runtime/routing.ts
 @@ -4,6 +4,8 @@
- import { withRuntimeEnv } from './env.ts';
- import { convertReturnValue } from './response.ts';
+ import { withRuntimeEnv } from "./env.ts";
+ import { convertReturnValue } from "./response.ts";
  
-+export { createPagesAssetTags } from './routing-assets.ts';
++export { createPagesAssetTags } from "./routing-assets.ts";
 +
  type RouteModule = Record<string, ((c: Context) => unknown) | undefined>;
  
@@ -172,9 +172,9 @@ export function createPagesAssetTags(options: { dev: boolean }) {
 -    `import { createModuleLoader, createHttpRouteHandler, createPageGetHandler } from "chibivoid/runtime/routing";`,
 +    `import { createModuleLoader, createHttpRouteHandler, createPageGetHandler, createPagesAssetTags } from "chibivoid/runtime/routing";`,
    ];
-   const body: string[] = ['const app = new Hono();'];
+   const body: string[] = ["const app = new Hono();"];
    // 本番ではロードしたモジュールをキャッシュし、開発中は毎回インポートし直す
-@@ -72,8 +72,8 @@
+@@ -74,8 +74,8 @@
  ): void {
    // ページの描画方法はフレームワークアダプター（@chibivoid/react など）が提供する
    imports.push(`import { renderPage } from "virtual:chibivoid-pages-renderer";`);
@@ -184,7 +184,7 @@ export function createPagesAssetTags(options: { dev: boolean }) {
 +  body.push(`const getAssetTags = createPagesAssetTags({ dev: ${options.dev} });`);
  
    pages.pages.forEach((page, i) => {
-     let load = 'undefined';
+     let load = "undefined";
 ```
 <!-- /diff -->
 
@@ -232,7 +232,7 @@ sequenceDiagram
  
 +/** クライアント遷移（fetch）からのリクエストかどうか */
 +function isPagesRequest(c: Context): boolean {
-+  return c.req.header('X-ChibivoidPages') === 'true';
++  return c.req.header("X-ChibivoidPages") === "true";
 +}
 +
 +/**
@@ -244,13 +244,13 @@ sequenceDiagram
 +  pageObj: PageObject,
 +  options: PageRouteOptions,
 +): Promise<Response> {
-+  const headers = new Headers({ Vary: 'X-ChibivoidPages' });
++  const headers = new Headers({ Vary: "X-ChibivoidPages" });
 +  if (isPagesRequest(c)) {
-+    headers.set('X-ChibivoidPages', 'true');
++    headers.set("X-ChibivoidPages", "true");
 +    return Response.json(pageObj, { headers });
 +  }
 +  const html = await options.render(pageObj, await options.assets(c.req.raw, c.env));
-+  headers.set('Content-Type', 'text/html; charset=utf-8');
++  headers.set("Content-Type", "text/html; charset=utf-8");
 +  return new Response(html, { headers });
 +}
 +
@@ -272,7 +272,7 @@ sequenceDiagram
    }
 -  const pageObj = createPageObject(c, options.componentId, props);
 -  const html = await options.render(pageObj, await options.assets(c.req.raw, c.env));
--  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+-  return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
 +  return respondWithPage(c, createPageObject(c, options.componentId, props), options);
  }
 ```
@@ -296,7 +296,7 @@ sequenceDiagram
 ```ts:packages/chibivoid/src/pages/client.ts
 // ブラウザで動く、フレームワーク非依存のナビゲーションエンジン。
 // React、Vue、Svelte、Solid のアダプターが共通で使う想定の部分。
-import type { PageObject } from './protocol.ts';
+import type { PageObject } from "./protocol.ts";
 
 export type { PageObject };
 
@@ -312,9 +312,9 @@ export type Router = {
 
 /** サーバーが HTML に埋め込んだ、最初のページオブジェクトを読む */
 export function readInitialPage(): PageObject {
-  const element = document.getElementById('__CHIBIVOID_PAGE_DATA__');
+  const element = document.getElementById("__CHIBIVOID_PAGE_DATA__");
   if (!element?.textContent) {
-    throw new Error('pages: #__CHIBIVOID_PAGE_DATA__ が見つかりません');
+    throw new Error("pages: #__CHIBIVOID_PAGE_DATA__ が見つかりません");
   }
   return JSON.parse(element.textContent) as PageObject;
 }
@@ -336,13 +336,13 @@ export function createRouter(options: {
 
     // 「HTML ではなくページオブジェクト（JSON）をください」という合図のヘッダー
     const response = await fetch(url, {
-      headers: { 'X-ChibivoidPages': 'true', Accept: 'application/json' },
+      headers: { "X-ChibivoidPages": "true", Accept: "application/json" },
     });
     if (visitId !== latestVisit) {
       // 待っている間に別の遷移が始まったため、この結果は捨てる
       return undefined;
     }
-    if (response.headers.get('X-ChibivoidPages') !== 'true') {
+    if (response.headers.get("X-ChibivoidPages") !== "true") {
       // ページ以外（API のエラーなど）が返ってきた場合は、通常の画面遷移に切り替える
       location.href = response.url;
       return undefined;
@@ -353,18 +353,18 @@ export function createRouter(options: {
 
     if (updateHistory) {
       if (page.url !== currentUrl()) {
-        history.pushState({ chibivoidPage: true }, '', page.url);
+        history.pushState({ chibivoidPage: true }, "", page.url);
       } else {
-        history.replaceState({ chibivoidPage: true }, '', page.url);
+        history.replaceState({ chibivoidPage: true }, "", page.url);
       }
       window.scrollTo(0, 0);
     }
     return page;
   }
 
-  history.replaceState({ chibivoidPage: true }, '');
+  history.replaceState({ chibivoidPage: true }, "");
   // ブラウザの「戻る」、「進む」では、その URL のページを取り直す
-  window.addEventListener('popstate', () => {
+  window.addEventListener("popstate", () => {
     void visit(currentUrl(), { history: false });
   });
 
@@ -409,8 +409,8 @@ export function createRouter(options: {
 <!-- diff: code/how-void-works/ch08/packages/react/src/plugin.ts code/how-void-works/ch09/packages/react/src/plugin.ts -->
 ```diff ts:packages/react/src/plugin.ts
 @@ -4,6 +4,18 @@
- import { createPagesPlugin, generateComponentManifest } from 'chibivoid/pages';
- import { normalizePath, type PluginOption, type UserConfig } from 'vite';
+ import { createPagesPlugin, generateComponentManifest } from "chibivoid/pages";
+ import { normalizePath, type PluginOption, type UserConfig } from "vite";
  
 +/**
 + * サーバーで描画した HTML には、@vitejs/plugin-react が通常 index.html に差し込む
@@ -426,16 +426,16 @@ export function createRouter(options: {
 +
  /** chibivoid の React アダプター。`plugins: [chibivoidPlugin(), chibivoidReact()]` のように使う */
  export function chibivoidReact(): PluginOption[] {
-   const pagesDir = normalizePath(join(process.cwd(), 'pages'));
+   const pagesDir = normalizePath(join(process.cwd(), "pages"));
 @@ -14,20 +26,32 @@
-       name: 'chibivoid-react:pages',
+       name: "chibivoid-react:pages",
  
        // サーバー（Worker）で HTML を描画するモジュール
 -      generateRenderer(scan) {
 +      generateRenderer(scan, isDev) {
          return `import { renderReactPage } from "@chibivoid/react/pages-server";
  ${generateComponentManifest(scan, pagesDir)}
-+const preamble = ${JSON.stringify(isDev ? REACT_REFRESH_PREAMBLE : '')};
++const preamble = ${JSON.stringify(isDev ? REACT_REFRESH_PREAMBLE : "")};
  export function renderPage(pageObj, assetTags) {
 -  return renderReactPage({ pageObj, assetTags, components, layoutTree });
 +  return renderReactPage({ pageObj, assetTags, components, layoutTree, preamble });
@@ -457,10 +457,10 @@ export function createRouter(options: {
            return {
              environments: {
 +              client: {
-+                optimizeDeps: { include: ['react', 'react-dom/client', 'react/jsx-dev-runtime'] },
++                optimizeDeps: { include: ["react", "react-dom/client", "react/jsx-dev-runtime"] },
 +              },
                [WORKER_ENVIRONMENT_NAME]: {
-                 optimizeDeps: { include: ['react', 'react-dom/server', 'react/jsx-dev-runtime'] },
+                 optimizeDeps: { include: ["react", "react-dom/server", "react/jsx-dev-runtime"] },
                },
 ```
 <!-- /diff -->
@@ -514,9 +514,9 @@ startReactPages({ components, layoutTree });
 <!-- diff: code/how-void-works/ch08/packages/react/src/runtime/context.ts code/how-void-works/ch09/packages/react/src/runtime/context.ts -->
 ```diff ts:packages/react/src/runtime/context.ts
 @@ -1,5 +1,8 @@
- import { createContext } from 'react';
--import type { PageObject } from 'chibivoid/pages-protocol';
-+import type { PageObject, Router } from 'chibivoid/pages-client';
+ import { createContext } from "react";
+-import type { PageObject } from "chibivoid/pages-protocol";
++import type { PageObject, Router } from "chibivoid/pages-client";
 +
 +/** クライアント遷移に使うルーター（サーバーでの描画中は null） */
 +export const RouterContext = createContext<Router | null>(null);
@@ -533,11 +533,11 @@ startReactPages({ components, layoutTree });
 @@ -1,7 +1,7 @@
 -// ページの組み立て部分。第 9 章ではブラウザでのハイドレーションにも使う。
 +// サーバーでの描画とブラウザでのハイドレーションの両方で使う、ページの組み立て部分。
- import type { ComponentType, ReactNode } from 'react';
--import type { PageObject } from 'chibivoid/pages-protocol';
--import { PageContext } from './context.ts';
-+import type { PageObject, Router } from 'chibivoid/pages-client';
-+import { PageContext, RouterContext } from './context.ts';
+ import type { ComponentType, ReactNode } from "react";
+-import type { PageObject } from "chibivoid/pages-protocol";
+-import { PageContext } from "./context.ts";
++import type { PageObject, Router } from "chibivoid/pages-client";
++import { PageContext, RouterContext } from "./context.ts";
  
  type ComponentModule = { default: ComponentType<any> };
  export type ComponentMap = Record<string, () => Promise<ComponentModule>>;
@@ -606,10 +606,10 @@ startReactPages({ components, layoutTree });
 ```tsx:packages/react/src/runtime/pages-client.tsx
 // ブラウザで、サーバーが描画した HTML を React に引き継がせ（ハイドレーション）、
 // 以後のページ遷移をクライアント側でおこなう。
-import { flushSync } from 'react-dom';
-import { hydrateRoot } from 'react-dom/client';
-import { createRouter, readInitialPage } from 'chibivoid/pages-client';
-import { loadPageModules, PageView, type ComponentMap, type LayoutTree } from './page-view.tsx';
+import { flushSync } from "react-dom";
+import { hydrateRoot } from "react-dom/client";
+import { createRouter, readInitialPage } from "chibivoid/pages-client";
+import { loadPageModules, PageView, type ComponentMap, type LayoutTree } from "./page-view.tsx";
 
 export async function startReactPages(options: {
   components: ComponentMap;
@@ -635,7 +635,7 @@ export async function startReactPages(options: {
 
   // 3. サーバーと同じものを描画して、既存の DOM を React に引き継がせる
   const root = hydrateRoot(
-    document.getElementById('app')!,
+    document.getElementById("app")!,
     <PageView page={initialPage} modules={initialModules} router={router} />,
   );
 }
@@ -654,8 +654,8 @@ export async function startReactPages(options: {
 
 <!-- file: code/how-void-works/ch09/packages/react/src/runtime/link.tsx -->
 ```tsx:packages/react/src/runtime/link.tsx
-import { useContext, type AnchorHTMLAttributes, type MouseEvent } from 'react';
-import { RouterContext } from './context.ts';
+import { useContext, type AnchorHTMLAttributes, type MouseEvent } from "react";
+import { RouterContext } from "./context.ts";
 
 export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
 
@@ -707,8 +707,8 @@ export function Link({ href, onClick, ...rest }: LinkProps) {
 <!-- diff: code/how-void-works/ch08/playground/pages/index.tsx code/how-void-works/ch09/playground/pages/index.tsx -->
 ```diff tsx:playground/pages/index.tsx
 @@ -1,10 +1,15 @@
-+import { useState } from 'react';
- import type { Props } from './index.server.ts';
++import { useState } from "react";
+ import type { Props } from "./index.server.ts";
  
  export default function Home({ title, renderedAt }: Props) {
 +  // ハイドレーションされると、このボタンが動くようになる

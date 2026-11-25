@@ -1,7 +1,7 @@
 // Worker の中で、ページを HTML 文字列に描画する。
-import { renderToReadableStream } from 'react-dom/server';
-import { serializePageData, type AssetTags, type PageObject } from 'chibivoid/pages-protocol';
-import { loadPageModules, PageView, type ComponentMap, type LayoutTree } from './page-view.tsx';
+import { renderToReadableStream } from "react-dom/server";
+import { serializePageData, type AssetTags, type PageObject } from "chibivoid/pages-protocol";
+import { loadPageModules, PageView, type ComponentMap, type LayoutTree } from "./page-view.tsx";
 
 export async function renderReactPage(options: {
   pageObj: PageObject;

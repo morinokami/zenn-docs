@@ -1,5 +1,5 @@
-import type { Context } from 'hono';
-import { ValidationError } from '../runtime/handler.ts';
+import type { Context } from "hono";
+import { ValidationError } from "../runtime/handler.ts";
 
 /**
  * サーバーからクライアントへ渡す「ページオブジェクト」。
@@ -40,13 +40,13 @@ export type PageRouteOptions = {
 /** `<script type="application/json">` に安全に埋め込めるように JSON をエスケープする */
 export function serializePageData(pageObj: PageObject): string {
   return JSON.stringify(pageObj).replace(/[<>&\u2028\u2029]/g, (char) => {
-    return `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`;
+    return `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`;
   });
 }
 
 /** クライアント遷移（fetch）からのリクエストかどうか */
 function isPagesRequest(c: Context): boolean {
-  return c.req.header('X-ChibivoidPages') === 'true';
+  return c.req.header("X-ChibivoidPages") === "true";
 }
 
 /**
@@ -58,13 +58,13 @@ async function respondWithPage(
   pageObj: PageObject,
   options: PageRouteOptions,
 ): Promise<Response> {
-  const headers = new Headers({ Vary: 'X-ChibivoidPages' });
+  const headers = new Headers({ Vary: "X-ChibivoidPages" });
   if (isPagesRequest(c)) {
-    headers.set('X-ChibivoidPages', 'true');
+    headers.set("X-ChibivoidPages", "true");
     return Response.json(pageObj, { headers });
   }
   const html = await options.render(pageObj, await options.assets(c.req.raw, c.env));
-  headers.set('Content-Type', 'text/html; charset=utf-8');
+  headers.set("Content-Type", "text/html; charset=utf-8");
   return new Response(html, { headers });
 }
 
@@ -125,7 +125,7 @@ export async function handlePageMutation(
   options: PageRouteOptions,
 ): Promise<Response> {
   if (!isSameOrigin(c.req.raw)) {
-    return new Response('Cross-origin page actions are not allowed.', { status: 403 });
+    return new Response("Cross-origin page actions are not allowed.", { status: 403 });
   }
   let errors: Record<string, string> | null = null;
   try {
@@ -149,10 +149,10 @@ export async function handlePageMutation(
 
 /** 別サイトのページから勝手にフォームを送信させる攻撃（CSRF）を防ぐ */
 function isSameOrigin(request: Request): boolean {
-  const origin = request.headers.get('Origin');
+  const origin = request.headers.get("Origin");
   if (origin !== null) {
     return origin === new URL(request.url).origin;
   }
-  const site = request.headers.get('Sec-Fetch-Site');
-  return !site || site === 'same-origin' || site === 'none';
+  const site = request.headers.get("Sec-Fetch-Site");
+  return !site || site === "same-origin" || site === "none";
 }

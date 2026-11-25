@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { Props } from './index.server.ts';
+import { useState } from "react";
+import type { Props } from "./index.server.ts";
 
 export default function Home({ title, renderedAt }: Props) {
   // ハイドレーションされると、このボタンが動くようになる

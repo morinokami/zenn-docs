@@ -1,11 +1,11 @@
-type SegmentKind = 'static' | 'param' | 'rest';
+type SegmentKind = "static" | "param" | "rest";
 
 /** パターンの 1 セグメントが「固定文字列」、「:param」、「残り全部」のどれかを判定する */
 function segmentKind(segment: string): SegmentKind {
-  if (segment === '*' || segment.endsWith('{.+}')) {
-    return 'rest';
+  if (segment === "*" || segment.endsWith("{.+}")) {
+    return "rest";
   }
-  return segment.startsWith(':') ? 'param' : 'static';
+  return segment.startsWith(":") ? "param" : "static";
 }
 
 const RANK: Record<SegmentKind, number> = { static: 0, param: 1, rest: 2 };
@@ -24,8 +24,8 @@ export function compareRouteSpecificity(
   if (a.catchAll !== b.catchAll) {
     return a.catchAll ? 1 : -1;
   }
-  const aSegments = a.pattern.split('/');
-  const bSegments = b.pattern.split('/');
+  const aSegments = a.pattern.split("/");
+  const bSegments = b.pattern.split("/");
   const shared = Math.min(aSegments.length, bSegments.length);
   for (let i = 0; i < shared; i++) {
     const diff = RANK[segmentKind(aSegments[i])] - RANK[segmentKind(bSegments[i])];

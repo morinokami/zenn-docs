@@ -2,10 +2,10 @@
   "name": "chibivoid",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "bin": {
     "chibivoid": "./src/cli/cli.ts"
   },
+  "type": "module",
   "exports": {
     ".": "./src/index.ts",
     "./kv": "./src/runtime/kv.ts",

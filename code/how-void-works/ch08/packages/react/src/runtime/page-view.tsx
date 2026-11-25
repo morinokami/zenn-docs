@@ -1,7 +1,7 @@
 // ページの組み立て部分。第 9 章ではブラウザでのハイドレーションにも使う。
-import type { ComponentType, ReactNode } from 'react';
-import type { PageObject } from 'chibivoid/pages-protocol';
-import { PageContext } from './context.ts';
+import type { ComponentType, ReactNode } from "react";
+import type { PageObject } from "chibivoid/pages-protocol";
+import { PageContext } from "./context.ts";
 
 type ComponentModule = { default: ComponentType<any> };
 export type ComponentMap = Record<string, () => Promise<ComponentModule>>;

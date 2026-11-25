@@ -1,6 +1,6 @@
 // Worker の中で使われる軽量なランタイム。
-// `import { defineHandler } from 'chibivoid'` は、Worker ではこのファイルに解決される。
-import type { Context, MiddlewareHandler, Next } from 'hono';
+// `import { defineHandler } from "chibivoid"` は、Worker ではこのファイルに解決される。
+import type { Context, MiddlewareHandler, Next } from "hono";
 
 /** ハンドラーが受け取るコンテキスト（Hono の Context） */
 export type CloudContext = Context;

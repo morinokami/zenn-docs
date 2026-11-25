@@ -1,7 +1,7 @@
-import type { AssetTags } from '../pages/protocol.ts';
+import type { AssetTags } from "../pages/protocol.ts";
 
 /** ブラウザ用のエントリの仮想モジュール ID（pages/plugin.ts と同じ値） */
-const CLIENT_ENTRY_ID = 'virtual:chibivoid-pages-client';
+const CLIENT_ENTRY_ID = "virtual:chibivoid-pages-client";
 
 /** Vite がビルド時に出力する .vite/manifest.json のかたち（使う部分だけ） */
 type ViteManifest = Record<string, { file: string }>;
@@ -30,8 +30,8 @@ export function createPagesAssetTags(options: { dev: boolean }) {
     // マニフェストのキーはエントリのモジュール ID（ここでは仮想モジュールの ID）
     const entry = (await manifest)?.[CLIENT_ENTRY_ID];
     return {
-      head: '',
-      body: entry ? `<script type="module" src="/${entry.file}"></script>` : '',
+      head: "",
+      body: entry ? `<script type="module" src="/${entry.file}"></script>` : "",
     };
   };
 }
@@ -44,6 +44,6 @@ async function loadManifest(
   if (!assets) {
     return null;
   }
-  const response = await assets.fetch(new URL('/.vite/manifest.json', request.url).toString());
+  const response = await assets.fetch(new URL("/.vite/manifest.json", request.url).toString());
   return response.ok ? ((await response.json()) as ViteManifest) : null;
 }

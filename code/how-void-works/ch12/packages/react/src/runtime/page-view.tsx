@@ -1,7 +1,7 @@
 // サーバーでの描画とブラウザでのハイドレーションの両方で使う、ページの組み立て部分。
-import type { ComponentType, ReactNode } from 'react';
-import type { PageObject, Router } from 'chibivoid/pages-client';
-import { PageContext, RouterContext } from './context.ts';
+import type { ComponentType, ReactNode } from "react";
+import type { PageObject, Router } from "chibivoid/pages-client";
+import { PageContext, RouterContext } from "./context.ts";
 
 type ComponentModule = { default: ComponentType<any> };
 export type ComponentMap = Record<string, () => Promise<ComponentModule>>;

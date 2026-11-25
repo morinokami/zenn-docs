@@ -6,10 +6,10 @@ Void では、[`routes/`](https://void.cloud/guide/server-routing) にファイ�
 
 ```ts
 // routes/api/hello.ts → GET /api/hello
-import { defineHandler } from 'void';
+import { defineHandler } from "void";
 
 export const GET = defineHandler(() => {
-  return { message: 'Hello from Void' };
+  return { message: "Hello from Void" };
 });
 ```
 
@@ -21,7 +21,7 @@ export const GET = defineHandler(() => {
 - ファイルを実行せずに、どの HTTP メソッドがエクスポートされているかを調べる
 - スキャン結果から Hono アプリのコードを生成する
 - `defineHandler()` と、ハンドラーの戻り値を `Response` に変換するしくみを実装する
-- `import { defineHandler } from 'chibivoid'` を Worker の中で別のファイルに差し替える理由を理解する
+- `import { defineHandler } from "chibivoid"` を Worker の中で別のファイルに差し替える理由を理解する
 
 ## 全体の設計
 
@@ -93,26 +93,26 @@ export const ROUTE_FILE_RE = /\.(ts|tsx|js|jsx|mts|mjs)$/;
  * 5. 先頭に / を付ける
  */
 export function parseRouteFilename(relativePath: string): RouteDefinition {
-  const path = relativePath.replaceAll('\\', '/').replace(ROUTE_FILE_RE, '');
+  const path = relativePath.replaceAll("\\", "/").replace(ROUTE_FILE_RE, "");
 
-  const segments = path.split('/');
-  if (segments.at(-1) === 'index') {
+  const segments = path.split("/");
+  if (segments.at(-1) === "index") {
     segments.pop();
   }
 
   const params: string[] = [];
   let catchAll = false;
   const converted = segments
-    .filter((segment) => !(segment.startsWith('(') && segment.endsWith(')')))
+    .filter((segment) => !(segment.startsWith("(") && segment.endsWith(")")))
     .map((segment) => {
-      if (segment.startsWith('[...') && segment.endsWith(']')) {
+      if (segment.startsWith("[...") && segment.endsWith("]")) {
         const name = segment.slice(4, -1);
         params.push(name);
         catchAll = true;
         // Hono では `:name{.+}` で「残りのパス全部」にマッチする
         return `:${name}{.+}`;
       }
-      if (segment.startsWith('[') && segment.endsWith(']')) {
+      if (segment.startsWith("[") && segment.endsWith("]")) {
         const name = segment.slice(1, -1);
         params.push(name);
         return `:${name}`;
@@ -121,7 +121,7 @@ export function parseRouteFilename(relativePath: string): RouteDefinition {
     });
 
   return {
-    pattern: '/' + converted.join('/'),
+    pattern: "/" + converted.join("/"),
     params,
     catchAll,
     filePath: relativePath,
@@ -141,14 +141,14 @@ Hono は、[先に登録されたルートから順に](https://hono.dev/docs/ap
 
 <!-- file: code/how-void-works/ch05/packages/chibivoid/src/router/route-order.ts -->
 ```ts:packages/chibivoid/src/router/route-order.ts
-type SegmentKind = 'static' | 'param' | 'rest';
+type SegmentKind = "static" | "param" | "rest";
 
 /** パターンの 1 セグメントが「固定文字列」、「:param」、「残り全部」のどれかを判定する */
 function segmentKind(segment: string): SegmentKind {
-  if (segment === '*' || segment.endsWith('{.+}')) {
-    return 'rest';
+  if (segment === "*" || segment.endsWith("{.+}")) {
+    return "rest";
   }
-  return segment.startsWith(':') ? 'param' : 'static';
+  return segment.startsWith(":") ? "param" : "static";
 }
 
 const RANK: Record<SegmentKind, number> = { static: 0, param: 1, rest: 2 };
@@ -167,8 +167,8 @@ export function compareRouteSpecificity(
   if (a.catchAll !== b.catchAll) {
     return a.catchAll ? 1 : -1;
   }
-  const aSegments = a.pattern.split('/');
-  const bSegments = b.pattern.split('/');
+  const aSegments = a.pattern.split("/");
+  const bSegments = b.pattern.split("/");
   const shared = Math.min(aSegments.length, bSegments.length);
   for (let i = 0; i < shared; i++) {
     const diff = RANK[segmentKind(aSegments[i])] - RANK[segmentKind(bSegments[i])];
@@ -205,11 +205,11 @@ export function compareRouteSpecificity(
 
 <!-- file: code/how-void-works/ch05/packages/chibivoid/src/router/detect-exports.ts -->
 ```ts:packages/chibivoid/src/router/detect-exports.ts
-import { readFileSync } from 'node:fs';
-import { basename } from 'node:path';
-import { parseSync } from 'vite';
+import { readFileSync } from "node:fs";
+import { basename } from "node:path";
+import { parseSync } from "vite";
 
-const HTTP_METHODS = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']);
+const HTTP_METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
 
 /**
  * ファイルを「実行せずに」解析して、エクスポートされている値の名前を列挙する。
@@ -217,7 +217,7 @@ const HTTP_METHODS = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'
  * ESM のインポートとエクスポートの一覧（`module`）も一緒に返してくれる。
  */
 export function detectExports(absPath: string): string[] {
-  const code = readFileSync(absPath, 'utf8');
+  const code = readFileSync(absPath, "utf8");
   const { module, errors } = parseSync(basename(absPath), code);
   if (errors.length > 0) {
     return [];
@@ -257,8 +257,8 @@ mkdir -p packages/chibivoid/src/shared
 
 <!-- file: code/how-void-works/ch05/packages/chibivoid/src/shared/list-files.ts -->
 ```ts:packages/chibivoid/src/shared/list-files.ts
-import { existsSync, readdirSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { existsSync, readdirSync } from "node:fs";
+import { join, relative } from "node:path";
 
 /**
  * ディレクトリ配下のファイルを再帰的に列挙する（スラッシュ区切りの相対パス）。
@@ -270,8 +270,8 @@ export function listFiles(dir: string): string[] {
   }
   return readdirSync(dir, { recursive: true, withFileTypes: true })
     .filter((entry) => entry.isFile())
-    .map((entry) => relative(dir, join(entry.parentPath, entry.name)).replaceAll('\\', '/'))
-    .filter((file) => !file.split('/').some((segment) => /^[_.]/.test(segment)))
+    .map((entry) => relative(dir, join(entry.parentPath, entry.name)).replaceAll("\\", "/"))
+    .filter((file) => !file.split("/").some((segment) => /^[_.]/.test(segment)))
     .sort();
 }
 ```
@@ -283,11 +283,11 @@ export function listFiles(dir: string): string[] {
 
 <!-- file: code/how-void-works/ch05/packages/chibivoid/src/router/scan.ts -->
 ```ts:packages/chibivoid/src/router/scan.ts
-import { join } from 'node:path';
-import { listFiles } from '../shared/list-files.ts';
-import { detectHttpExports } from './detect-exports.ts';
-import { parseRouteFilename, ROUTE_FILE_RE, type RouteDefinition } from './parse-filename.ts';
-import { compareRouteSpecificity } from './route-order.ts';
+import { join } from "node:path";
+import { listFiles } from "../shared/list-files.ts";
+import { detectHttpExports } from "./detect-exports.ts";
+import { parseRouteFilename, ROUTE_FILE_RE, type RouteDefinition } from "./parse-filename.ts";
+import { compareRouteSpecificity } from "./route-order.ts";
 
 export type ProjectPaths = {
   routesDir: string;
@@ -329,8 +329,8 @@ export function scanApp(paths: ProjectPaths): ScanResult {
 <!-- file: code/how-void-works/ch05/packages/chibivoid/src/runtime/handler.ts -->
 ```ts:packages/chibivoid/src/runtime/handler.ts
 // Worker の中で使われる軽量なランタイム。
-// `import { defineHandler } from 'chibivoid'` は、Worker ではこのファイルに解決される。
-import type { Context } from 'hono';
+// `import { defineHandler } from "chibivoid"` は、Worker ではこのファイルに解決される。
+import type { Context } from "hono";
 
 /** ハンドラーが受け取るコンテキスト（Hono の Context） */
 export type CloudContext = Context;
@@ -376,8 +376,8 @@ export function convertReturnValue(value: unknown): Response {
   if (value === null || value === undefined) {
     return new Response(null, { status: 204 });
   }
-  if (typeof value === 'string') {
-    return new Response(value, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  if (typeof value === "string") {
+    return new Response(value, { headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
   return Response.json(value);
 }
@@ -402,8 +402,8 @@ export function convertReturnValue(value: unknown): Response {
 <!-- file: code/how-void-works/ch05/packages/chibivoid/src/runtime/routing.ts -->
 ```ts:packages/chibivoid/src/runtime/routing.ts
 // 生成されたルートテーブル（virtual:chibivoid-routes）と Worker エントリから呼ばれる実行時の関数。
-import type { Context, ExecutionContext, Hono } from 'hono';
-import { convertReturnValue } from './response.ts';
+import type { Context, ExecutionContext, Hono } from "hono";
+import { convertReturnValue } from "./response.ts";
 
 type RouteModule = Record<string, ((c: Context) => unknown) | undefined>;
 
@@ -428,7 +428,7 @@ export function createHttpRouteHandler(load: () => Promise<RouteModule>, method:
   return async (c: Context): Promise<Response> => {
     const handler = (await load())[method];
     if (!handler) {
-      return c.text('Method Not Allowed', 405);
+      return c.text("Method Not Allowed", 405);
     }
     return convertReturnValue(await handler(c));
   };
@@ -445,7 +445,7 @@ export function createWorkerFetch(app: Hono) {
 ```
 <!-- /file -->
 
-`createModuleLoader()` は、`() => import('...')` を包んで、最初に呼ばれた際にモジュールを読み込む関数を返します。ルートのファイルを最初からすべてインポートせず、リクエストが来た際に初めて読み込む（遅延ロード）ためです。Worker は起動の速さが大切であるため、使わないルートのコードを評価しないで済むのは大きな利点です。
+`createModuleLoader()` は、`() => import("...")` を包んで、最初に呼ばれた際にモジュールを読み込む関数を返します。ルートのファイルを最初からすべてインポートせず、リクエストが来た際に初めて読み込む（遅延ロード）ためです。Worker は起動の速さが大切であるため、使わないルートのコードを評価しないで済むのは大きな利点です。
 
 `cache` が `true` であれば、一度読み込んだモジュールを使い回します。開発中（`cache` が `false`）は毎回インポートし直すため、ファイルを書き換えて Vite がそのモジュールを無効化した後は、次の `import()` により新しい内容が読み込まれます。
 
@@ -457,7 +457,7 @@ export function createWorkerFetch(app: Hono) {
 
 <!-- file: code/how-void-works/ch05/packages/chibivoid/src/router/compile.ts -->
 ```ts:packages/chibivoid/src/router/compile.ts
-import type { ProjectPaths, ScanResult } from './scan.ts';
+import type { ProjectPaths, ScanResult } from "./scan.ts";
 
 export type CompileOptions = ProjectPaths & {
   /** `vite dev` 用にコンパイルするか */
@@ -474,8 +474,8 @@ const str = (value: string) => JSON.stringify(value);
  */
 export function compileWorkerEntry(): string {
   return `// chibivoid が自動生成したファイルです。編集しないでください。
-import app from 'virtual:chibivoid-routes';
-import { createWorkerFetch } from 'chibivoid/runtime/routing';
+import app from "virtual:chibivoid-routes";
+import { createWorkerFetch } from "chibivoid/runtime/routing";
 
 export default {
   fetch: createWorkerFetch(app),
@@ -492,7 +492,7 @@ export function compileRouteTable(scan: ScanResult, options: CompileOptions): st
     `import { Hono } from "hono";`,
     `import { createModuleLoader, createHttpRouteHandler } from "chibivoid/runtime/routing";`,
   ];
-  const body: string[] = ['const app = new Hono();'];
+  const body: string[] = ["const app = new Hono();"];
   // 本番ではロードしたモジュールをキャッシュし、開発中は毎回インポートし直す
   const cache = !options.dev;
 
@@ -508,7 +508,7 @@ export function compileRouteTable(scan: ScanResult, options: CompileOptions): st
     }
   });
 
-  return [...imports, '', ...body, '', 'export default app;', ''].join('\n');
+  return [...imports, "", ...body, "", "export default app;", ""].join("\n");
 }
 ```
 <!-- /file -->
@@ -539,7 +539,7 @@ export default app;
 
 `/api/users/me` が `/api/users/:id` より先に登録されていることがわかります。また、`createModuleLoader()` の 2 つ目の引数（`cache`）は `false` です。`vite build` により生成されるコードでは、これが `true` になります。
 
-仮想モジュールはディスク上の場所をもたないため、`import('./routes/...')` のような相対パスには、基準になるディレクトリがありません。そのため、ルートのファイルは絶対パスでインポートしています。
+仮想モジュールはディスク上の場所をもたないため、`import("./routes/...")` のような相対パスには、基準になるディレクトリがありません。そのため、ルートのファイルは絶対パスでインポートしています。
 
 ## ステップ 7: プラグインにつなぐ
 
@@ -547,17 +547,17 @@ export default app;
 
 <!-- file: code/how-void-works/ch05/packages/chibivoid/src/plugin-routing.ts -->
 ```ts:packages/chibivoid/src/plugin-routing.ts
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { normalizePath, type Plugin } from 'vite';
-import { compileRouteTable } from './router/compile.ts';
-import { scanApp, type ProjectPaths, type ScanResult } from './router/scan.ts';
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { normalizePath, type Plugin } from "vite";
+import { compileRouteTable } from "./router/compile.ts";
+import { scanApp, type ProjectPaths, type ScanResult } from "./router/scan.ts";
 
-const VIRTUAL_ROUTES_ID = 'virtual:chibivoid-routes';
-const RESOLVED_VIRTUAL_ROUTES_ID = '\0' + VIRTUAL_ROUTES_ID;
+const VIRTUAL_ROUTES_ID = "virtual:chibivoid-routes";
+const RESOLVED_VIRTUAL_ROUTES_ID = "\0" + VIRTUAL_ROUTES_ID;
 
 /** Worker で使う軽量なランタイム（defineHandler など）の実ファイル */
-const HANDLER_PATH = fileURLToPath(new URL('./runtime/handler.ts', import.meta.url));
+const HANDLER_PATH = fileURLToPath(new URL("./runtime/handler.ts", import.meta.url));
 
 /**
  * ファイルベースルーティングを担当するプラグイン。
@@ -566,7 +566,7 @@ const HANDLER_PATH = fileURLToPath(new URL('./runtime/handler.ts', import.meta.u
  */
 export function routingPlugin(root: string): Plugin {
   const paths: ProjectPaths = {
-    routesDir: normalizePath(join(root, 'routes')),
+    routesDir: normalizePath(join(root, "routes")),
   };
   let scan: ScanResult | undefined;
   let dev = false;
@@ -577,13 +577,13 @@ export function routingPlugin(root: string): Plugin {
   }
 
   return {
-    name: 'chibivoid:routing',
-    // Vite 本体の解決処理より先に動いてほしいため 'pre'
-    enforce: 'pre',
+    name: "chibivoid:routing",
+    // Vite 本体の解決処理より先に動いてほしいため "pre"
+    enforce: "pre",
 
     config(_config, env) {
       // `vite dev` の場合だけ true（`vite preview` は本番ビルドを動かすため false）
-      dev = env.command === 'serve' && !env.isPreview;
+      dev = env.command === "serve" && !env.isPreview;
     },
 
     buildStart() {
@@ -594,10 +594,10 @@ export function routingPlugin(root: string): Plugin {
       if (id === VIRTUAL_ROUTES_ID) {
         return RESOLVED_VIRTUAL_ROUTES_ID;
       }
-      // `import { defineHandler } from 'chibivoid'` は Vite プラグイン本体（index.ts）を指す。
+      // `import { defineHandler } from "chibivoid"` は Vite プラグイン本体（index.ts）を指す。
       // そのまま Worker にバンドルすると vite や wrangler まで引き込んでしまうため、
       // サーバー側の環境では軽量な runtime/handler.ts に差し替える。
-      if (id === 'chibivoid' && this.environment.config.consumer === 'server') {
+      if (id === "chibivoid" && this.environment.config.consumer === "server") {
         return HANDLER_PATH;
       }
     },
@@ -606,7 +606,7 @@ export function routingPlugin(root: string): Plugin {
       if (id !== RESOLVED_VIRTUAL_ROUTES_ID) {
         return;
       }
-      if (this.environment.config.consumer === 'client') {
+      if (this.environment.config.consumer === "client") {
         throw new Error(`${VIRTUAL_ROUTES_ID} はサーバー専用のモジュールです`);
       }
       return compileRouteTable(scan ?? rescan(), { ...paths, dev });
@@ -620,7 +620,7 @@ export function routingPlugin(root: string): Plugin {
 
 ### 1. `config` フックで開発サーバーかどうかを記録する
 
-[`env.command`](https://vite.dev/config/#conditional-config) は、`vite dev` と `vite preview` の場合は `'serve'`、`vite build` の場合は `'build'` です。`vite preview` は本番ビルドを動かすため、`isPreview` も見て、開発サーバーの場合だけ `dev = true` にしています。この `dev` は、生成するコードの `cache` フラグに使います。
+[`env.command`](https://vite.dev/config/#conditional-config) は、`vite dev` と `vite preview` の場合は `"serve"`、`vite build` の場合は `"build"` です。`vite preview` は本番ビルドを動かすため、`isPreview` も見て、開発サーバーの場合だけ `dev = true` にしています。この `dev` は、生成するコードの `cache` フラグに使います。
 
 ### 2. `buildStart` でスキャンする
 
@@ -628,11 +628,11 @@ export function routingPlugin(root: string): Plugin {
 
 ### 3. クライアント側からの読み込みを拒否する
 
-`virtual:chibivoid-routes` には、サーバーでしか使わないコードや情報（ファイルの絶対パスなど）が含まれます。そのため、ブラウザ用の環境（`consumer` が `'client'`）から読み込まれた場合は、エラーにします。Void も、`client` 環境からの読み込みをエラーにしています。
+`virtual:chibivoid-routes` には、サーバーでしか使わないコードや情報（ファイルの絶対パスなど）が含まれます。そのため、ブラウザ用の環境（`consumer` が `"client"`）から読み込まれた場合は、エラーにします。Void も、`client` 環境からの読み込みをエラーにしています。
 
 ### 4. `chibivoid` のインポートを差し替える
 
-ルートのファイルでは、`import { defineHandler } from 'chibivoid'` と記述します。`chibivoid` の `exports` の `"."` は `src/index.ts`、つまり Vite のプラグイン本体です。`index.ts` は `@cloudflare/vite-plugin` をインポートしており、その先には Wrangler やファイルシステムを使うコードが大量につながっています。
+ルートのファイルでは、`import { defineHandler } from "chibivoid"` と記述します。`chibivoid` の `exports` の `"."` は `src/index.ts`、つまり Vite のプラグイン本体です。`index.ts` は `@cloudflare/vite-plugin` をインポートしており、その先には Wrangler やファイルシステムを使うコードが大量につながっています。
 
 「ルートを作成して動かす」でルートのファイルを作成した後で、試しに `resolveId` の差し替えをコメントアウトしてビルドしてみると、次のようなエラーになるはずです:
 
@@ -658,9 +658,9 @@ Build failed with 1 error:
 
 `defineHandler()` を使いたかっただけにもかかわらず、Wrangler の CLI まで Worker にバンドルしようとして失敗しています。試した場合は、コメントアウトを外しておいてください。そのままにしておくと、開発サーバーでもルートのレスポンスが 500 Internal Server Error になります。
 
-`resolveId` の差し替えが効くのは、プラグインに `enforce: 'pre'` を付けているためです。第 2 章で見たように、インポートの行き先を探す Vite の組み込みプラグイン（`builtin:vite-resolve`）は、`enforce` を付けないプラグインより先に動きます。`chibivoid` は実在するパッケージであるため、`enforce: 'pre'` がないと、`routingPlugin()` の `resolveId` が呼ばれる前に Vite が `src/index.ts` に解決してしまいます。
+`resolveId` の差し替えが効くのは、プラグインに `enforce: "pre"` を付けているためです。第 2 章で見たように、インポートの行き先を探す Vite の組み込みプラグイン（`builtin:vite-resolve`）は、`enforce` を付けないプラグインより先に動きます。`chibivoid` は実在するパッケージであるため、`enforce: "pre"` がないと、`routingPlugin()` の `resolveId` が呼ばれる前に Vite が `src/index.ts` に解決してしまいます。
 
-そこで、`resolveId` では、サーバー側の環境（`consumer` が `'server'`）において `chibivoid` がインポートされた場合に、軽量な `runtime/handler.ts` に差し替えています。この節の最後で追加するように、`index.ts` は `defineHandler()` を `runtime/handler.ts` から再エクスポートするだけであるため、差し替えても利用者のコードは同じように動きます。差し替えた後のビルド結果は 60 KB ほどで、Wrangler は含まれていません。
+そこで、`resolveId` では、サーバー側の環境（`consumer` が `"server"`）において `chibivoid` がインポートされた場合に、軽量な `runtime/handler.ts` に差し替えています。この節の最後で追加するように、`index.ts` は `defineHandler()` を `runtime/handler.ts` から再エクスポートするだけであるため、差し替えても利用者のコードは同じように動きます。差し替えた後のビルド結果は 60 KB ほどで、Wrangler は含まれていません。
 
 ここでは、`resolveId` は `\0` 付きの ID ではなく、実在するファイルの絶対パスを返しています。Vite では、通常のファイルのモジュール ID は、そのファイルの絶対パスです。この ID に対して `load` で値を返すプラグインはないため、第 2 章の「プラグインとフック」で見たように、最後に Vite がこのパスのファイルを読み込みます。その後は普通のファイルと同じように、TypeScript から JavaScript に変換されます。つまり、`resolveId` が `\0` 付きの ID を返せば仮想モジュールを作成でき、実在するファイルのパスを返せばインポートの行き先を別のファイルに差し替えることができます。
 
@@ -680,14 +680,14 @@ Build failed with 1 error:
        // Worker 用の Vite 環境に名前を付ける
        viteEnvironment: { name: WORKER_ENVIRONMENT_NAME },
 @@ -46,3 +46,8 @@
-     .replace(/^-+|-+$/g, '');
-   return name || 'chibivoid-app';
+     .replace(/^-+|-+$/g, "");
+   return name || "chibivoid-app";
  }
 +
-+// アプリのコードから `import { defineHandler } from 'chibivoid'` と記述することができるように再エクスポートする。
++// アプリのコードから `import { defineHandler } from "chibivoid"` と記述することができるように再エクスポートする。
 +// （Worker の中ではこの index.ts ではなく runtime/handler.ts に差し替えられる）
-+export { defineHandler } from './runtime/handler.ts';
-+export type { CloudContext } from './runtime/handler.ts';
++export { defineHandler } from "./runtime/handler.ts";
++export type { CloudContext } from "./runtime/handler.ts";
 ```
 <!-- /diff -->
 
@@ -705,10 +705,10 @@ mkdir -p playground/routes/api/users
 
 <!-- file: code/how-void-works/ch05/playground/routes/api/hello.ts -->
 ```ts:playground/routes/api/hello.ts
-import { defineHandler } from 'chibivoid';
+import { defineHandler } from "chibivoid";
 
 export const GET = defineHandler(() => {
-  return { message: 'Hello from chibivoid!' };
+  return { message: "Hello from chibivoid!" };
 });
 ```
 <!-- /file -->
@@ -717,10 +717,10 @@ export const GET = defineHandler(() => {
 
 <!-- file: code/how-void-works/ch05/playground/routes/api/users/[id].ts -->
 ```ts:playground/routes/api/users/[id].ts
-import { defineHandler } from 'chibivoid';
+import { defineHandler } from "chibivoid";
 
 export const GET = defineHandler((c) => {
-  return { id: c.req.param('id') };
+  return { id: c.req.param("id") };
 });
 ```
 <!-- /file -->
@@ -729,11 +729,11 @@ export const GET = defineHandler((c) => {
 
 <!-- file: code/how-void-works/ch05/playground/routes/api/users/me.ts -->
 ```ts:playground/routes/api/users/me.ts
-import { defineHandler } from 'chibivoid';
+import { defineHandler } from "chibivoid";
 
 // /api/users/[id].ts より具体的であるため、こちらが優先される
 export const GET = defineHandler(() => {
-  return { id: 'me', name: 'あなた' };
+  return { id: "me", name: "あなた" };
 });
 ```
 <!-- /file -->

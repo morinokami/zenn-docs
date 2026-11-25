@@ -1,10 +1,10 @@
 // 生成されたルートテーブル（virtual:chibivoid-routes）と Worker エントリから呼ばれる実行時の関数。
-import type { Context, ExecutionContext, Hono } from 'hono';
-import { handlePageGet, type PageHandler, type PageRouteOptions } from '../pages/protocol.ts';
-import { withRuntimeEnv } from './env.ts';
-import { convertReturnValue } from './response.ts';
+import type { Context, ExecutionContext, Hono } from "hono";
+import { handlePageGet, type PageHandler, type PageRouteOptions } from "../pages/protocol.ts";
+import { withRuntimeEnv } from "./env.ts";
+import { convertReturnValue } from "./response.ts";
 
-export { createPagesAssetTags } from './routing-assets.ts';
+export { createPagesAssetTags } from "./routing-assets.ts";
 
 type RouteModule = Record<string, ((c: Context) => unknown) | undefined>;
 
@@ -29,7 +29,7 @@ export function createHttpRouteHandler(load: () => Promise<RouteModule>, method:
   return async (c: Context): Promise<Response> => {
     const handler = (await load())[method];
     if (!handler) {
-      return c.text('Method Not Allowed', 405);
+      return c.text("Method Not Allowed", 405);
     }
     return convertReturnValue(await handler(c));
   };

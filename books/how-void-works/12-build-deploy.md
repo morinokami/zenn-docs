@@ -53,12 +53,12 @@ vite v8.3.6 building chibivoid_worker environment for production...
 <!-- diff: code/how-void-works/ch11/packages/react/src/plugin.ts code/how-void-works/ch12/packages/react/src/plugin.ts -->
 ```diff ts:packages/react/src/plugin.ts
 @@ -1,7 +1,7 @@
- import { join } from 'node:path';
- import react from '@vitejs/plugin-react';
- import { WORKER_ENVIRONMENT_NAME } from 'chibivoid';
--import { createPagesPlugin, generateComponentManifest } from 'chibivoid/pages';
-+import { CLIENT_ENTRY_ID, createPagesPlugin, generateComponentManifest } from 'chibivoid/pages';
- import { normalizePath, type PluginOption, type UserConfig } from 'vite';
+ import { join } from "node:path";
+ import react from "@vitejs/plugin-react";
+ import { WORKER_ENVIRONMENT_NAME } from "chibivoid";
+-import { createPagesPlugin, generateComponentManifest } from "chibivoid/pages";
++import { CLIENT_ENTRY_ID, createPagesPlugin, generateComponentManifest } from "chibivoid/pages";
+ import { normalizePath, type PluginOption, type UserConfig } from "vite";
  
  /**
 @@ -58,7 +58,17 @@
@@ -72,7 +72,7 @@ vite v8.3.6 building chibivoid_worker environment for production...
 +            client: {
 +              build: {
 +                manifest: true,
-+                rolldownOptions: { input: { 'pages-client': CLIENT_ENTRY_ID } },
++                rolldownOptions: { input: { "pages-client": CLIENT_ENTRY_ID } },
 +              },
 +            },
 +          },
@@ -101,7 +101,13 @@ vite v8.3.6 building chibivoid_worker environment for production...
     "name": "pages-client",
     "src": "virtual:chibivoid-pages-client",
     "isEntry": true,
-    "dynamicImports": ["pages/index.tsx", "pages/about.tsx", "pages/users/index.tsx", "pages/users/[id].tsx", "pages/layout.tsx"]
+    "dynamicImports": [
+      "pages/index.tsx",
+      "pages/about.tsx",
+      "pages/users/index.tsx",
+      "pages/users/[id].tsx",
+      "pages/layout.tsx"
+    ]
   },
   "pages/users/index.tsx": {
     "file": "assets/users-B1XRoXDe.js",
@@ -124,10 +130,10 @@ vite v8.3.6 building chibivoid_worker environment for production...
 
 ```ts
 // Worker から静的アセット（マニフェストなど）を読むための ASSETS バインディング
-assets: { binding: 'ASSETS' },
+assets: { binding: "ASSETS" },
 ```
 
-`assets: { binding: 'ASSETS' }` を指定すると、Cloudflare のプラグインは、ビルドの際に静的アセットを置くディレクトリを表わす `directory` を補って `wrangler.json` に次のように出力します:
+`assets: { binding: "ASSETS" }` を指定すると、Cloudflare のプラグインは、ビルドの際に静的アセットを置くディレクトリを表わす `directory` を補って `wrangler.json` に次のように出力します:
 
 ```json
 "assets": { "binding": "ASSETS", "directory": "../client" }
@@ -154,7 +160,7 @@ assets: { binding: 'ASSETS' },
 ```diff ts:packages/chibivoid/src/runtime/routing-assets.ts
 @@ -3,21 +3,47 @@
  /** ブラウザ用のエントリの仮想モジュール ID（pages/plugin.ts と同じ値） */
- const CLIENT_ENTRY_ID = 'virtual:chibivoid-pages-client';
+ const CLIENT_ENTRY_ID = "virtual:chibivoid-pages-client";
  
 +/** Vite がビルド時に出力する .vite/manifest.json のかたち（使う部分だけ） */
 +type ViteManifest = Record<string, { file: string }>;
@@ -172,7 +178,7 @@ assets: { binding: 'ASSETS' },
 -  return async (_request: Request, _env: unknown): Promise<AssetTags> => {
 -    if (!options.dev) {
 -      // 本番ビルドへの対応は第 12 章でおこなう
--      return { head: '', body: '' };
+-      return { head: "", body: "" };
 +  let manifest: Promise<ViteManifest | null> | undefined;
 +
 +  return async (request: Request, env: unknown): Promise<AssetTags> => {
@@ -192,8 +198,8 @@ assets: { binding: 'ASSETS' },
 -      head: '<script type="module" src="/@vite/client"></script>',
 -      // 仮想モジュールは /@id/ の下で配信される。先頭の \0 は URL では __x00__ になる
 -      body: `<script type="module" src="/@id/__x00__${CLIENT_ENTRY_ID}"></script>`,
-+      head: '',
-+      body: entry ? `<script type="module" src="/${entry.file}"></script>` : '',
++      head: "",
++      body: entry ? `<script type="module" src="/${entry.file}"></script>` : "",
      };
    };
  }
@@ -206,7 +212,7 @@ assets: { binding: 'ASSETS' },
 +  if (!assets) {
 +    return null;
 +  }
-+  const response = await assets.fetch(new URL('/.vite/manifest.json', request.url).toString());
++  const response = await assets.fetch(new URL("/.vite/manifest.json", request.url).toString());
 +  return response.ok ? ((await response.json()) as ViteManifest) : null;
 +}
 ```
@@ -316,8 +322,8 @@ mkdir -p packages/chibivoid/src/cli
 
 <!-- file: code/how-void-works/ch12/packages/chibivoid/src/cli/lock.ts -->
 ```ts:packages/chibivoid/src/cli/lock.ts
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 /**
  * デプロイ時に作成した Cloudflare リソースの ID を記録するファイル（chibivoid.lock.json）。
@@ -327,15 +333,15 @@ export type LockFile = {
   kv?: { id: string; title: string };
 };
 
-const LOCK_FILE = 'chibivoid.lock.json';
+const LOCK_FILE = "chibivoid.lock.json";
 
 export function readLockFile(root: string): LockFile {
   const path = join(root, LOCK_FILE);
-  return existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as LockFile) : {};
+  return existsSync(path) ? (JSON.parse(readFileSync(path, "utf8")) as LockFile) : {};
 }
 
 export function writeLockFile(root: string, lock: LockFile): void {
-  writeFileSync(join(root, LOCK_FILE), JSON.stringify(lock, null, 2) + '\n');
+  writeFileSync(join(root, LOCK_FILE), JSON.stringify(lock, null, 2) + "\n");
 }
 ```
 <!-- /file -->
@@ -347,13 +353,13 @@ export function writeLockFile(root: string, lock: LockFile): void {
 <!-- diff: code/how-void-works/ch11/packages/chibivoid/src/index.ts code/how-void-works/ch12/packages/chibivoid/src/index.ts -->
 ```diff ts:packages/chibivoid/src/index.ts
 @@ -2,6 +2,7 @@
- import { join } from 'node:path';
- import { cloudflare } from '@cloudflare/vite-plugin';
- import type { Plugin } from 'vite';
-+import { readLockFile } from './cli/lock.ts';
- import { inferProjectBindings } from './inference/walk.ts';
- import { routingPlugin } from './plugin-routing.ts';
- import { compileWorkerEntry } from './router/compile.ts';
+ import { join } from "node:path";
+ import { cloudflare } from "@cloudflare/vite-plugin";
+ import type { Plugin } from "vite";
++import { readLockFile } from "./cli/lock.ts";
+ import { inferProjectBindings } from "./inference/walk.ts";
+ import { routingPlugin } from "./plugin-routing.ts";
+ import { compileWorkerEntry } from "./router/compile.ts";
 @@ -25,6 +26,8 @@
  
    // ソースコードを静的解析して、必要な Cloudflare リソースを推論する
@@ -366,12 +372,12 @@ export function writeLockFile(root: string, lock: LockFile): void {
 @@ -36,8 +39,10 @@
          name: readWorkerName(root),
          main: entryPath,
-         compatibility_date: '2026-10-01',
+         compatibility_date: "2026-10-01",
 +        // Worker から静的アセット（マニフェストなど）を読むための ASSETS バインディング
-+        assets: { binding: 'ASSETS' },
++        assets: { binding: "ASSETS" },
          // `chibivoid/kv` が使われていれば KV バインディングを追加する
--        kv_namespaces: bindings.needsKV ? [{ binding: 'KV', id: 'local' }] : [],
-+        kv_namespaces: bindings.needsKV ? [{ binding: 'KV', id: lock.kv?.id ?? 'local' }] : [],
+-        kv_namespaces: bindings.needsKV ? [{ binding: "KV", id: "local" }] : [],
++        kv_namespaces: bindings.needsKV ? [{ binding: "KV", id: lock.kv?.id ?? "local" }] : [],
        },
      }),
    ];
@@ -386,11 +392,11 @@ export function writeLockFile(root: string, lock: LockFile): void {
 
 <!-- file: code/how-void-works/ch12/packages/chibivoid/src/cli/deploy.ts -->
 ```ts:packages/chibivoid/src/cli/deploy.ts
-import { spawnSync } from 'node:child_process';
-import { createBuilder } from 'vite';
-import { readWorkerName } from '../index.ts';
-import { inferProjectBindings } from '../inference/walk.ts';
-import { readLockFile, writeLockFile } from './lock.ts';
+import { spawnSync } from "node:child_process";
+import { createBuilder } from "vite";
+import { readWorkerName } from "../index.ts";
+import { inferProjectBindings } from "../inference/walk.ts";
+import { readLockFile, writeLockFile } from "./lock.ts";
 
 /**
  * `chibivoid deploy`: 推論 → プロビジョニング → ビルド → 公開
@@ -407,7 +413,7 @@ export async function runDeploy(root: string, options: { dryRun: boolean }): Pro
     if (options.dryRun) {
       console.log(`[dry-run] wrangler kv namespace create ${title}`);
     } else {
-      const output = wrangler(['kv', 'namespace', 'create', title]);
+      const output = wrangler(["kv", "namespace", "create", title]);
       const id = /"id":\s*"([0-9a-f]{32})"/.exec(output)?.[1];
       if (!id) {
         throw new Error(`KV ネームスペースの ID を読み取れませんでした:\n${output}`);
@@ -425,19 +431,19 @@ export async function runDeploy(root: string, options: { dryRun: boolean }): Pro
 
   // 4. 公開する。Cloudflare の Vite プラグインが、ビルド結果の wrangler.json を指す
   //    リダイレクト設定を出力するため、`wrangler deploy` は引数なしでよい
-  wrangler(['deploy', ...(options.dryRun ? ['--dry-run'] : [])], { inherit: true });
+  wrangler(["deploy", ...(options.dryRun ? ["--dry-run"] : [])], { inherit: true });
 }
 
 function wrangler(args: string[], options: { inherit?: boolean } = {}): string {
-  const result = spawnSync('npx', ['wrangler', ...args], {
-    encoding: 'utf8',
-    stdio: options.inherit ? 'inherit' : 'pipe',
-    shell: process.platform === 'win32',
+  const result = spawnSync("npx", ["wrangler", ...args], {
+    encoding: "utf8",
+    stdio: options.inherit ? "inherit" : "pipe",
+    shell: process.platform === "win32",
   });
   if (result.status !== 0) {
-    throw new Error(`wrangler ${args.join(' ')} が失敗しました\n${result.stderr ?? ''}`);
+    throw new Error(`wrangler ${args.join(" ")} が失敗しました\n${result.stderr ?? ""}`);
   }
-  return result.stdout ?? '';
+  return result.stdout ?? "";
 }
 ```
 <!-- /file -->
@@ -459,23 +465,23 @@ function wrangler(args: string[], options: { inherit?: boolean } = {}): string {
 ```ts:packages/chibivoid/src/cli/cli.ts
 #!/usr/bin/env node
 // `chibivoid` コマンドの入り口。Node.js が TypeScript をそのまま実行する（型注釈を取り除くだけ）。
-import { parseArgs } from 'node:util';
-import { runDeploy } from './deploy.ts';
+import { parseArgs } from "node:util";
+import { runDeploy } from "./deploy.ts";
 
 // 知らないオプション（`--dryrun` のような打ち間違いも）はエラーにする
 const { positionals, values } = parseArgs({
   allowPositionals: true,
-  options: { 'dry-run': { type: 'boolean', default: false } },
+  options: { "dry-run": { type: "boolean", default: false } },
 });
 const [command] = positionals;
 const root = process.cwd();
 
 switch (command) {
-  case 'deploy':
-    await runDeploy(root, { dryRun: values['dry-run'] });
+  case "deploy":
+    await runDeploy(root, { dryRun: values["dry-run"] });
     break;
   default:
-    console.log('使い方: chibivoid deploy [--dry-run]');
+    console.log("使い方: chibivoid deploy [--dry-run]");
     process.exitCode = command ? 1 : 0;
 }
 ```
@@ -491,16 +497,16 @@ switch (command) {
 
 <!-- diff: code/how-void-works/ch11/packages/chibivoid/package.json code/how-void-works/ch12/packages/chibivoid/package.json -->
 ```diff json:packages/chibivoid/package.json
-@@ -3,6 +3,9 @@
+@@ -2,6 +2,9 @@
+   "name": "chibivoid",
    "version": "0.0.0",
    "private": true,
-   "type": "module",
 +  "bin": {
 +    "chibivoid": "./src/cli/cli.ts"
 +  },
+   "type": "module",
    "exports": {
      ".": "./src/index.ts",
-     "./kv": "./src/runtime/kv.ts",
 ```
 <!-- /diff -->
 

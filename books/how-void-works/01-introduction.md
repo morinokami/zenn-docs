@@ -28,22 +28,22 @@ title: "はじめに"
 
 ```ts:routes/api/hello.ts
 // GET /api/hello
-import { defineHandler } from 'void';
+import { defineHandler } from "void";
 
 export const GET = defineHandler(() => {
-  return { message: 'Hello from Void' };
+  return { message: "Hello from Void" };
 });
 ```
 
 ```ts:pages/users/index.server.ts
 // /users ページのサーバー側
-import { defineHandler, type InferProps } from 'void';
-import { kv } from 'void/kv';
+import { defineHandler, type InferProps } from "void";
+import { kv } from "void/kv";
 
 type User = { id: number; name: string };
 
 export const loader = defineHandler(async () => {
-  return { users: (await kv.get<User[]>('users')) ?? [] };
+  return { users: (await kv.get<User[]>("users")) ?? [] };
 });
 
 export type Props = InferProps<typeof loader>;
@@ -51,17 +51,23 @@ export type Props = InferProps<typeof loader>;
 
 ```tsx:pages/users/index.tsx
 // /users ページの UI
-import type { Props } from './index.server';
+import type { Props } from "./index.server";
 
 export default function UsersPage({ users }: Props) {
-  return <ul>{users.map((u) => <li key={u.id}>{u.name}</li>)}</ul>;
+  return (
+    <ul>
+      {users.map((u) => (
+        <li key={u.id}>{u.name}</li>
+      ))}
+    </ul>
+  );
 }
 ```
 
 ```ts:vite.config.ts
-import { voidReact } from '@void/react/plugin';
-import { defineConfig } from 'vite';
-import { voidPlugin } from 'void';
+import { voidReact } from "@void/react/plugin";
+import { defineConfig } from "vite";
+import { voidPlugin } from "void";
 
 export default defineConfig({
   plugins: [voidPlugin(), voidReact()],
@@ -152,7 +158,7 @@ flowchart LR
 - `pages/` の React コンポーネントがサーバーで描画され、ブラウザでハイドレーション（hydration）される
 - `Link` により画面遷移すると、ページ全体を読み込み直さずに JSON を取得して画面が切り替わる
 - `Form` により送信したデータを `action` が受け取り、バリデーションエラーがあればページに表示される（JavaScript が無効でも動く）
-- `chibivoid/client` の `fetch()` により、`fetch('/api/hello')` の戻り値に型が付く
+- `chibivoid/client` の `fetch()` により、`fetch("/api/hello")` の戻り値に型が付く
 - `vite build`/`vite preview` により本番ビルドを確認し、`chibivoid deploy` により Cloudflare にデプロイできる
 
 ### ここでは作らないもの

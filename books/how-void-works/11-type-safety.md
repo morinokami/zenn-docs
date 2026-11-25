@@ -6,10 +6,10 @@ Void の特徴の 1 つは、サーバーとクライアントの間で型がつ
 
 ```ts
 // routes/api/hello.ts → GET /api/hello
-import { defineHandler } from 'void';
+import { defineHandler } from "void";
 
 export const GET = defineHandler(() => {
-  return { message: 'Hello from Void' };
+  return { message: "Hello from Void" };
 });
 ```
 
@@ -17,9 +17,9 @@ export const GET = defineHandler(() => {
 
 ```ts
 // ブラウザのコード
-import { fetch } from 'void/client';
+import { fetch } from "void/client";
 
-const { message } = await fetch('/api/hello');   // message は string 型
+const { message } = await fetch("/api/hello"); // message は string 型
 ```
 
 そのため、API の戻り値を変更した際に、クライアントのコードがその変更に追従していなければ型エラーになります。この章では、このしくみを chibivoid に実装していきます。
@@ -35,14 +35,14 @@ const { message } = await fetch('/api/hello');   // message は string 型
 この章を終えると、chibivoid でも次のようなコードを記述することができるようになります:
 
 ```ts
-import { fetch } from 'chibivoid/client';
+import { fetch } from "chibivoid/client";
 
-const hello = await fetch('/api/hello');
-hello.message;                               // string
+const hello = await fetch("/api/hello");
+hello.message; // string
 
-const user = await fetch('/api/users/[id]', { params: { id: 1 } });
-const counter = await fetch('/api/counter', { method: 'POST' });
-counter.count;                               // number
+const user = await fetch("/api/users/[id]", { params: { id: 1 } });
+const counter = await fetch("/api/counter", { method: "POST" });
+counter.count; // number
 ```
 
 そして、次のような誤ったコードは、型チェックによりエラーとなります:
@@ -51,14 +51,14 @@ counter.count;                               // number
 hello.message.toFixed();
 // error TS2551: Property 'toFixed' does not exist on type 'string'. Did you mean 'fixed'?
 
-await fetch('/api/helo');
+await fetch("/api/helo");
 // error TS2345: Argument of type '"/api/helo"' is not assignable to parameter of type 'StaticPath'.
 
-await fetch('/api/users/[id]');
+await fetch("/api/users/[id]");
 // error TS2345: Argument of type '"/api/users/[id]"' is not assignable to parameter of type 'StaticPath'.
 // （[id] のあるルートには params が必要）
 
-await fetch('/api/hello', { method: 'DELETE' });
+await fetch("/api/hello", { method: "DELETE" });
 // error TS2769: No overload matches this call.
 //   The last overload gave the following error.
 //     Type '"DELETE"' is not assignable to type '"GET"'.
@@ -66,7 +66,7 @@ await fetch('/api/hello', { method: 'DELETE' });
 
 ## 方針: 型の計算は TypeScript に任せる
 
-`fetch('/api/hello')` の戻り値の型を決めるには、「`/api/hello` への `GET` リクエストの結果は、`routes/api/hello.ts` の `GET` が返す値の型になる」という対応を、TypeScript に伝える必要があります。
+`fetch("/api/hello")` の戻り値の型を決めるには、「`/api/hello` への `GET` リクエストの結果は、`routes/api/hello.ts` の `GET` が返す値の型になる」という対応を、TypeScript に伝える必要があります。
 
 この対応は、ルートのファイルの型を直接解析して求めることもできます。しかし、そのためにはコード生成の中で TypeScript のコンパイラーを動かし、ルートのファイルと、そこからインポートされるファイルの型をすべて解析する必要があり、処理が重くなってしまいます。そこで、Void は型を自分で解析するのではなく、ファイル構成から次のような型定義を生成し、型の計算そのものは TypeScript に任せています:
 
@@ -103,14 +103,14 @@ export interface RouteMap {}
 // .chibivoid/routes.d.ts（生成されるファイル）
 export {};
 
-declare module 'chibivoid/routes' {
+declare module "chibivoid/routes" {
   interface RouteMap {
     "/api/hello": { GET: { output: { message: string } } };
   }
 }
 ```
 
-TypeScript では、同じモジュールの中に同じ名前のインターフェイスの宣言が複数ある場合、それらは 1 つのインターフェイスにまとめられます。これを宣言のマージ（[declaration merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html)）と呼びます。そして、`declare module 'chibivoid/routes'` の中に記述した宣言は、`chibivoid/routes` というモジュールの中で宣言されたものとして扱われます。そのため、生成したファイルの `RouteMap` は、ライブラリの `RouteMap` と同じモジュールの中にある同じ名前のインターフェイスとなり、2 つの宣言は 1 つにマージされます。その結果、`chibivoid/routes` の `RouteMap` は、次のように宣言した場合と同じ型になります:
+TypeScript では、同じモジュールの中に同じ名前のインターフェイスの宣言が複数ある場合、それらは 1 つのインターフェイスにまとめられます。これを宣言のマージ（[declaration merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html)）と呼びます。そして、`declare module "chibivoid/routes"` の中に記述した宣言は、`chibivoid/routes` というモジュールの中で宣言されたものとして扱われます。そのため、生成したファイルの `RouteMap` は、ライブラリの `RouteMap` と同じモジュールの中にある同じ名前のインターフェイスとなり、2 つの宣言は 1 つにマージされます。その結果、`chibivoid/routes` の `RouteMap` は、次のように宣言した場合と同じ型になります:
 
 ```ts
 // chibivoid/routes（マージ後）
@@ -123,7 +123,7 @@ export interface RouteMap {
 
 ただし、TypeScript が `.chibivoid/routes.d.ts` を読み込まなければ、宣言のマージはおこなわれません。TypeScript は、`tsconfig.json` の [`include`](https://www.typescriptlang.org/tsconfig/#include) に指定したファイルと、そこからインポートされるファイルを型チェックの対象として読み込みます。`.chibivoid/routes.d.ts` はどこからもインポートされないため、`include` に追加しておく必要があります。この設定は「型付き `fetch()` を使ってみる」でおこないます。
 
-なお、生成するファイルの先頭にある `export {};` は省略することができません。トップレベルに `import` や `export` が 1 つもないファイルは、TypeScript から[モジュールではなくスクリプトとして扱われます](https://www.typescriptlang.org/docs/handbook/2/modules.html#how-javascript-modules-are-defined)。その場合、ファイルの中の `declare module 'chibivoid/routes'` は、既存のモジュールの拡張ではなく、新しいモジュールの宣言になってしまいます。その結果、本物の `chibivoid/routes` の `RouteMap` は空のままになり、`fetch()` の呼び出しはすべて型エラーになります。
+なお、生成するファイルの先頭にある `export {};` は省略することができません。トップレベルに `import` や `export` が 1 つもないファイルは、TypeScript から[モジュールではなくスクリプトとして扱われます](https://www.typescriptlang.org/docs/handbook/2/modules.html#how-javascript-modules-are-defined)。その場合、ファイルの中の `declare module "chibivoid/routes"` は、既存のモジュールの拡張ではなく、新しいモジュールの宣言になってしまいます。その結果、本物の `chibivoid/routes` の `RouteMap` は空のままになり、`fetch()` の呼び出しはすべて型エラーになります。
 
 ## 型定義の生成と型付き `fetch()` を実装する
 
@@ -157,8 +157,8 @@ mkdir -p packages/chibivoid/src/codegen
 
 <!-- file: code/how-void-works/ch11/packages/chibivoid/src/codegen/route-types.ts -->
 ```ts:packages/chibivoid/src/codegen/route-types.ts
-import { relative } from 'node:path';
-import type { ProjectPaths, ScanResult } from '../router/scan.ts';
+import { relative } from "node:path";
+import type { ProjectPaths, ScanResult } from "../router/scan.ts";
 
 /**
  * Hono の書式のパターンを、ファイル名と同じかたちに戻す。
@@ -178,26 +178,29 @@ function publicPattern(pattern: string): string {
  */
 export function generateRouteTypes(scan: ScanResult, paths: ProjectPaths, outDir: string): string {
   const lines: string[] = [
-    '// chibivoid が自動生成したファイルです。編集しないでください。',
+    "// chibivoid が自動生成したファイルです。編集しないでください。",
     // トップレベルにエクスポート文があると、生成するファイルは「モジュール」になり、
     // 下の `declare module` は既存のモジュールの「拡張」（augmentation）として扱われる。
-    'export {};',
-    '',
-    '// JSON にした際の型（Date は文字列になり、関数は消える）',
-    'type Serialize<T> =',
-    '  T extends Date ? string :',
-    '  T extends (...args: any[]) => any ? never :',
-    '  T extends ReadonlyArray<infer U> ? Array<Serialize<U>> :',
-    '  T extends object ? { [K in keyof T as T[K] extends (...args: any[]) => any ? never : K]: Serialize<T[K]> } :',
-    '  T;',
-    '',
-    "declare module 'chibivoid/routes' {",
-    '  interface RouteMap {',
+    "export {};",
+    "",
+    "// JSON にした際の型（Date は文字列になり、関数は消える）",
+    "type Serialize<T> =",
+    "  T extends Date ? string :",
+    "  T extends (...args: any[]) => any ? never :",
+    "  T extends ReadonlyArray<infer U> ? Array<Serialize<U>> :",
+    "  T extends object ? { [K in keyof T as T[K] extends (...args: any[]) => any ? never : K]: Serialize<T[K]> } :",
+    "  T;",
+    "",
+    'declare module "chibivoid/routes" {',
+    "  interface RouteMap {",
   ];
 
   for (const route of scan.routes) {
     // .chibivoid/ から見た相対パスで、ルートファイルをインポートする
-    const importPath = relative(outDir, `${paths.routesDir}/${route.filePath}`).replaceAll('\\', '/');
+    const importPath = relative(outDir, `${paths.routesDir}/${route.filePath}`).replaceAll(
+      "\\",
+      "/",
+    );
     // キーは fetch() に渡すパスになるため、ファイル名と同じかたちにする
     lines.push(`    ${JSON.stringify(publicPattern(route.pattern))}: {`);
     for (const method of route.methods) {
@@ -205,11 +208,11 @@ export function generateRouteTypes(scan: ScanResult, paths: ProjectPaths, outDir
         `      ${method}: { output: Serialize<(typeof import(${JSON.stringify(importPath)}))[${JSON.stringify(method)}]["__output"]> };`,
       );
     }
-    lines.push('    };');
+    lines.push("    };");
   }
 
-  lines.push('  }', '}', '');
-  return lines.join('\n');
+  lines.push("  }", "}", "");
+  return lines.join("\n");
 }
 ```
 <!-- /file -->
@@ -229,7 +232,7 @@ export {};
 // JSON にした際の型（Date は文字列になり、関数は消える）
 type Serialize<T> = ...;
 
-declare module 'chibivoid/routes' {
+declare module "chibivoid/routes" {
   interface RouteMap {
     "/api/counter": {
       GET: { output: Serialize<(typeof import("../routes/api/counter.ts"))["GET"]["__output"]> };
@@ -254,15 +257,15 @@ declare module 'chibivoid/routes' {
 
 <!-- file: code/how-void-works/ch11/packages/chibivoid/src/codegen/write-if-changed.ts -->
 ```ts:packages/chibivoid/src/codegen/write-if-changed.ts
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 
 /**
  * 内容が変わった場合だけファイルを書き出す。
  * 同じ内容を書き直すと、ファイル監視や TypeScript の再チェックが無駄に走ってしまうため。
  */
 export function writeFileIfChanged(path: string, content: string): void {
-  if (existsSync(path) && readFileSync(path, 'utf8') === content) {
+  if (existsSync(path) && readFileSync(path, "utf8") === content) {
     return;
   }
   mkdirSync(dirname(path), { recursive: true });
@@ -280,26 +283,26 @@ export function writeFileIfChanged(path: string, content: string): void {
 <!-- diff: code/how-void-works/ch10/packages/chibivoid/src/plugin-routing.ts code/how-void-works/ch11/packages/chibivoid/src/plugin-routing.ts -->
 ```diff ts:packages/chibivoid/src/plugin-routing.ts
 @@ -1,6 +1,8 @@
- import { join } from 'node:path';
- import { fileURLToPath } from 'node:url';
- import { normalizePath, type Plugin } from 'vite';
-+import { generateRouteTypes } from './codegen/route-types.ts';
-+import { writeFileIfChanged } from './codegen/write-if-changed.ts';
- import { compileRouteTable } from './router/compile.ts';
- import { scanApp, type ProjectPaths, type ScanResult } from './router/scan.ts';
+ import { join } from "node:path";
+ import { fileURLToPath } from "node:url";
+ import { normalizePath, type Plugin } from "vite";
++import { generateRouteTypes } from "./codegen/route-types.ts";
++import { writeFileIfChanged } from "./codegen/write-if-changed.ts";
+ import { compileRouteTable } from "./router/compile.ts";
+ import { scanApp, type ProjectPaths, type ScanResult } from "./router/scan.ts";
  
 @@ -22,11 +24,14 @@
-     middlewareDir: normalizePath(join(root, 'middleware')),
-     pagesDir: normalizePath(join(root, 'pages')),
+     middlewareDir: normalizePath(join(root, "middleware")),
+     pagesDir: normalizePath(join(root, "pages")),
    };
-+  const outDir = join(root, '.chibivoid');
++  const outDir = join(root, ".chibivoid");
    let scan: ScanResult | undefined;
    let dev = false;
  
    function rescan(): ScanResult {
      scan = scanApp(paths);
 +    // ルートの型定義 `.chibivoid/routes.d.ts` も一緒に更新する
-+    writeFileIfChanged(join(outDir, 'routes.d.ts'), generateRouteTypes(scan, paths, outDir));
++    writeFileIfChanged(join(outDir, "routes.d.ts"), generateRouteTypes(scan, paths, outDir));
      return scan;
    }
  
@@ -314,8 +317,8 @@ export function writeFileIfChanged(path: string, content: string): void {
 
 <!-- file: code/how-void-works/ch11/packages/chibivoid/src/runtime/fetch.ts -->
 ```ts:packages/chibivoid/src/runtime/fetch.ts
-// `import { fetch } from 'chibivoid/client'` で使う、型付きの fetch。
-import type { RouteMap } from './routes.ts';
+// `import { fetch } from "chibivoid/client"` で使う、型付きの fetch。
+import type { RouteMap } from "./routes.ts";
 
 type RoutePath = keyof RouteMap & string;
 type MethodOf<P extends RoutePath> = keyof RouteMap[P] & string;
@@ -348,14 +351,14 @@ type FetchOptions<M extends string> = {
 /**
  * パスとメソッドから、レスポンスの型が自動で決まる fetch。
  *
- *   const { message } = await fetch('/api/hello');
- *   const user = await fetch('/api/users/[id]', { params: { id: 1 } });
+ *   const { message } = await fetch("/api/hello");
+ *   const user = await fetch("/api/users/[id]", { params: { id: 1 } });
  */
-export function fetch<P extends DynamicPath, M extends MethodOf<P> = Extract<'GET', MethodOf<P>>>(
+export function fetch<P extends DynamicPath, M extends MethodOf<P> = Extract<"GET", MethodOf<P>>>(
   path: P,
   options: FetchOptions<M> & { params: Record<ParamNames<P>, string | number> },
 ): Promise<OutputOf<P, M>>;
-export function fetch<P extends StaticPath, M extends MethodOf<P> = Extract<'GET', MethodOf<P>>>(
+export function fetch<P extends StaticPath, M extends MethodOf<P> = Extract<"GET", MethodOf<P>>>(
   path: P,
   options?: FetchOptions<M>,
 ): Promise<OutputOf<P, M>>;
@@ -370,9 +373,9 @@ export async function fetch(
   );
   const hasBody = options.body !== undefined;
   const response = await globalThis.fetch(url, {
-    method: options.method ?? 'GET',
+    method: options.method ?? "GET",
     headers: {
-      ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
       ...options.headers,
     },
     body: hasBody ? JSON.stringify(options.body) : undefined,
@@ -383,8 +386,8 @@ export async function fetch(
   if (response.status === 204) {
     return undefined;
   }
-  const contentType = response.headers.get('Content-Type') ?? '';
-  return contentType.includes('application/json') ? response.json() : response.text();
+  const contentType = response.headers.get("Content-Type") ?? "";
+  return contentType.includes("application/json") ? response.json() : response.text();
 }
 ```
 <!-- /file -->
@@ -399,7 +402,7 @@ export async function fetch(
 
 `fetch()` には 2 つのオーバーロードがあります。オーバーロードとは、同じ関数に対する、引数の型が異なる複数の宣言のことです。1 つ目のオーバーロードは、パラメータのあるルート（`DynamicPath`）のためのもので、`params` を含むオプションを必須にしています。一方、2 つ目のオーバーロードは、パラメータのないルート（`StaticPath`）のためのもので、オプション自体を省略することができます。
 
-メソッドの型 `M` は、オプションの `method` から推論されます。`method` を省略した場合は、既定の型である `Extract<'GET', MethodOf<P>>` が使われるため、そのルートが `GET` をエクスポートしていれば、`M` は `'GET'` になります。
+メソッドの型 `M` は、オプションの `method` から推論されます。`method` を省略した場合は、既定の型である `Extract<"GET", MethodOf<P>>` が使われるため、そのルートが `GET` をエクスポートしていれば、`M` は `"GET"` になります。
 
 最後に、`package.json` の `exports` に `./client` と `./routes` を追加し、`chibivoid/client` と `chibivoid/routes` からインポートできるようにします:
 
@@ -425,12 +428,20 @@ export async function fetch(
 
 <!-- diff: code/how-void-works/ch10/playground/tsconfig.json code/how-void-works/ch11/playground/tsconfig.json -->
 ```diff json:playground/tsconfig.json
-@@ -13,5 +13,5 @@
+@@ -13,5 +13,13 @@
      "erasableSyntaxOnly": true,
      "types": ["node"]
    },
 -  "include": ["routes", "middleware", "pages", "src", "vite.config.ts", "../packages"]
-+  "include": ["routes", "middleware", "pages", "src", "vite.config.ts", "../packages", ".chibivoid/*.d.ts"]
++  "include": [
++    "routes",
++    "middleware",
++    "pages",
++    "src",
++    "vite.config.ts",
++    "../packages",
++    ".chibivoid/*.d.ts"
++  ]
  }
 ```
 <!-- /diff -->
@@ -442,9 +453,9 @@ export async function fetch(
 <!-- diff: code/how-void-works/ch10/playground/pages/index.tsx code/how-void-works/ch11/playground/pages/index.tsx -->
 ```diff tsx:playground/pages/index.tsx
 @@ -1,15 +1,20 @@
- import { useState } from 'react';
-+import { fetch } from 'chibivoid/client';
- import type { Props } from './index.server.ts';
+ import { useState } from "react";
++import { fetch } from "chibivoid/client";
+ import type { Props } from "./index.server.ts";
  
  export default function Home({ title, renderedAt }: Props) {
 -  // ハイドレーションされると、このボタンが動くようになる
@@ -452,7 +463,7 @@ export async function fetch(
 +  const [count, setCount] = useState<number | null>(null);
 +
 +  async function like() {
-+    const result = await fetch('/api/counter', { method: 'POST' });
++    const result = await fetch("/api/counter", { method: "POST" });
 +    setCount(result.count);
 +  }
  
@@ -461,7 +472,7 @@ export async function fetch(
        <h1>{title}</h1>
        <p>サーバーで描画した時刻: {renderedAt}</p>
 -      <button onClick={() => setClicks(clicks + 1)}>クリック: {clicks}</button>
-+      <button onClick={like}>いいね {count ?? ''}</button>
++      <button onClick={like}>いいね {count ?? ""}</button>
      </div>
    );
  }
@@ -502,7 +513,7 @@ npm run dev
 npm run typecheck --workspace playground
 ```
 
-型エラーが出力されなければ成功です。また、エディターで `pages/index.tsx` を開き、`fetch('` まで入力してみてください。ルートのパターンが補完の候補として表示されるはずです。
+型エラーが出力されなければ成功です。また、エディターで `pages/index.tsx` を開き、`fetch("` まで入力してみてください。ルートのパターンが補完の候補として表示されるはずです。
 
 さらに、「型付き `fetch()` でできること」で見たような誤ったコードを記述して、もう一度 `typecheck` スクリプトを実行し、エラーになることも確かめてみましょう。また、`routes/api/counter.ts` の `POST` が返す `{ count }` を `{ total: count }` に変更すると、`pages/index.tsx` の `result.count` がエラーになるはずです。このように、サーバー側のコードの変更が、クライアント側のコードの型エラーとして現れます。
 
@@ -527,4 +538,4 @@ Void では、`packages/void/src/codegen/route-types.ts` の `generateRouteTypes
 
 「型付き `fetch()` を使ってみる」で紹介した `void prepare` コマンドは、`cli/prepare.ts` と `codegen/prepare.ts` に実装されています。
 
-型付き `fetch()` は、`packages/void/src/runtime/client/fetch.ts` に実装されており、`void/client` として公開されています。HTTP の処理には ofetch を使っています。必須の入力があるかどうかによってオーバーロードを分けるという考え方は、chibivoid と同じです。ただし、何を必須とみなすかについては異なります。Void で必須になるのは、`defineHandler.withValidator()` によりバリデーションスキーマを指定した `body`、`query`、`params` と、`GET` 以外のリクエストを送る際の `method` です。chibivoid とは異なり、パターンの `[id]` から `params` を必須にすることはしていないため、`withValidator()` を使っていないルートであれば、`fetch('/api/users/[id]')` のように `params` を省略した場合でも、型エラーになりません。
+型付き `fetch()` は、`packages/void/src/runtime/client/fetch.ts` に実装されており、`void/client` として公開されています。HTTP の処理には ofetch を使っています。必須の入力があるかどうかによってオーバーロードを分けるという考え方は、chibivoid と同じです。ただし、何を必須とみなすかについては異なります。Void で必須になるのは、`defineHandler.withValidator()` によりバリデーションスキーマを指定した `body`、`query`、`params` と、`GET` 以外のリクエストを送る際の `method` です。chibivoid とは異なり、パターンの `[id]` から `params` を必須にすることはしていないため、`withValidator()` を使っていないルートであれば、`fetch("/api/users/[id]")` のように `params` を省略した場合でも、型エラーになりません。

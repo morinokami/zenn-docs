@@ -6,10 +6,16 @@ title: "Pages (1): サーバーサイドレンダリングと loader"
 
 ```tsx
 // pages/users/index.tsx → /users ページの UI
-import type { Props } from './index.server';
+import type { Props } from "./index.server";
 
 export default function UsersPage({ users }: Props) {
-  return <ul>{users.map((u) => <li key={u.id}>{u.name}</li>)}</ul>;
+  return (
+    <ul>
+      {users.map((u) => (
+        <li key={u.id}>{u.name}</li>
+      ))}
+    </ul>
+  );
 }
 ```
 
@@ -103,12 +109,12 @@ chibivoid は、`pages/` に置かれたファイルを次のように扱いま�
 
 <!-- file: code/how-void-works/ch08/packages/chibivoid/src/pages/scan.ts -->
 ```ts:packages/chibivoid/src/pages/scan.ts
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { detectExports } from '../router/detect-exports.ts';
-import { parseRouteFilename } from '../router/parse-filename.ts';
-import { compareRouteSpecificity } from '../router/route-order.ts';
-import { listFiles } from '../shared/list-files.ts';
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { detectExports } from "../router/detect-exports.ts";
+import { parseRouteFilename } from "../router/parse-filename.ts";
+import { compareRouteSpecificity } from "../router/route-order.ts";
+import { listFiles } from "../shared/list-files.ts";
 
 export type PageDefinition = {
   /** URL パターン。例: "/users/:id" */
@@ -143,8 +149,8 @@ export type PageScanResult = {
 const COMPONENT_RE = /\.(tsx|jsx)$/;
 /** `.server.ts` などのコンパニオンファイル */
 const SERVER_RE = /\.server\.(ts|tsx|js|jsx|mts|mjs)$/;
-const SERVER_EXTENSIONS = ['ts', 'tsx', 'js', 'jsx', 'mts', 'mjs'];
-const PAGE_METHODS = new Set(['loader', 'action']);
+const SERVER_EXTENSIONS = ["ts", "tsx", "js", "jsx", "mts", "mjs"];
+const PAGE_METHODS = new Set(["loader", "action"]);
 
 /** pages/ をスキャンして、ページとレイアウトの一覧を返す */
 export function scanPages(pagesDir: string): PageScanResult {
@@ -155,10 +161,10 @@ export function scanPages(pagesDir: string): PageScanResult {
     if (SERVER_RE.test(file) || !COMPONENT_RE.test(file)) {
       continue;
     }
-    const componentId = file.replace(COMPONENT_RE, '');
-    const segments = componentId.split('/');
-    if (segments.at(-1) === 'layout') {
-      layouts.push({ id: componentId, filePath: file, directory: segments.slice(0, -1).join('/') });
+    const componentId = file.replace(COMPONENT_RE, "");
+    const segments = componentId.split("/");
+    if (segments.at(-1) === "layout") {
+      layouts.push({ id: componentId, filePath: file, directory: segments.slice(0, -1).join("/") });
       continue;
     }
 
@@ -192,10 +198,10 @@ export function scanPages(pagesDir: string): PageScanResult {
  * 例: "users/[id]" → ["layout", "users/layout"]（存在するものだけ）
  */
 export function resolveLayoutIds(page: PageDefinition, layouts: LayoutDefinition[]): string[] {
-  const directories = [''];
-  const segments = page.componentId.split('/').slice(0, -1);
+  const directories = [""];
+  const segments = page.componentId.split("/").slice(0, -1);
   for (let i = 1; i <= segments.length; i++) {
-    directories.push(segments.slice(0, i).join('/'));
+    directories.push(segments.slice(0, i).join("/"));
   }
   return directories.flatMap((directory) =>
     layouts.filter((layout) => layout.directory === directory).map((layout) => layout.id),
@@ -217,7 +223,7 @@ export function resolveLayoutIds(page: PageDefinition, layouts: LayoutDefinition
 
 <!-- file: code/how-void-works/ch08/packages/chibivoid/src/pages/manifest.ts -->
 ```ts:packages/chibivoid/src/pages/manifest.ts
-import { resolveLayoutIds, type PageScanResult } from './scan.ts';
+import { resolveLayoutIds, type PageScanResult } from "./scan.ts";
 
 /**
  * ページとレイアウトのコンポーネントを「動的インポートする関数」の表と、
@@ -229,21 +235,21 @@ import { resolveLayoutIds, type PageScanResult } from './scan.ts';
  */
 export function generateComponentManifest(scan: PageScanResult, pagesDir: string): string {
   const load = (filePath: string) => `() => import(${JSON.stringify(`${pagesDir}/${filePath}`)})`;
-  const lines: string[] = ['const components = {'];
+  const lines: string[] = ["const components = {"];
   for (const page of scan.pages) {
     lines.push(`  ${JSON.stringify(page.componentId)}: ${load(page.componentPath)},`);
   }
   for (const layout of scan.layouts) {
     lines.push(`  ${JSON.stringify(layout.id)}: ${load(layout.filePath)},`);
   }
-  lines.push('};');
-  lines.push('const layoutTree = {');
+  lines.push("};");
+  lines.push("const layoutTree = {");
   for (const page of scan.pages) {
     const layoutIds = resolveLayoutIds(page, scan.layouts);
     lines.push(`  ${JSON.stringify(page.componentId)}: ${JSON.stringify(layoutIds)},`);
   }
-  lines.push('};');
-  return lines.join('\n');
+  lines.push("};");
+  return lines.join("\n");
 }
 ```
 <!-- /file -->
@@ -274,10 +280,10 @@ const layoutTree = {
 
 <!-- file: code/how-void-works/ch08/packages/chibivoid/src/pages/plugin.ts -->
 ```ts:packages/chibivoid/src/pages/plugin.ts
-import { normalizePath, type Plugin, type UserConfig } from 'vite';
-import { scanPages, type PageScanResult } from './scan.ts';
+import { normalizePath, type Plugin, type UserConfig } from "vite";
+import { scanPages, type PageScanResult } from "./scan.ts";
 
-export const RENDERER_ID = 'virtual:chibivoid-pages-renderer';
+export const RENDERER_ID = "virtual:chibivoid-pages-renderer";
 
 type CreatePagesPluginOptions = {
   /** プラグイン名。例: "chibivoid-react:pages" */
@@ -302,7 +308,7 @@ export function createPagesPlugin(pagesDir: string, options: CreatePagesPluginOp
     name: options.name,
 
     config(_config, env) {
-      isDev = env.command === 'serve' && !env.isPreview;
+      isDev = env.command === "serve" && !env.isPreview;
       return options.config?.({ isDev });
     },
 
@@ -312,12 +318,12 @@ export function createPagesPlugin(pagesDir: string, options: CreatePagesPluginOp
 
     resolveId(id) {
       if (id === RENDERER_ID) {
-        return '\0' + id;
+        return "\0" + id;
       }
     },
 
     load(id) {
-      if (id === '\0' + RENDERER_ID) {
+      if (id === "\0" + RENDERER_ID) {
         return options.generateRenderer(scan, isDev);
       }
     },
@@ -325,19 +331,19 @@ export function createPagesPlugin(pagesDir: string, options: CreatePagesPluginOp
     configureServer(server) {
       // ページが追加・削除された場合は、仮想モジュールを作り直してもらう
       const onStructureChange = (file: string) => {
-        if (!normalizePath(file).startsWith(normalizedPagesDir + '/')) {
+        if (!normalizePath(file).startsWith(normalizedPagesDir + "/")) {
           return;
         }
         scan = scanPages(pagesDir);
         for (const environment of Object.values(server.environments)) {
-          const mod = environment.moduleGraph.getModuleById('\0' + RENDERER_ID);
+          const mod = environment.moduleGraph.getModuleById("\0" + RENDERER_ID);
           if (mod) {
             environment.moduleGraph.invalidateModule(mod);
           }
         }
       };
-      server.watcher.on('add', onStructureChange);
-      server.watcher.on('unlink', onStructureChange);
+      server.watcher.on("add", onStructureChange);
+      server.watcher.on("unlink", onStructureChange);
     },
   };
 }
@@ -351,10 +357,10 @@ export function createPagesPlugin(pagesDir: string, options: CreatePagesPluginOp
 <!-- file: code/how-void-works/ch08/packages/chibivoid/src/pages/index.ts -->
 ```ts:packages/chibivoid/src/pages/index.ts
 // フレームワークアダプター（@chibivoid/react など）の Vite プラグインが使う、Node.js 側の API。
-export { createPagesPlugin, RENDERER_ID } from './plugin.ts';
-export { generateComponentManifest } from './manifest.ts';
-export { scanPages, resolveLayoutIds } from './scan.ts';
-export type { PageDefinition, LayoutDefinition, PageScanResult } from './scan.ts';
+export { createPagesPlugin, RENDERER_ID } from "./plugin.ts";
+export { generateComponentManifest } from "./manifest.ts";
+export { scanPages, resolveLayoutIds } from "./scan.ts";
+export type { PageDefinition, LayoutDefinition, PageScanResult } from "./scan.ts";
 ```
 <!-- /file -->
 
@@ -364,7 +370,7 @@ export type { PageDefinition, LayoutDefinition, PageScanResult } from './scan.ts
 
 <!-- file: code/how-void-works/ch08/packages/chibivoid/src/pages/protocol.ts -->
 ```ts:packages/chibivoid/src/pages/protocol.ts
-import type { Context } from 'hono';
+import type { Context } from "hono";
 
 /**
  * サーバーからクライアントへ渡す「ページオブジェクト」。
@@ -403,7 +409,7 @@ export type PageRouteOptions = {
 /** `<script type="application/json">` に安全に埋め込めるように JSON をエスケープする */
 export function serializePageData(pageObj: PageObject): string {
   return JSON.stringify(pageObj).replace(/[<>&\u2028\u2029]/g, (char) => {
-    return `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`;
+    return `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`;
   });
 }
 
@@ -448,7 +454,7 @@ export async function handlePageGet(
   }
   const pageObj = createPageObject(c, options.componentId, props);
   const html = await options.render(pageObj, await options.assets(c.req.raw, c.env));
-  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
 }
 ```
 <!-- /file -->
@@ -470,11 +476,11 @@ export async function handlePageGet(
 <!-- diff: code/how-void-works/ch07/packages/chibivoid/src/router/scan.ts code/how-void-works/ch08/packages/chibivoid/src/router/scan.ts -->
 ```diff ts:packages/chibivoid/src/router/scan.ts
 @@ -1,4 +1,5 @@
- import { join } from 'node:path';
-+import { scanPages, type PageScanResult } from '../pages/scan.ts';
- import { listFiles } from '../shared/list-files.ts';
- import { detectHttpExports } from './detect-exports.ts';
- import { parseRouteFilename, ROUTE_FILE_RE, type RouteDefinition } from './parse-filename.ts';
+ import { join } from "node:path";
++import { scanPages, type PageScanResult } from "../pages/scan.ts";
+ import { listFiles } from "../shared/list-files.ts";
+ import { detectHttpExports } from "./detect-exports.ts";
+ import { parseRouteFilename, ROUTE_FILE_RE, type RouteDefinition } from "./parse-filename.ts";
 @@ -7,6 +8,7 @@
  export type ProjectPaths = {
    routesDir: string;
@@ -507,10 +513,10 @@ export async function handlePageGet(
 ```diff ts:packages/chibivoid/src/runtime/routing.ts
 @@ -1,5 +1,6 @@
  // 生成されたルートテーブル（virtual:chibivoid-routes）と Worker エントリから呼ばれる実行時の関数。
- import type { Context, ExecutionContext, Hono } from 'hono';
-+import { handlePageGet, type PageHandler, type PageRouteOptions } from '../pages/protocol.ts';
- import { withRuntimeEnv } from './env.ts';
- import { convertReturnValue } from './response.ts';
+ import type { Context, ExecutionContext, Hono } from "hono";
++import { handlePageGet, type PageHandler, type PageRouteOptions } from "../pages/protocol.ts";
+ import { withRuntimeEnv } from "./env.ts";
+ import { convertReturnValue } from "./response.ts";
  
 @@ -32,6 +33,21 @@
    };
@@ -542,8 +548,8 @@ export async function handlePageGet(
 <!-- diff: code/how-void-works/ch07/packages/chibivoid/src/router/compile.ts code/how-void-works/ch08/packages/chibivoid/src/router/compile.ts -->
 ```diff ts:packages/chibivoid/src/router/compile.ts
 @@ -1,3 +1,4 @@
-+import type { PageScanResult } from '../pages/scan.ts';
- import type { ProjectPaths, ScanResult } from './scan.ts';
++import type { PageScanResult } from "../pages/scan.ts";
+ import type { ProjectPaths, ScanResult } from "./scan.ts";
  
  export type CompileOptions = ProjectPaths & {
 @@ -31,7 +32,7 @@
@@ -553,9 +559,9 @@ export async function handlePageGet(
 -    `import { createModuleLoader, createHttpRouteHandler } from "chibivoid/runtime/routing";`,
 +    `import { createModuleLoader, createHttpRouteHandler, createPageGetHandler } from "chibivoid/runtime/routing";`,
    ];
-   const body: string[] = ['const app = new Hono();'];
+   const body: string[] = ["const app = new Hono();"];
    // 本番ではロードしたモジュールをキャッシュし、開発中は毎回インポートし直す
-@@ -55,5 +56,33 @@
+@@ -57,5 +58,33 @@
      }
    });
  
@@ -564,7 +570,7 @@ export async function handlePageGet(
 +    compilePageRoutes(imports, body, scan.pages, options);
 +  }
 +
-   return [...imports, '', ...body, '', 'export default app;', ''].join('\n');
+   return [...imports, "", ...body, "", "export default app;", ""].join("\n");
  }
 +
 +function compilePageRoutes(
@@ -579,7 +585,7 @@ export async function handlePageGet(
 +  body.push(`const getAssetTags = async () => ({ head: "", body: "" });`);
 +
 +  pages.pages.forEach((page, i) => {
-+    let load = 'undefined';
++    let load = "undefined";
 +    if (page.serverPath) {
 +      load = `loadPage${i}`;
 +      const file = `${options.pagesDir}/${page.serverPath}`;
@@ -623,9 +629,9 @@ app.get("/users", createPageGetHandler({ componentId: "users/index", load: loadP
   */
 @@ -20,6 +20,7 @@
    const paths: ProjectPaths = {
-     routesDir: normalizePath(join(root, 'routes')),
-     middlewareDir: normalizePath(join(root, 'middleware')),
-+    pagesDir: normalizePath(join(root, 'pages')),
+     routesDir: normalizePath(join(root, "routes")),
+     middlewareDir: normalizePath(join(root, "middleware")),
++    pagesDir: normalizePath(join(root, "pages")),
    };
    let scan: ScanResult | undefined;
    let dev = false;
@@ -635,7 +641,7 @@ app.get("/users", createPageGetHandler({ componentId: "users/index", load: loadP
      configureServer(server) {
 -      const watched = [paths.routesDir, paths.middlewareDir];
 +      const watched = [paths.routesDir, paths.middlewareDir, paths.pagesDir];
-       const isWatched = (file: string) => watched.some((dir) => file.startsWith(dir + '/'));
+       const isWatched = (file: string) => watched.some((dir) => file.startsWith(dir + "/"));
  
        const onFileEvent = (rawFile: string) => {
 @@ -75,7 +76,7 @@
@@ -716,10 +722,10 @@ app.get("/users", createPageGetHandler({ componentId: "users/index", load: loadP
 
 ```ts
 export const loader = defineHandler(async () => {
-  return { users: await listUsers() };   // Promise<{ users: User[] }>
+  return { users: await listUsers() }; // Promise<{ users: User[] }>
 });
 // typeof loader は TypedHandler<{ users: User[] }>
-export type Props = InferProps<typeof loader>;   // { users: User[] }
+export type Props = InferProps<typeof loader>; // { users: User[] }
 ```
 
 `Exclude<Awaited<R>, Response>` は、「`loader` の戻り値を `await` した結果の型から、`c.notFound()` などで返した `Response` を除いた型」を表わします。`loader` が `Response` を返した場合、`handlePageGet()` はその `Response` をそのまま返すため、props には `Response` 以外の値だけが渡されます。
@@ -731,11 +737,11 @@ export type Props = InferProps<typeof loader>;   // { users: User[] }
 <!-- diff: code/how-void-works/ch07/packages/chibivoid/src/index.ts code/how-void-works/ch08/packages/chibivoid/src/index.ts -->
 ```diff ts:packages/chibivoid/src/index.ts
 @@ -56,4 +56,4 @@
- // アプリのコードから `import { defineHandler } from 'chibivoid'` と記述することができるように再エクスポートする。
+ // アプリのコードから `import { defineHandler } from "chibivoid"` と記述することができるように再エクスポートする。
  // （Worker の中ではこの index.ts ではなく runtime/handler.ts に差し替えられる）
- export { defineHandler, defineMiddleware } from './runtime/handler.ts';
--export type { CloudContext } from './runtime/handler.ts';
-+export type { CloudContext, InferProps, TypedHandler } from './runtime/handler.ts';
+ export { defineHandler, defineMiddleware } from "./runtime/handler.ts";
+-export type { CloudContext } from "./runtime/handler.ts";
++export type { CloudContext, InferProps, TypedHandler } from "./runtime/handler.ts";
 ```
 <!-- /diff -->
 
@@ -786,20 +792,20 @@ mkdir -p packages/react/src/runtime
 
 <!-- file: code/how-void-works/ch08/packages/react/src/plugin.ts -->
 ```ts:packages/react/src/plugin.ts
-import { join } from 'node:path';
-import react from '@vitejs/plugin-react';
-import { WORKER_ENVIRONMENT_NAME } from 'chibivoid';
-import { createPagesPlugin, generateComponentManifest } from 'chibivoid/pages';
-import { normalizePath, type PluginOption, type UserConfig } from 'vite';
+import { join } from "node:path";
+import react from "@vitejs/plugin-react";
+import { WORKER_ENVIRONMENT_NAME } from "chibivoid";
+import { createPagesPlugin, generateComponentManifest } from "chibivoid/pages";
+import { normalizePath, type PluginOption, type UserConfig } from "vite";
 
 /** chibivoid の React アダプター。`plugins: [chibivoidPlugin(), chibivoidReact()]` のように使う */
 export function chibivoidReact(): PluginOption[] {
-  const pagesDir = normalizePath(join(process.cwd(), 'pages'));
+  const pagesDir = normalizePath(join(process.cwd(), "pages"));
 
   return [
     react(),
     createPagesPlugin(pagesDir, {
-      name: 'chibivoid-react:pages',
+      name: "chibivoid-react:pages",
 
       // サーバー（Worker）で HTML を描画するモジュール
       generateRenderer(scan) {
@@ -817,7 +823,7 @@ export function renderPage(pageObj, assetTags) {
           return {
             environments: {
               [WORKER_ENVIRONMENT_NAME]: {
-                optimizeDeps: { include: ['react', 'react-dom/server', 'react/jsx-dev-runtime'] },
+                optimizeDeps: { include: ["react", "react-dom/server", "react/jsx-dev-runtime"] },
               },
             },
           };
@@ -856,8 +862,8 @@ export function renderPage(pageObj, assetTags) {
 
 <!-- file: code/how-void-works/ch08/packages/react/src/runtime/context.ts -->
 ```ts:packages/react/src/runtime/context.ts
-import { createContext } from 'react';
-import type { PageObject } from 'chibivoid/pages-protocol';
+import { createContext } from "react";
+import type { PageObject } from "chibivoid/pages-protocol";
 
 /** 今表示しているページのページオブジェクト */
 export const PageContext = createContext<PageObject | null>(null);
@@ -869,9 +875,9 @@ export const PageContext = createContext<PageObject | null>(null);
 <!-- file: code/how-void-works/ch08/packages/react/src/runtime/page-view.tsx -->
 ```tsx:packages/react/src/runtime/page-view.tsx
 // ページの組み立て部分。第 9 章ではブラウザでのハイドレーションにも使う。
-import type { ComponentType, ReactNode } from 'react';
-import type { PageObject } from 'chibivoid/pages-protocol';
-import { PageContext } from './context.ts';
+import type { ComponentType, ReactNode } from "react";
+import type { PageObject } from "chibivoid/pages-protocol";
+import { PageContext } from "./context.ts";
 
 type ComponentModule = { default: ComponentType<any> };
 export type ComponentMap = Record<string, () => Promise<ComponentModule>>;
@@ -928,9 +934,9 @@ export function PageView(props: { page: PageObject; modules: PageModules }) {
 <!-- file: code/how-void-works/ch08/packages/react/src/runtime/pages-server.tsx -->
 ```tsx:packages/react/src/runtime/pages-server.tsx
 // Worker の中で、ページを HTML 文字列に描画する。
-import { renderToReadableStream } from 'react-dom/server';
-import { serializePageData, type AssetTags, type PageObject } from 'chibivoid/pages-protocol';
-import { loadPageModules, PageView, type ComponentMap, type LayoutTree } from './page-view.tsx';
+import { renderToReadableStream } from "react-dom/server";
+import { serializePageData, type AssetTags, type PageObject } from "chibivoid/pages-protocol";
+import { loadPageModules, PageView, type ComponentMap, type LayoutTree } from "./page-view.tsx";
 
 export async function renderReactPage(options: {
   pageObj: PageObject;
@@ -976,7 +982,7 @@ chibivoid では簡単のため、`stream.allReady` により描画が終わる�
 
 <!-- file: code/how-void-works/ch08/packages/react/src/runtime/link.tsx -->
 ```tsx:packages/react/src/runtime/link.tsx
-import type { AnchorHTMLAttributes } from 'react';
+import type { AnchorHTMLAttributes } from "react";
 
 export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
 
@@ -991,11 +997,11 @@ export function Link(props: LinkProps) {
 
 <!-- file: code/how-void-works/ch08/packages/react/src/runtime/index.ts -->
 ```ts:packages/react/src/runtime/index.ts
-// `import { Link } from '@chibivoid/react'` でアプリから使う API。
-import { useContext } from 'react';
-import { PageContext } from './context.ts';
+// `import { Link } from "@chibivoid/react"` でアプリから使う API。
+import { useContext } from "react";
+import { PageContext } from "./context.ts";
 
-export { Link } from './link.tsx';
+export { Link } from "./link.tsx";
 
 /** URL パラメータ（例: pages/users/[id].tsx の id） */
 export function useParams(): Record<string, string> {
@@ -1040,9 +1046,9 @@ export function useParams(): Record<string, string> {
 <!-- diff: code/how-void-works/ch07/playground/vite.config.ts code/how-void-works/ch08/playground/vite.config.ts -->
 ```diff ts:playground/vite.config.ts
 @@ -1,6 +1,7 @@
-+import { chibivoidReact } from '@chibivoid/react/plugin';
- import { chibivoidPlugin } from 'chibivoid';
- import { defineConfig } from 'vite';
++import { chibivoidReact } from "@chibivoid/react/plugin";
+ import { chibivoidPlugin } from "chibivoid";
+ import { defineConfig } from "vite";
  
  export default defineConfig({
 -  plugins: [chibivoidPlugin()],
@@ -1069,17 +1075,17 @@ mkdir -p playground/src
 
 <!-- file: code/how-void-works/ch08/playground/src/users.ts -->
 ```ts:playground/src/users.ts
-import { kv } from 'chibivoid/kv';
+import { kv } from "chibivoid/kv";
 
 export type User = { id: number; name: string };
 
 const SEED: User[] = [
-  { id: 1, name: 'Ada' },
-  { id: 2, name: 'Linus' },
+  { id: 1, name: "Ada" },
+  { id: 2, name: "Linus" },
 ];
 
 export async function listUsers(): Promise<User[]> {
-  return (await kv.get<User[]>('users')) ?? SEED;
+  return (await kv.get<User[]>("users")) ?? SEED;
 }
 
 export async function findUser(id: number): Promise<User | null> {
@@ -1089,7 +1095,7 @@ export async function findUser(id: number): Promise<User | null> {
 export async function addUser(name: string): Promise<User> {
   const users = await listUsers();
   const user = { id: Math.max(0, ...users.map((u) => u.id)) + 1, name };
-  await kv.put('users', [...users, user]);
+  await kv.put("users", [...users, user]);
   return user;
 }
 ```
@@ -1109,14 +1115,14 @@ mkdir -p playground/pages/users
 
 <!-- file: code/how-void-works/ch08/playground/pages/layout.tsx -->
 ```tsx:playground/pages/layout.tsx
-import type { ReactNode } from 'react';
-import { Link } from '@chibivoid/react';
+import type { ReactNode } from "react";
+import { Link } from "@chibivoid/react";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div>
       <nav>
-        <Link href="/">Home</Link> | <Link href="/users">Users</Link> |{' '}
+        <Link href="/">Home</Link> | <Link href="/users">Users</Link> |{" "}
         <Link href="/about">About</Link>
       </nav>
       <hr />
@@ -1131,10 +1137,10 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 <!-- file: code/how-void-works/ch08/playground/pages/index.server.ts -->
 ```ts:playground/pages/index.server.ts
-import { defineHandler, type InferProps } from 'chibivoid';
+import { defineHandler, type InferProps } from "chibivoid";
 
 export const loader = defineHandler(() => {
-  return { title: 'chibivoid へようこそ', renderedAt: new Date().toISOString() };
+  return { title: "chibivoid へようこそ", renderedAt: new Date().toISOString() };
 });
 
 export type Props = InferProps<typeof loader>;
@@ -1143,7 +1149,7 @@ export type Props = InferProps<typeof loader>;
 
 <!-- file: code/how-void-works/ch08/playground/pages/index.tsx -->
 ```tsx:playground/pages/index.tsx
-import type { Props } from './index.server.ts';
+import type { Props } from "./index.server.ts";
 
 export default function Home({ title, renderedAt }: Props) {
   return (
@@ -1156,7 +1162,7 @@ export default function Home({ title, renderedAt }: Props) {
 ```
 <!-- /file -->
 
-コンポーネントが、`import type { Props } from './index.server.ts'` のように型だけをインポートしている点に注目してください。`import type` は JavaScript に変換される際に完全に消えるため、KV へのアクセスなど、サーバーだけで動くべき `.server.ts` のコードがブラウザ向けのコードに紛れ込むことはありません。その一方で、props の型はサーバー側の `loader` の戻り値の型と常に一致します。
+コンポーネントが、`import type { Props } from "./index.server.ts"` のように型だけをインポートしている点に注目してください。`import type` は JavaScript に変換される際に完全に消えるため、KV へのアクセスなど、サーバーだけで動くべき `.server.ts` のコードがブラウザ向けのコードに紛れ込むことはありません。その一方で、props の型はサーバー側の `loader` の戻り値の型と常に一致します。
 
 また、`.server.ts` のないページとして、About ページも作成しておきます:
 
@@ -1177,8 +1183,8 @@ export default function About() {
 
 <!-- file: code/how-void-works/ch08/playground/pages/users/index.server.ts -->
 ```ts:playground/pages/users/index.server.ts
-import { defineHandler, type InferProps } from 'chibivoid';
-import { listUsers } from '../../src/users.ts';
+import { defineHandler, type InferProps } from "chibivoid";
+import { listUsers } from "../../src/users.ts";
 
 export const loader = defineHandler(async () => {
   return { users: await listUsers() };
@@ -1190,8 +1196,8 @@ export type Props = InferProps<typeof loader>;
 
 <!-- file: code/how-void-works/ch08/playground/pages/users/index.tsx -->
 ```tsx:playground/pages/users/index.tsx
-import { Link } from '@chibivoid/react';
-import type { Props } from './index.server.ts';
+import { Link } from "@chibivoid/react";
+import type { Props } from "./index.server.ts";
 
 export default function Users({ users }: Props) {
   return (
@@ -1214,11 +1220,11 @@ export default function Users({ users }: Props) {
 
 <!-- file: code/how-void-works/ch08/playground/pages/users/[id].server.ts -->
 ```ts:playground/pages/users/[id].server.ts
-import { defineHandler, type InferProps } from 'chibivoid';
-import { findUser } from '../../src/users.ts';
+import { defineHandler, type InferProps } from "chibivoid";
+import { findUser } from "../../src/users.ts";
 
 export const loader = defineHandler(async (c) => {
-  const user = await findUser(Number(c.req.param('id')));
+  const user = await findUser(Number(c.req.param("id")));
   if (!user) {
     return c.notFound();
   }
@@ -1231,8 +1237,8 @@ export type Props = InferProps<typeof loader>;
 
 <!-- file: code/how-void-works/ch08/playground/pages/users/[id].tsx -->
 ```tsx:playground/pages/users/[id].tsx
-import { Link } from '@chibivoid/react';
-import type { Props } from './[id].server.ts';
+import { Link } from "@chibivoid/react";
+import type { Props } from "./[id].server.ts";
 
 export default function UserPage({ user }: Props) {
   return (

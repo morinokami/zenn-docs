@@ -1,5 +1,5 @@
-import { useContext, type AnchorHTMLAttributes, type MouseEvent } from 'react';
-import { RouterContext } from './context.ts';
+import { useContext, type AnchorHTMLAttributes, type MouseEvent } from "react";
+import { RouterContext } from "./context.ts";
 
 export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
 

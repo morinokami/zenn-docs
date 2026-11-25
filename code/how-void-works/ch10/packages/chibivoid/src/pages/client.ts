@@ -1,6 +1,6 @@
 // ブラウザで動く、フレームワーク非依存のナビゲーションエンジン。
 // React、Vue、Svelte、Solid のアダプターが共通で使う想定の部分。
-import type { PageObject } from './protocol.ts';
+import type { PageObject } from "./protocol.ts";
 
 export type { PageObject };
 
@@ -18,9 +18,9 @@ export type Router = {
 
 /** サーバーが HTML に埋め込んだ、最初のページオブジェクトを読む */
 export function readInitialPage(): PageObject {
-  const element = document.getElementById('__CHIBIVOID_PAGE_DATA__');
+  const element = document.getElementById("__CHIBIVOID_PAGE_DATA__");
   if (!element?.textContent) {
-    throw new Error('pages: #__CHIBIVOID_PAGE_DATA__ が見つかりません');
+    throw new Error("pages: #__CHIBIVOID_PAGE_DATA__ が見つかりません");
   }
   return JSON.parse(element.textContent) as PageObject;
 }
@@ -37,20 +37,20 @@ export function createRouter(options: {
   let latestVisit = 0;
 
   async function visit(url: string, visitOptions: VisitOptions = {}) {
-    const { method = 'GET', body, history: updateHistory = true } = visitOptions;
+    const { method = "GET", body, history: updateHistory = true } = visitOptions;
     const visitId = ++latestVisit;
 
     // 「HTML ではなくページオブジェクト（JSON）をください」という合図のヘッダー
     const response = await fetch(url, {
       method,
       body,
-      headers: { 'X-ChibivoidPages': 'true', Accept: 'application/json' },
+      headers: { "X-ChibivoidPages": "true", Accept: "application/json" },
     });
     if (visitId !== latestVisit) {
       // 待っている間に別の遷移が始まったため、この結果は捨てる
       return undefined;
     }
-    if (response.headers.get('X-ChibivoidPages') !== 'true') {
+    if (response.headers.get("X-ChibivoidPages") !== "true") {
       // ページ以外（API のエラーなど）が返ってきた場合は、通常の画面遷移に切り替える
       location.href = response.url;
       return undefined;
@@ -62,20 +62,20 @@ export function createRouter(options: {
     if (updateHistory) {
       // fetch がリダイレクトをたどった場合は page.url が変わっている
       if (page.url !== currentUrl()) {
-        history.pushState({ chibivoidPage: true }, '', page.url);
+        history.pushState({ chibivoidPage: true }, "", page.url);
       } else {
-        history.replaceState({ chibivoidPage: true }, '', page.url);
+        history.replaceState({ chibivoidPage: true }, "", page.url);
       }
-      if (method === 'GET') {
+      if (method === "GET") {
         window.scrollTo(0, 0);
       }
     }
     return page;
   }
 
-  history.replaceState({ chibivoidPage: true }, '');
+  history.replaceState({ chibivoidPage: true }, "");
   // ブラウザの「戻る」、「進む」では、その URL のページを取り直す
-  window.addEventListener('popstate', () => {
+  window.addEventListener("popstate", () => {
     void visit(currentUrl(), { history: false });
   });
 

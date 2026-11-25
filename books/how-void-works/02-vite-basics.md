@@ -118,8 +118,8 @@ mkdir src
 ```
 
 ```ts:src/main.ts
-const list = document.querySelector('#notes')!;
-list.innerHTML = '<li>まだメモはありません</li>';
+const list = document.querySelector("#notes")!;
+list.innerHTML = "<li>まだメモはありません</li>";
 ```
 
 開発サーバーを起動してみましょう:
@@ -168,15 +168,15 @@ list.innerHTML = "<li>まだメモはありません</li>";
 Vite の振る舞いは、プラグインにより拡張することができます。プラグインは、`name` と、いくつかのフック（決まったタイミングで Vite から呼ばれる関数）をもつただのオブジェクトです:
 
 ```ts
-import type { Plugin } from 'vite';
+import type { Plugin } from "vite";
 
 // 例: .ts ファイルが変換されるたびにログを出すだけのプラグイン
 function logPlugin(): Plugin {
   return {
-    name: 'log',
+    name: "log",
     transform(code, id) {
-      if (id.endsWith('.ts')) {
-        console.log('transform:', id);
+      if (id.endsWith(".ts")) {
+        console.log("transform:", id);
       }
     },
   };
@@ -198,7 +198,7 @@ export default defineConfig({
 | `config` | 設定を確定する前。設定の一部を返すとマージされる | 開発サーバーかビルドかを記録する（第 5 章）、環境ごとの設定を足す（第 8・9・12 章） |
 | `configureServer` | 開発サーバーの起動時のみ | ファイルを監視する（この章と第 6 章） |
 | `buildStart` | 開発サーバーの起動時とビルドの開始時 | `routes/` などをスキャンする（第 5 章） |
-| `resolveId` | インポートの指定子（`'./foo'` など）を、モジュールの ID に解決する際 | 仮想モジュールの ID を返す（この章）、インポートの行き先を差し替える（第 5 章） |
+| `resolveId` | インポートの指定子（`"./foo"` など）を、モジュールの ID に解決する際 | 仮想モジュールの ID を返す（この章）、インポートの行き先を差し替える（第 5 章） |
 | `load` | ID からモジュールのソースコードを読み込む際 | 仮想モジュールのコードを生成して返す（この章） |
 | `transform` | 読み込んだソースコードを変換する際。TypeScript や JSX から JavaScript への変換もここでおこなわれる | 本書のプラグインでは使わない（上の `logPlugin()` は説明用） |
 
@@ -206,14 +206,14 @@ export default defineConfig({
 
 ```mermaid
 flowchart LR
-  I["import 'xxx'"] --> R["resolveId<br/>どのモジュール？"] --> L["load<br/>中身は？"] --> T["transform<br/>どう変換する？"] --> M["モジュール"]
+  I["import #quot;xxx#quot;"] --> R["resolveId<br/>どのモジュール？"] --> L["load<br/>中身は？"] --> T["transform<br/>どう変換する？"] --> M["モジュール"]
 ```
 
 `resolveId` と `load` は、いずれかのプラグインが値を返した時点で、それ以降のプラグインでは呼ばれません。値を返さなければ、次のプラグインに進みます。`transform` は、すべてのプラグインで順に呼ばれます。
 
 ここで注意したいのは、Vite 本体の処理の多くも組み込みのプラグインとして実装されており、利用者のプラグインと一緒に順に呼ばれることです。たとえば、インポートの行き先をファイルやパッケージから探す処理は、`builtin:vite-resolve` という組み込みのプラグインの `resolveId` がおこなっており、利用者のプラグインは、特に指定しなければその後に呼ばれます。そのため、ファイルやパッケージとして見つかるインポートでは、利用者のプラグインの `resolveId` は呼ばれません。なお、`load` では、どのプラグインも値を返さなければ、最後に Vite がファイルを読み込みます。
 
-プラグインの順番は `plugins` に並べた順ですが、[`enforce: 'pre'`](https://vite.dev/guide/api-plugin#plugin-ordering) を付けると Vite 本体の処理より前に回されます。Void のルーティングプラグインは `enforce: 'pre'` を指定しています（その理由は第 5 章でわかります）。
+プラグインの順番は `plugins` に並べた順ですが、[`enforce: "pre"`](https://vite.dev/guide/api-plugin#plugin-ordering) を付けると Vite 本体の処理より前に回されます。Void のルーティングプラグインは `enforce: 'pre'` を指定しています（その理由は第 5 章でわかります）。
 
 :::message
 上の `logPlugin()` は説明用です。この章の完成形には含まれていないため、試した場合は消しておいてください。
@@ -226,8 +226,8 @@ flowchart LR
 ここでは練習として、`notes/` ディレクトリに置いたテキストファイルの一覧を、`virtual:notes` という仮想モジュールとして読み込むことができるようにしてみます:
 
 ```ts
-import notes from 'virtual:notes';
-// notes は [{ title: 'hello', body: 'はじめてのメモ' }, ...] のような配列
+import notes from "virtual:notes";
+// notes は [{ title: "hello", body: "はじめてのメモ" }, ...] のような配列
 ```
 
 まず、メモを 2 つ用意します:
@@ -244,23 +244,23 @@ echo "Vite はプラグインで拡張できる" > notes/vite.txt
 
 <!-- file: code/how-void-works/ch02/notes-plugin.ts -->
 ```ts:notes-plugin.ts
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { normalizePath, type Plugin } from 'vite';
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { normalizePath, type Plugin } from "vite";
 
 // アプリのコードがインポートする ID と、プラグインの内部で使う ID
-const VIRTUAL_ID = 'virtual:notes';
-const RESOLVED_ID = '\0' + VIRTUAL_ID;
+const VIRTUAL_ID = "virtual:notes";
+const RESOLVED_ID = "\0" + VIRTUAL_ID;
 
 /**
  * notes/ ディレクトリの .txt ファイルを集めて、
  * `virtual:notes` という仮想モジュールとして提供するプラグイン。
  */
 export function notesPlugin(): Plugin {
-  const notesDir = normalizePath(join(process.cwd(), 'notes'));
+  const notesDir = normalizePath(join(process.cwd(), "notes"));
 
   return {
-    name: 'notes',
+    name: "notes",
 
     // 1. インポートされた ID を「どのモジュールか」に解決する
     resolveId(id) {
@@ -276,11 +276,11 @@ export function notesPlugin(): Plugin {
       }
       console.log(`[notes] "${this.environment.name}" 環境でモジュールを生成します`);
       const notes = readdirSync(notesDir)
-        .filter((file) => file.endsWith('.txt'))
+        .filter((file) => file.endsWith(".txt"))
         .sort()
         .map((file) => ({
-          title: file.replace(/\.txt$/, ''),
-          body: readFileSync(join(notesDir, file), 'utf8').trim(),
+          title: file.replace(/\.txt$/, ""),
+          body: readFileSync(join(notesDir, file), "utf8").trim(),
         }));
       return `export default ${JSON.stringify(notes)};`;
     },
@@ -288,7 +288,7 @@ export function notesPlugin(): Plugin {
     // 3. 開発サーバーに手を入れる: notes/ が変更された場合は仮想モジュールを作り直す
     configureServer(server) {
       const onChange = (file: string) => {
-        if (!normalizePath(file).startsWith(notesDir + '/')) {
+        if (!normalizePath(file).startsWith(notesDir + "/")) {
           return;
         }
         const client = server.environments.client;
@@ -298,11 +298,11 @@ export function notesPlugin(): Plugin {
           client.moduleGraph.invalidateModule(mod);
         }
         // ブラウザにページの再読み込みを指示する
-        client.hot.send({ type: 'full-reload' });
+        client.hot.send({ type: "full-reload" });
       };
-      server.watcher.on('add', onChange);
-      server.watcher.on('change', onChange);
-      server.watcher.on('unlink', onChange);
+      server.watcher.on("add", onChange);
+      server.watcher.on("change", onChange);
+      server.watcher.on("unlink", onChange);
     },
   };
 }
@@ -311,7 +311,7 @@ export function notesPlugin(): Plugin {
 
 順に見ていきましょう。
 
-`resolveId` は、`import notes from 'virtual:notes'` の指定子 `'virtual:notes'` を受け取った場合に、`'\0virtual:notes'` という ID を返します。これで「このモジュールは `notes` プラグインが担当する」ことが決まります。
+`resolveId` は、`import notes from "virtual:notes"` の指定子 `"virtual:notes"` を受け取った場合に、`"\0virtual:notes"` という ID を返します。これで「このモジュールは `notes` プラグインが担当する」ことが決まります。
 
 ID の先頭に `\0`（ヌル文字）を付けるのは、プラグインの間での慣習で、Rolldown のドキュメントの「[Virtual Modules Convention](https://rolldown.rs/apis/plugin-api#virtual-modules)」で説明されています。`\0` は「これは実在するファイルではない」という目印で、他のプラグインがこの ID をファイルパスだと思って処理しようとするのを防ぎます。アプリのコードに記述する名前（`virtual:notes`）と、内部の ID（`\0virtual:notes`）を分けておくのがポイントです。`virtual:` という接頭辞は、付けるだけで仮想モジュールになるような特別な指定ではなく、「仮想モジュールである」ことを示すための慣習的な目印です。
 
@@ -331,8 +331,8 @@ export default [{"title":"hello","body":"はじめてのメモ"},{"title":"vite"
 
 <!-- file: code/how-void-works/ch02/vite.config.ts -->
 ```ts:vite.config.ts
-import { defineConfig } from 'vite';
-import { notesPlugin } from './notes-plugin.ts';
+import { defineConfig } from "vite";
+import { notesPlugin } from "./notes-plugin.ts";
 
 export default defineConfig({
   plugins: [notesPlugin()],
@@ -346,11 +346,11 @@ export default defineConfig({
 ```ts:src/main.ts
 // `virtual:notes` はディスク上には存在しない「仮想モジュール」。
 // 中身は notes-plugin.ts が notes/ ディレクトリから組み立てる。
-import notes from 'virtual:notes';
+import notes from "virtual:notes";
 
-const list = document.querySelector('#notes')!;
+const list = document.querySelector("#notes")!;
 for (const note of notes) {
-  const item = document.createElement('li');
+  const item = document.createElement("li");
   item.textContent = `${note.title}: ${note.body}`;
   list.append(item);
 }
@@ -362,7 +362,7 @@ TypeScript は `virtual:notes` というモジュールを知らないため、�
 <!-- file: code/how-void-works/ch02/src/virtual-notes.d.ts -->
 ```ts:src/virtual-notes.d.ts
 // 仮想モジュールの型を TypeScript に教える。
-declare module 'virtual:notes' {
+declare module "virtual:notes" {
   const notes: Array<{ title: string; body: string }>;
   export default notes;
 }
@@ -410,7 +410,7 @@ const list = document.querySelector("#notes");
 ...
 ```
 
-`import notes from 'virtual:notes'` が `import notes from "/@id/__x00__virtual:notes"` に書き換わっています。ブラウザは URL しか扱うことができないため、Vite はインポートの指定子をブラウザが要求できる URL に置き換えます（インポート解析と呼ばれる Vite の内部処理です）:
+`import notes from "virtual:notes"` が `import notes from "/@id/__x00__virtual:notes"` に書き換わっています。ブラウザは URL しか扱うことができないため、Vite はインポートの指定子をブラウザが要求できる URL に置き換えます（インポート解析と呼ばれる Vite の内部処理です）:
 
 - `/@id/` は「ファイルパスではなく、モジュール ID で要求する」ための Vite の特別なパス
 - [`__x00__`](https://vite.dev/guide/api-plugin#importing-a-virtual-file) は `\0` を URL で表わしたもの（URL にはヌル文字を入れることができないため）
@@ -463,7 +463,7 @@ flowchart LR
 - `server.watcher` は、Vite がプロジェクトのファイルを監視するために使っているウォッチャーです。`add`（追加）、`change`（変更）、`unlink`（削除）のイベントを受け取ることができます。Vite は既定でプロジェクトのルート以下（`node_modules` などを除く）を監視しているため、`notes/` も最初から監視対象です
 - `server.environments.client.moduleGraph.getModuleById(RESOLVED_ID)` により、モジュールグラフから仮想モジュールのノードを探します
 - `invalidateModule(mod)` によりキャッシュを捨てます。次に要求された際には、もう一度 `load` が呼ばれます
-- `client.hot.send({ type: 'full-reload' })` により、ブラウザにページ全体の再読み込みを指示します
+- `client.hot.send({ type: "full-reload" })` により、ブラウザにページ全体の再読み込みを指示します
 
 「仮想モジュールが、インポートしていないファイルの内容から作られている場合は、自分で監視して無効化する」。これは Void のルーティングプラグインがやっていることと、まったく同じです（第 6 章）。
 
@@ -531,15 +531,15 @@ Vite 6 から入った [Environment API](https://vite.dev/guide/api-environment)
 ```mermaid
 flowchart TB
   V["Vite（1 つの開発サーバー/1 回のビルド）"]
-  V --> C["client 環境<br/>ブラウザで動くコード<br/>consumer: 'client'"]
-  V --> W["void_worker 環境<br/>Worker で動くコード<br/>consumer: 'server'"]
+  V --> C["client 環境<br/>ブラウザで動くコード<br/>consumer: #quot;client#quot;"]
+  V --> W["void_worker 環境<br/>Worker で動くコード<br/>consumer: #quot;server#quot;"]
   C --> CG["独自のモジュールグラフ<br/>独自の依存の事前バンドル<br/>独自のビルド出力"]
   W --> WG["独自のモジュールグラフ<br/>独自の依存の事前バンドル<br/>独自のビルド出力"]
 ```
 
 - 各環境は、自分専用のモジュールグラフ、インポートの解決ルール（`resolve.conditions` など）、依存の事前バンドル、ビルドの出力先をもちます
 - 開発サーバーでは、プラグインは全環境で共有されます。`resolveId`、`load`、`transform` のような環境ごとに呼ばれるフックの中で `this.environment` を見れば、今どの環境のために動いているのかがわかります
-- `this.environment.config.consumer` は、その環境のコードを実行するのがブラウザ（`'client'`）かサーバー（`'server'`）かを表わします
+- `this.environment.config.consumer` は、その環境のコードを実行するのがブラウザ（`"client"`）かサーバー（`"server"`）かを表わします
 - ブラウザ以外の環境のコードは、開発中はモジュールランナー（[module runner](https://vite.dev/guide/api-environment-runtimes#modulerunner)）というしくみで実行されます。モジュールランナーは、開発サーバーから変換済みのモジュールを取ってきて評価する小さな部品で、Node.js 以外のランタイムの中でも動かすことができます
 
 この章の `load` で表示した `"client" 環境` の `client` は、ブラウザ向けの既定の環境の名前です。次の章では、Cloudflare の Vite プラグインが追加する Worker 用の環境を使い、同じ `this.environment.name` が別の値になることを確かめます。開発サーバーの `server.environments` が環境の一覧で、「モジュールグラフと無効化」の `server.environments.client` はその中の 1 つを取り出していたわけです。

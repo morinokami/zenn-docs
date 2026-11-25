@@ -1,6 +1,6 @@
-// `import { kv } from 'chibivoid/kv'` で使う KV クライアント。
-import { requireRuntimeBinding } from './env.ts';
-import type { KVNamespaceLike } from './handler.ts';
+// `import { kv } from "chibivoid/kv"` で使う KV クライアント。
+import { requireRuntimeBinding } from "./env.ts";
+import type { KVNamespaceLike } from "./handler.ts";
 
 export type KVClient = {
   get<T = unknown>(key: string): Promise<T | null>;
@@ -10,7 +10,7 @@ export type KVClient = {
 
 /** 呼ばれるたびに「今のリクエストの」KV バインディングを取り出す */
 function namespace(): KVNamespaceLike {
-  return requireRuntimeBinding<KVNamespaceLike>('KV');
+  return requireRuntimeBinding<KVNamespaceLike>("KV");
 }
 
 /** 値を JSON にして保存し、取り出す際に JSON から戻す KV クライアント */

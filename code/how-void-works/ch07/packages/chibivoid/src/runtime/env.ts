@@ -1,4 +1,4 @@
-import { AsyncLocalStorage } from 'node:async_hooks';
+import { AsyncLocalStorage } from "node:async_hooks";
 
 type RuntimeEnv = Record<string, unknown>;
 
@@ -16,7 +16,7 @@ export function withRuntimeEnv<T>(env: RuntimeEnv, fn: () => T): T {
 export function getRuntimeEnv(): RuntimeEnv {
   const env = envContext.getStore();
   if (!env) {
-    throw new Error('env: リクエストの処理中以外では、バインディングにアクセスできません');
+    throw new Error("env: リクエストの処理中以外では、バインディングにアクセスできません");
   }
   return env;
 }

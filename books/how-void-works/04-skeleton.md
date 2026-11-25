@@ -61,11 +61,11 @@ cd chibivoid
 {
   "name": "chibivoid-root",
   "private": true,
-  "type": "module",
   "workspaces": [
     "packages/*",
     "playground"
   ],
+  "type": "module",
   "scripts": {
     "dev": "npm run dev --workspace playground",
     "build": "npm run build --workspace playground",
@@ -75,7 +75,7 @@ cd chibivoid
 ```
 <!-- /file -->
 
-`workspaces` に並べたディレクトリが、それぞれ 1 つのパッケージになります。モノレポのルートで `npm install` を実行すると、workspace のパッケージは `node_modules/` にシンボリックリンクとして置かれます。つまり、`playground` から `import { chibivoidPlugin } from 'chibivoid'` と記述すると、`node_modules/chibivoid` のリンクをたどって、`packages/chibivoid` の中身がそのまま読み込まれます。
+`workspaces` に並べたディレクトリが、それぞれ 1 つのパッケージになります。モノレポのルートで `npm install` を実行すると、workspace のパッケージは `node_modules/` にシンボリックリンクとして置かれます。つまり、`playground` から `import { chibivoidPlugin } from "chibivoid"` と記述すると、`node_modules/chibivoid` のリンクをたどって、`packages/chibivoid` の中身がそのまま読み込まれます。
 
 ルートの `name` を `chibivoid-root` にしているのは、`packages/chibivoid` のパッケージ名 `chibivoid` と区別するためです。
 
@@ -124,8 +124,8 @@ mkdir -p packages/chibivoid/src/router packages/chibivoid/src/runtime
 
 ここでは [`exports`](https://nodejs.org/api/packages.html#subpath-exports) に注目してください:
 
-- `"."`: `import ... from 'chibivoid'` により読み込まれるファイル
-- [`"./runtime/*"`](https://nodejs.org/api/packages.html#subpath-patterns): `import ... from 'chibivoid/runtime/routing'` のように、`runtime/` 以下のファイルを読み込むことができるようにする
+- `"."`: `import ... from "chibivoid"` により読み込まれるファイル
+- [`"./runtime/*"`](https://nodejs.org/api/packages.html#subpath-patterns): `import ... from "chibivoid/runtime/routing"` のように、`runtime/` 以下のファイルを読み込むことができるようにする
 
 普通の npm パッケージであれば、TypeScript を JavaScript にビルドして `dist/` に出力し、`exports` はそれを指すようにします。Void も、Vite+ の `vp pack` コマンドにより `dist/*.mjs` をビルドしています。
 
@@ -137,7 +137,7 @@ chibivoid では、学習の手間を減らすためにビルドの過程を省�
 ただし、type stripping は型注釈を消すだけであるため、次のルールを守る必要があります:
 
 - `enum` や、実行時のコードを含む `namespace`、コンストラクターのパラメータプロパティ（`constructor(private x: number)`）のような、[JavaScript への変換が必要な TypeScript 独自の構文](https://nodejs.org/api/typescript.html#typescript-features)は使わない
-- 相対パスのインポートには `.ts` の拡張子を付ける（`import { foo } from './foo.ts'`）
+- 相対パスのインポートには `.ts` の拡張子を付ける（`import { foo } from "./foo.ts"`）
 - 型だけをインポートする場合は `import type` を使う（実行時に存在しない名前をインポートしようとしてエラーになることを防ぐ）
 
 依存パッケージは `@cloudflare/vite-plugin` と、Worker の中でルーターとして使う `hono` です。`vite` は利用者のプロジェクトに入っているものを使うため `peerDependencies` にしています。
@@ -147,12 +147,12 @@ chibivoid では、学習の手間を減らすためにビルドの過程を省�
 Void は、Worker の中で動くルーターとして [Hono](https://hono.dev) を使っています。Hono はウェブ標準の `Request`/`Response` の上で動く軽量なウェブフレームワークで、Cloudflare Workers でよく使われています。使い方はとても簡単です:
 
 ```ts
-import { Hono } from 'hono';
+import { Hono } from "hono";
 
 const app = new Hono();
 
-app.get('/', (c) => c.text('Hello!'));
-app.get('/users/:id', (c) => c.json({ id: c.req.param('id') }));
+app.get("/", (c) => c.text("Hello!"));
+app.get("/users/:id", (c) => c.json({ id: c.req.param("id") }));
 
 export default app;
 ```
@@ -176,7 +176,7 @@ chibivoid は、`routes/` のファイルからこの `app.get(...)` を並べ�
 <!-- file: code/how-void-works/ch04/packages/chibivoid/src/runtime/routing.ts -->
 ```ts:packages/chibivoid/src/runtime/routing.ts
 // Worker エントリ（.chibivoid/entry.ts）から呼ばれる実行時の関数。
-import type { ExecutionContext, Hono } from 'hono';
+import type { ExecutionContext, Hono } from "hono";
 
 type WorkerEnv = Record<string, unknown>;
 
@@ -206,8 +206,8 @@ export function createWorkerFetch(app: Hono) {
  */
 export function compileWorkerEntry(): string {
   return `// chibivoid が自動生成したファイルです。編集しないでください。
-import app from 'virtual:chibivoid-routes';
-import { createWorkerFetch } from 'chibivoid/runtime/routing';
+import app from "virtual:chibivoid-routes";
+import { createWorkerFetch } from "chibivoid/runtime/routing";
 
 export default {
   fetch: createWorkerFetch(app),
@@ -244,11 +244,11 @@ export default app;
 
 <!-- file: code/how-void-works/ch04/packages/chibivoid/src/plugin-routing.ts -->
 ```ts:packages/chibivoid/src/plugin-routing.ts
-import type { Plugin } from 'vite';
-import { compileRouteTable } from './router/compile.ts';
+import type { Plugin } from "vite";
+import { compileRouteTable } from "./router/compile.ts";
 
-const VIRTUAL_ROUTES_ID = 'virtual:chibivoid-routes';
-const RESOLVED_VIRTUAL_ROUTES_ID = '\0' + VIRTUAL_ROUTES_ID;
+const VIRTUAL_ROUTES_ID = "virtual:chibivoid-routes";
+const RESOLVED_VIRTUAL_ROUTES_ID = "\0" + VIRTUAL_ROUTES_ID;
 
 /**
  * ルーティングを担当するプラグイン。
@@ -256,9 +256,9 @@ const RESOLVED_VIRTUAL_ROUTES_ID = '\0' + VIRTUAL_ROUTES_ID;
  */
 export function routingPlugin(): Plugin {
   return {
-    name: 'chibivoid:routing',
-    // Vite 本体の解決処理より先に動いてほしいため 'pre'
-    enforce: 'pre',
+    name: "chibivoid:routing",
+    // Vite 本体の解決処理より先に動いてほしいため "pre"
+    enforce: "pre",
 
     resolveId(id) {
       if (id === VIRTUAL_ROUTES_ID) {
@@ -284,15 +284,15 @@ export function routingPlugin(): Plugin {
 
 <!-- file: code/how-void-works/ch04/packages/chibivoid/src/index.ts -->
 ```ts:packages/chibivoid/src/index.ts
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { cloudflare } from '@cloudflare/vite-plugin';
-import type { Plugin } from 'vite';
-import { routingPlugin } from './plugin-routing.ts';
-import { compileWorkerEntry } from './router/compile.ts';
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { cloudflare } from "@cloudflare/vite-plugin";
+import type { Plugin } from "vite";
+import { routingPlugin } from "./plugin-routing.ts";
+import { compileWorkerEntry } from "./router/compile.ts";
 
 /** Worker のコードを動かす Vite 環境の名前（Void では `void_worker`） */
-export const WORKER_ENVIRONMENT_NAME = 'chibivoid_worker';
+export const WORKER_ENVIRONMENT_NAME = "chibivoid_worker";
 
 /**
  * chibivoid の Vite プラグイン。
@@ -300,12 +300,12 @@ export const WORKER_ENVIRONMENT_NAME = 'chibivoid_worker';
  */
 export function chibivoidPlugin(): Plugin[] {
   const root = process.cwd();
-  const outDir = join(root, '.chibivoid');
+  const outDir = join(root, ".chibivoid");
   mkdirSync(outDir, { recursive: true });
 
   // Cloudflare プラグインは設定を解決する時点で `main` のファイルを必要とする。
   // そのため、どのフックよりも前（= chibivoidPlugin() が呼ばれた瞬間）にエントリを書き出しておく。
-  const entryPath = join(outDir, 'entry.ts');
+  const entryPath = join(outDir, "entry.ts");
   writeFileSync(entryPath, compileWorkerEntry());
 
   return [
@@ -317,7 +317,7 @@ export function chibivoidPlugin(): Plugin[] {
       config: {
         name: readWorkerName(root),
         main: entryPath,
-        compatibility_date: '2026-10-01',
+        compatibility_date: "2026-10-01",
       },
     }),
   ];
@@ -325,12 +325,12 @@ export function chibivoidPlugin(): Plugin[] {
 
 /** package.json の name から Worker 名を作る */
 export function readWorkerName(root: string): string {
-  const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as { name?: string };
-  const name = (pkg.name ?? 'chibivoid-app')
+  const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { name?: string };
+  const name = (pkg.name ?? "chibivoid-app")
     .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  return name || 'chibivoid-app';
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return name || "chibivoid-app";
 }
 ```
 <!-- /file -->
@@ -397,8 +397,8 @@ mkdir playground
 
 <!-- file: code/how-void-works/ch04/playground/vite.config.ts -->
 ```ts:playground/vite.config.ts
-import { chibivoidPlugin } from 'chibivoid';
-import { defineConfig } from 'vite';
+import { chibivoidPlugin } from "chibivoid";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [chibivoidPlugin()],
@@ -468,8 +468,8 @@ Hello from chibivoid!
 
 ```ts
 // chibivoid が自動生成したファイルです。編集しないでください。
-import app from 'virtual:chibivoid-routes';
-import { createWorkerFetch } from 'chibivoid/runtime/routing';
+import app from "virtual:chibivoid-routes";
+import { createWorkerFetch } from "chibivoid/runtime/routing";
 
 export default {
   fetch: createWorkerFetch(app),
@@ -554,4 +554,4 @@ dist/chibivoid_worker/index.js             57.58 kB │ gzip: 16.05 kB │ map: 
 
 `createWorkerFetch()` は、Void では `packages/void/src/runtime/routing/worker.ts` にあります。環境変数のバリデーション、Void の内部エンドポイント（`/__void/ready` など）、内部用のバインディングを隠す処理、ISR（Incremental Static Regeneration）のキャッシュなどを経てから Hono アプリを呼び出し、どのルートにもマッチしなかった `GET` または `HEAD` リクエストは、静的アセットにフォールバックしています。
 
-生成コードからのインポートについては違いがあります。chibivoid は生成コードの中で `'hono'` や `'chibivoid/runtime/routing'` とパッケージ名でインポートしています。Void は、Vite プラグインのコードの中で `import.meta.resolve()` を使ってルーティングのランタイム（`packages/void/src/runtime/routing/index.ts`）などを絶対パスに解決してから、生成コードに埋め込んでいます。これらは、Void が `exports` で公開していないモジュールであるためです。`Hono` も、`'hono'` からではなく、このルーティングのランタイムが再エクスポートしたものをインポートしています。アプリが `hono` に直接依存していなくても、ルーティングのランタイムと同じ Hono を使うためです。chibivoid では、読みやすさを優先して名前のまま記述し、`runtime/` を `exports` で公開し（「TypeScript をビルドせずにパッケージにする」）、アプリ側にも `hono` を依存として入れる（「playground を作成する」）ことで解決しています。
+生成コードからのインポートについては違いがあります。chibivoid は生成コードの中で `"hono"` や `"chibivoid/runtime/routing"` とパッケージ名でインポートしています。Void は、Vite プラグインのコードの中で `import.meta.resolve()` を使ってルーティングのランタイム（`packages/void/src/runtime/routing/index.ts`）などを絶対パスに解決してから、生成コードに埋め込んでいます。これらは、Void が `exports` で公開していないモジュールであるためです。`Hono` も、`"hono"` からではなく、このルーティングのランタイムが再エクスポートしたものをインポートしています。アプリが `hono` に直接依存していなくても、ルーティングのランタイムと同じ Hono を使うためです。chibivoid では、読みやすさを優先して名前のまま記述し、`runtime/` を `exports` で公開し（「TypeScript をビルドせずにパッケージにする」）、アプリ側にも `hono` を依存として入れる（「playground を作成する」）ことで解決しています。

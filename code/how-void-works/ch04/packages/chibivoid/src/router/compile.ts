@@ -5,8 +5,8 @@
  */
 export function compileWorkerEntry(): string {
   return `// chibivoid が自動生成したファイルです。編集しないでください。
-import app from 'virtual:chibivoid-routes';
-import { createWorkerFetch } from 'chibivoid/runtime/routing';
+import app from "virtual:chibivoid-routes";
+import { createWorkerFetch } from "chibivoid/runtime/routing";
 
 export default {
   fetch: createWorkerFetch(app),

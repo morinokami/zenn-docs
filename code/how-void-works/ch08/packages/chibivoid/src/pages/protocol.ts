@@ -1,4 +1,4 @@
-import type { Context } from 'hono';
+import type { Context } from "hono";
 
 /**
  * サーバーからクライアントへ渡す「ページオブジェクト」。
@@ -37,7 +37,7 @@ export type PageRouteOptions = {
 /** `<script type="application/json">` に安全に埋め込めるように JSON をエスケープする */
 export function serializePageData(pageObj: PageObject): string {
   return JSON.stringify(pageObj).replace(/[<>&\u2028\u2029]/g, (char) => {
-    return `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`;
+    return `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`;
   });
 }
 
@@ -82,5 +82,5 @@ export async function handlePageGet(
   }
   const pageObj = createPageObject(c, options.componentId, props);
   const html = await options.render(pageObj, await options.assets(c.req.raw, c.env));
-  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
 }

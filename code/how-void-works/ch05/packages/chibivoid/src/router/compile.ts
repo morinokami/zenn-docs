@@ -1,4 +1,4 @@
-import type { ProjectPaths, ScanResult } from './scan.ts';
+import type { ProjectPaths, ScanResult } from "./scan.ts";
 
 export type CompileOptions = ProjectPaths & {
   /** `vite dev` 用にコンパイルするか */
@@ -15,8 +15,8 @@ const str = (value: string) => JSON.stringify(value);
  */
 export function compileWorkerEntry(): string {
   return `// chibivoid が自動生成したファイルです。編集しないでください。
-import app from 'virtual:chibivoid-routes';
-import { createWorkerFetch } from 'chibivoid/runtime/routing';
+import app from "virtual:chibivoid-routes";
+import { createWorkerFetch } from "chibivoid/runtime/routing";
 
 export default {
   fetch: createWorkerFetch(app),
@@ -33,7 +33,7 @@ export function compileRouteTable(scan: ScanResult, options: CompileOptions): st
     `import { Hono } from "hono";`,
     `import { createModuleLoader, createHttpRouteHandler } from "chibivoid/runtime/routing";`,
   ];
-  const body: string[] = ['const app = new Hono();'];
+  const body: string[] = ["const app = new Hono();"];
   // 本番ではロードしたモジュールをキャッシュし、開発中は毎回インポートし直す
   const cache = !options.dev;
 
@@ -49,5 +49,5 @@ export function compileRouteTable(scan: ScanResult, options: CompileOptions): st
     }
   });
 
-  return [...imports, '', ...body, '', 'export default app;', ''].join('\n');
+  return [...imports, "", ...body, "", "export default app;", ""].join("\n");
 }

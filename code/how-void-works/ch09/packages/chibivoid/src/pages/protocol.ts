@@ -1,4 +1,4 @@
-import type { Context } from 'hono';
+import type { Context } from "hono";
 
 /**
  * サーバーからクライアントへ渡す「ページオブジェクト」。
@@ -37,13 +37,13 @@ export type PageRouteOptions = {
 /** `<script type="application/json">` に安全に埋め込めるように JSON をエスケープする */
 export function serializePageData(pageObj: PageObject): string {
   return JSON.stringify(pageObj).replace(/[<>&\u2028\u2029]/g, (char) => {
-    return `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`;
+    return `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`;
   });
 }
 
 /** クライアント遷移（fetch）からのリクエストかどうか */
 function isPagesRequest(c: Context): boolean {
-  return c.req.header('X-ChibivoidPages') === 'true';
+  return c.req.header("X-ChibivoidPages") === "true";
 }
 
 /**
@@ -55,13 +55,13 @@ async function respondWithPage(
   pageObj: PageObject,
   options: PageRouteOptions,
 ): Promise<Response> {
-  const headers = new Headers({ Vary: 'X-ChibivoidPages' });
+  const headers = new Headers({ Vary: "X-ChibivoidPages" });
   if (isPagesRequest(c)) {
-    headers.set('X-ChibivoidPages', 'true');
+    headers.set("X-ChibivoidPages", "true");
     return Response.json(pageObj, { headers });
   }
   const html = await options.render(pageObj, await options.assets(c.req.raw, c.env));
-  headers.set('Content-Type', 'text/html; charset=utf-8');
+  headers.set("Content-Type", "text/html; charset=utf-8");
   return new Response(html, { headers });
 }
 

@@ -13,8 +13,8 @@ export function convertReturnValue(value: unknown): Response {
   if (value === null || value === undefined) {
     return new Response(null, { status: 204 });
   }
-  if (typeof value === 'string') {
-    return new Response(value, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  if (typeof value === "string") {
+    return new Response(value, { headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
   return Response.json(value);
 }

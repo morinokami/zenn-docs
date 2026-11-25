@@ -1,8 +1,8 @@
-import { normalizePath, type Plugin, type UserConfig } from 'vite';
-import { scanPages, type PageScanResult } from './scan.ts';
+import { normalizePath, type Plugin, type UserConfig } from "vite";
+import { scanPages, type PageScanResult } from "./scan.ts";
 
-export const RENDERER_ID = 'virtual:chibivoid-pages-renderer';
-export const CLIENT_ENTRY_ID = 'virtual:chibivoid-pages-client';
+export const RENDERER_ID = "virtual:chibivoid-pages-renderer";
+export const CLIENT_ENTRY_ID = "virtual:chibivoid-pages-client";
 
 type CreatePagesPluginOptions = {
   /** プラグイン名。例: "chibivoid-react:pages" */
@@ -29,7 +29,7 @@ export function createPagesPlugin(pagesDir: string, options: CreatePagesPluginOp
     name: options.name,
 
     config(_config, env) {
-      isDev = env.command === 'serve' && !env.isPreview;
+      isDev = env.command === "serve" && !env.isPreview;
       return options.config?.({ isDev });
     },
 
@@ -39,15 +39,15 @@ export function createPagesPlugin(pagesDir: string, options: CreatePagesPluginOp
 
     resolveId(id) {
       if (id === RENDERER_ID || id === CLIENT_ENTRY_ID) {
-        return '\0' + id;
+        return "\0" + id;
       }
     },
 
     load(id) {
-      if (id === '\0' + RENDERER_ID) {
+      if (id === "\0" + RENDERER_ID) {
         return options.generateRenderer(scan, isDev);
       }
-      if (id === '\0' + CLIENT_ENTRY_ID) {
+      if (id === "\0" + CLIENT_ENTRY_ID) {
         return options.generateClient(scan);
       }
     },
@@ -55,12 +55,12 @@ export function createPagesPlugin(pagesDir: string, options: CreatePagesPluginOp
     configureServer(server) {
       // ページが追加・削除された場合は、2 つの仮想モジュールを作り直してもらう
       const onStructureChange = (file: string) => {
-        if (!normalizePath(file).startsWith(normalizedPagesDir + '/')) {
+        if (!normalizePath(file).startsWith(normalizedPagesDir + "/")) {
           return;
         }
         scan = scanPages(pagesDir);
         for (const environment of Object.values(server.environments)) {
-          for (const id of ['\0' + RENDERER_ID, '\0' + CLIENT_ENTRY_ID]) {
+          for (const id of ["\0" + RENDERER_ID, "\0" + CLIENT_ENTRY_ID]) {
             const mod = environment.moduleGraph.getModuleById(id);
             if (mod) {
               environment.moduleGraph.invalidateModule(mod);
@@ -68,8 +68,8 @@ export function createPagesPlugin(pagesDir: string, options: CreatePagesPluginOp
           }
         }
       };
-      server.watcher.on('add', onStructureChange);
-      server.watcher.on('unlink', onStructureChange);
+      server.watcher.on("add", onStructureChange);
+      server.watcher.on("unlink", onStructureChange);
     },
   };
 }

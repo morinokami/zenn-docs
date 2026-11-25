@@ -1,8 +1,8 @@
-import { join } from 'node:path';
-import react from '@vitejs/plugin-react';
-import { WORKER_ENVIRONMENT_NAME } from 'chibivoid';
-import { createPagesPlugin, generateComponentManifest } from 'chibivoid/pages';
-import { normalizePath, type PluginOption, type UserConfig } from 'vite';
+import { join } from "node:path";
+import react from "@vitejs/plugin-react";
+import { WORKER_ENVIRONMENT_NAME } from "chibivoid";
+import { createPagesPlugin, generateComponentManifest } from "chibivoid/pages";
+import { normalizePath, type PluginOption, type UserConfig } from "vite";
 
 /**
  * サーバーで描画した HTML には、@vitejs/plugin-react が通常 index.html に差し込む
@@ -18,18 +18,18 @@ window.__vite_plugin_react_preamble_installed__ = true;
 
 /** chibivoid の React アダプター。`plugins: [chibivoidPlugin(), chibivoidReact()]` のように使う */
 export function chibivoidReact(): PluginOption[] {
-  const pagesDir = normalizePath(join(process.cwd(), 'pages'));
+  const pagesDir = normalizePath(join(process.cwd(), "pages"));
 
   return [
     react(),
     createPagesPlugin(pagesDir, {
-      name: 'chibivoid-react:pages',
+      name: "chibivoid-react:pages",
 
       // サーバー（Worker）で HTML を描画するモジュール
       generateRenderer(scan, isDev) {
         return `import { renderReactPage } from "@chibivoid/react/pages-server";
 ${generateComponentManifest(scan, pagesDir)}
-const preamble = ${JSON.stringify(isDev ? REACT_REFRESH_PREAMBLE : '')};
+const preamble = ${JSON.stringify(isDev ? REACT_REFRESH_PREAMBLE : "")};
 export function renderPage(pageObj, assetTags) {
   return renderReactPage({ pageObj, assetTags, components, layoutTree, preamble });
 }
@@ -50,10 +50,10 @@ startReactPages({ components, layoutTree });
           return {
             environments: {
               client: {
-                optimizeDeps: { include: ['react', 'react-dom/client', 'react/jsx-dev-runtime'] },
+                optimizeDeps: { include: ["react", "react-dom/client", "react/jsx-dev-runtime"] },
               },
               [WORKER_ENVIRONMENT_NAME]: {
-                optimizeDeps: { include: ['react', 'react-dom/server', 'react/jsx-dev-runtime'] },
+                optimizeDeps: { include: ["react", "react-dom/server", "react/jsx-dev-runtime"] },
               },
             },
           };

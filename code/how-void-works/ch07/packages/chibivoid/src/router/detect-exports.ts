@@ -1,8 +1,8 @@
-import { readFileSync } from 'node:fs';
-import { basename } from 'node:path';
-import { parseSync } from 'vite';
+import { readFileSync } from "node:fs";
+import { basename } from "node:path";
+import { parseSync } from "vite";
 
-const HTTP_METHODS = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']);
+const HTTP_METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
 
 /**
  * ファイルを「実行せずに」解析して、エクスポートされている値の名前を列挙する。
@@ -10,7 +10,7 @@ const HTTP_METHODS = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'
  * ESM のインポートとエクスポートの一覧（`module`）も一緒に返してくれる。
  */
 export function detectExports(absPath: string): string[] {
-  const code = readFileSync(absPath, 'utf8');
+  const code = readFileSync(absPath, "utf8");
   const { module, errors } = parseSync(basename(absPath), code);
   if (errors.length > 0) {
     return [];

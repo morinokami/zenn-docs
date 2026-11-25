@@ -1,6 +1,6 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { basename, join } from 'node:path';
-import { parseSync } from 'vite';
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { basename, join } from "node:path";
+import { parseSync } from "vite";
 
 /** アプリが必要としている Cloudflare リソース */
 export type InferredBindings = {
@@ -9,16 +9,16 @@ export type InferredBindings = {
 
 /** このインポートが見つかった場合は、このリソースが必要だと判断する */
 const MODULE_BINDINGS: Record<string, keyof InferredBindings> = {
-  'chibivoid/kv': 'needsKV',
+  "chibivoid/kv": "needsKV",
 };
 
 /** `env.KV` のようなアクセスが見つかった場合は、このリソースが必要だと判断する */
 const ENV_BINDINGS: Record<string, keyof InferredBindings> = {
-  KV: 'needsKV',
+  KV: "needsKV",
 };
 
 /** スキャンするディレクトリ（Void の DEFAULT_SCAN_DIRS を縮めたもの） */
-const SCAN_DIRS = ['routes', 'middleware', 'pages', 'src'];
+const SCAN_DIRS = ["routes", "middleware", "pages", "src"];
 const SOURCE_RE = /\.(ts|tsx|js|jsx|mts|mjs)$/;
 
 type AstNode = { type: string; [key: string]: unknown };
@@ -43,14 +43,14 @@ export function inferBindingsFromSource(code: string, filename: string): Inferre
 
   // 2. 構文木（AST）をたどって `env.KV`/`c.env.KV` のようなアクセスを探す
   visit(parsed.program as unknown as AstNode, (node) => {
-    if (node.type !== 'MemberExpression' || node.computed) {
+    if (node.type !== "MemberExpression" || node.computed) {
       return;
     }
     const object = node.object as AstNode;
     const property = node.property as AstNode & { name?: string };
     const isEnv =
-      (object.type === 'Identifier' && object.name === 'env') ||
-      (object.type === 'MemberExpression' && (object.property as AstNode).name === 'env');
+      (object.type === "Identifier" && object.name === "env") ||
+      (object.type === "MemberExpression" && (object.property as AstNode).name === "env");
     const key = property.name ? ENV_BINDINGS[property.name] : undefined;
     if (isEnv && key) {
       result[key] = true;
@@ -66,7 +66,7 @@ function visit(node: AstNode, callback: (node: AstNode) => void): void {
   for (const value of Object.values(node)) {
     const children = Array.isArray(value) ? value : [value];
     for (const child of children) {
-      if (child && typeof child === 'object' && typeof (child as AstNode).type === 'string') {
+      if (child && typeof child === "object" && typeof (child as AstNode).type === "string") {
         visit(child as AstNode, callback);
       }
     }
@@ -93,7 +93,7 @@ export function inferProjectBindings(root: string): InferredBindings {
   const result: InferredBindings = { needsKV: false };
   for (const dir of SCAN_DIRS) {
     for (const file of listSourceFiles(join(root, dir))) {
-      const found = inferBindingsFromSource(readFileSync(file, 'utf8'), file);
+      const found = inferBindingsFromSource(readFileSync(file, "utf8"), file);
       result.needsKV ||= found.needsKV;
     }
   }

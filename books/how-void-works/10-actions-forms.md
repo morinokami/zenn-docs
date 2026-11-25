@@ -8,7 +8,7 @@ title: "Pages (3): action とフォーム"
 // pages/users/index.server.ts
 export const action = defineHandler(async (c) => {
   const form = await c.req.formData();
-  await addUser(String(form.get('name')));
+  await addUser(String(form.get("name")));
   // 何も返さなければ、loader をもう一度実行して最新のページを返す
 });
 ```
@@ -68,8 +68,8 @@ JavaScript が無効な場合でも、JavaScript の読み込みが終わる前�
 +  readonly errors: Record<string, string>;
 +
 +  constructor(errors: Record<string, string>) {
-+    super('Validation failed');
-+    this.name = 'ValidationError';
++    super("Validation failed");
++    this.name = "ValidationError";
 +    this.errors = errors;
 +  }
 +}
@@ -79,7 +79,7 @@ JavaScript が無効な場合でも、JavaScript の読み込みが終わる前�
 `ValidationError` のコンストラクターには、次のように、フィールド名をキー、エラーメッセージを値とするオブジェクトを渡します:
 
 ```ts
-throw new ValidationError({ name: '名前を入力してください' });
+throw new ValidationError({ name: "名前を入力してください" });
 ```
 
 また、アプリのコードからインポートできるように、`index.ts` からも `ValidationError` を再エクスポートしておきます:
@@ -88,11 +88,11 @@ throw new ValidationError({ name: '名前を入力してください' });
 ```diff ts:packages/chibivoid/src/index.ts
 @@ -55,5 +55,5 @@
  
- // アプリのコードから `import { defineHandler } from 'chibivoid'` と記述することができるように再エクスポートする。
+ // アプリのコードから `import { defineHandler } from "chibivoid"` と記述することができるように再エクスポートする。
  // （Worker の中ではこの index.ts ではなく runtime/handler.ts に差し替えられる）
--export { defineHandler, defineMiddleware } from './runtime/handler.ts';
-+export { defineHandler, defineMiddleware, ValidationError } from './runtime/handler.ts';
- export type { CloudContext, InferProps, TypedHandler } from './runtime/handler.ts';
+-export { defineHandler, defineMiddleware } from "./runtime/handler.ts";
++export { defineHandler, defineMiddleware, ValidationError } from "./runtime/handler.ts";
+ export type { CloudContext, InferProps, TypedHandler } from "./runtime/handler.ts";
 ```
 <!-- /diff -->
 
@@ -103,8 +103,8 @@ throw new ValidationError({ name: '名前を入力してください' });
 <!-- diff: code/how-void-works/ch09/packages/chibivoid/src/pages/protocol.ts code/how-void-works/ch10/packages/chibivoid/src/pages/protocol.ts -->
 ```diff ts:packages/chibivoid/src/pages/protocol.ts
 @@ -1,4 +1,5 @@
- import type { Context } from 'hono';
-+import { ValidationError } from '../runtime/handler.ts';
+ import type { Context } from "hono";
++import { ValidationError } from "../runtime/handler.ts";
  
  /**
   * サーバーからクライアントへ渡す「ページオブジェクト」。
@@ -154,7 +154,7 @@ throw new ValidationError({ name: '名前を入力してください' });
 +  options: PageRouteOptions,
 +): Promise<Response> {
 +  if (!isSameOrigin(c.req.raw)) {
-+    return new Response('Cross-origin page actions are not allowed.', { status: 403 });
++    return new Response("Cross-origin page actions are not allowed.", { status: 403 });
 +  }
 +  let errors: Record<string, string> | null = null;
 +  try {
@@ -178,12 +178,12 @@ throw new ValidationError({ name: '名前を入力してください' });
 +
 +/** 別サイトのページから勝手にフォームを送信させる攻撃（CSRF）を防ぐ */
 +function isSameOrigin(request: Request): boolean {
-+  const origin = request.headers.get('Origin');
++  const origin = request.headers.get("Origin");
 +  if (origin !== null) {
 +    return origin === new URL(request.url).origin;
 +  }
-+  const site = request.headers.get('Sec-Fetch-Site');
-+  return !site || site === 'same-origin' || site === 'none';
++  const site = request.headers.get("Sec-Fetch-Site");
++  return !site || site === "same-origin" || site === "none";
  }
 ```
 <!-- /diff -->
@@ -202,9 +202,11 @@ action を実行した後に loader を実行し直している点に注目し�
 
 ```html
 <form method="post" action="https://your-app.example/users">
-  <input name="name" value="勝手に追加">
+  <input name="name" value="勝手に追加" />
 </form>
-<script>document.forms[0].submit()</script>
+<script>
+  document.forms[0].submit();
+</script>
 ```
 
 あなたのアプリにログインしている人がこのサイトを開くと、本人の知らないうちに、このフォームがあなたのアプリに送信されてしまいます。
@@ -221,16 +223,16 @@ action を実行した後に loader を実行し直している点に注目し�
 ```diff ts:packages/chibivoid/src/runtime/routing.ts
 @@ -1,6 +1,11 @@
  // 生成されたルートテーブル（virtual:chibivoid-routes）と Worker エントリから呼ばれる実行時の関数。
- import type { Context, ExecutionContext, Hono } from 'hono';
--import { handlePageGet, type PageHandler, type PageRouteOptions } from '../pages/protocol.ts';
+ import type { Context, ExecutionContext, Hono } from "hono";
+-import { handlePageGet, type PageHandler, type PageRouteOptions } from "../pages/protocol.ts";
 +import {
 +  handlePageGet,
 +  handlePageMutation,
 +  type PageHandler,
 +  type PageRouteOptions,
-+} from '../pages/protocol.ts';
- import { withRuntimeEnv } from './env.ts';
- import { convertReturnValue } from './response.ts';
++} from "../pages/protocol.ts";
+ import { withRuntimeEnv } from "./env.ts";
+ import { convertReturnValue } from "./response.ts";
  
 @@ -35,7 +40,7 @@
    };
@@ -250,7 +252,7 @@ action を実行した後に loader を実行し直している点に注目し�
 +  return async (c: Context): Promise<Response> => {
 +    const mod = config.load ? await config.load() : {};
 +    if (!mod.action) {
-+      return c.text('Method Not Allowed', 405);
++      return c.text("Method Not Allowed", 405);
 +    }
 +    return handlePageMutation(mod.action, mod.loader, c, config);
 +  };
@@ -273,13 +275,13 @@ action を実行した後に loader を実行し直している点に注目し�
 -    `import { createModuleLoader, createHttpRouteHandler, createPageGetHandler, createPagesAssetTags } from "chibivoid/runtime/routing";`,
 +    `import { createModuleLoader, createHttpRouteHandler, createPageGetHandler, createPageMutationHandler, createPagesAssetTags } from "chibivoid/runtime/routing";`,
    ];
-   const body: string[] = ['const app = new Hono();'];
+   const body: string[] = ["const app = new Hono();"];
    // 本番ではロードしたモジュールをキャッシュし、開発中は毎回インポートし直す
-@@ -84,5 +84,10 @@
+@@ -86,5 +86,10 @@
      }
      const routeOptions = `{ componentId: ${str(page.componentId)}, load: ${load}, render: renderPage, assets: getAssetTags }`;
      body.push(`app.get(${str(page.pattern)}, createPageGetHandler(${routeOptions}));`);
-+    if (page.methods.includes('action')) {
++    if (page.methods.includes("action")) {
 +      body.push(
 +        `app.on(["POST", "PUT", "PATCH", "DELETE"], ${str(page.pattern)}, createPageMutationHandler(${routeOptions}));`,
 +      );
@@ -311,14 +313,14 @@ Hono の `app.on()` は、`app.on(メソッドの配列, パス, ハンドラー
  
    async function visit(url: string, visitOptions: VisitOptions = {}) {
 -    const { history: updateHistory = true } = visitOptions;
-+    const { method = 'GET', body, history: updateHistory = true } = visitOptions;
++    const { method = "GET", body, history: updateHistory = true } = visitOptions;
      const visitId = ++latestVisit;
  
      // 「HTML ではなくページオブジェクト（JSON）をください」という合図のヘッダー
      const response = await fetch(url, {
 +      method,
 +      body,
-       headers: { 'X-ChibivoidPages': 'true', Accept: 'application/json' },
+       headers: { "X-ChibivoidPages": "true", Accept: "application/json" },
      });
      if (visitId !== latestVisit) {
 @@ -56,12 +60,15 @@
@@ -327,12 +329,12 @@ Hono の `app.on()` は、`app.on(メソッドの配列, パス, ハンドラー
      if (updateHistory) {
 +      // fetch がリダイレクトをたどった場合は page.url が変わっている
        if (page.url !== currentUrl()) {
-         history.pushState({ chibivoidPage: true }, '', page.url);
+         history.pushState({ chibivoidPage: true }, "", page.url);
        } else {
-         history.replaceState({ chibivoidPage: true }, '', page.url);
+         history.replaceState({ chibivoidPage: true }, "", page.url);
        }
 -      window.scrollTo(0, 0);
-+      if (method === 'GET') {
++      if (method === "GET") {
 +        window.scrollTo(0, 0);
 +      }
      }
@@ -343,7 +345,7 @@ Hono の `app.on()` は、`app.on(メソッドの配列, パス, ハンドラー
 
 変更は小さいですが、次の 2 点に注目してください:
 
-- リダイレクト: action が `c.redirect('/users/3', 303)` を返すと、`fetch()` は自動でリダイレクト先に `GET` リクエストを送り直します。このとき、元のリクエストに付けた `X-ChibivoidPages` ヘッダーも一緒に送られるため、リダイレクト先のページオブジェクトが JSON で返ってきます。このページオブジェクトの `url` は今の URL と異なるため、`history.pushState()` によりアドレスバーの URL が新しい URL に変わります。このように、リダイレクトのための特別な処理は必要ありません
+- リダイレクト: action が `c.redirect("/users/3", 303)` を返すと、`fetch()` は自動でリダイレクト先に `GET` リクエストを送り直します。このとき、元のリクエストに付けた `X-ChibivoidPages` ヘッダーも一緒に送られるため、リダイレクト先のページオブジェクトが JSON で返ってきます。このページオブジェクトの `url` は今の URL と異なるため、`history.pushState()` によりアドレスバーの URL が新しい URL に変わります。このように、リダイレクトのための特別な処理は必要ありません
 - スクロール: `GET` 以外のメソッド、つまりフォームの送信では、ページの先頭までスクロールしません。フォームを送信するたびにページの一番上に戻されてしまうと、ユーザーにとって不便であるためです
 
 ## アダプター: `Form` と `useErrors()`
@@ -352,10 +354,10 @@ Hono の `app.on()` は、`app.on(メソッドの配列, パス, ハンドラー
 
 <!-- file: code/how-void-works/ch10/packages/react/src/runtime/form.tsx -->
 ```tsx:packages/react/src/runtime/form.tsx
-import { useContext, type FormHTMLAttributes, type SubmitEvent } from 'react';
-import { RouterContext } from './context.ts';
+import { useContext, type FormHTMLAttributes, type SubmitEvent } from "react";
+import { RouterContext } from "./context.ts";
 
-export type FormProps = Omit<FormHTMLAttributes<HTMLFormElement>, 'method' | 'action'> & {
+export type FormProps = Omit<FormHTMLAttributes<HTMLFormElement>, "method" | "action"> & {
   /** 送信先のページ。省略すると今のページ */
   action?: string;
 };
@@ -377,7 +379,7 @@ export function Form({ action, onSubmit, ...rest }: FormProps) {
     // action を省略した場合は、普通のフォームと同じく今のページに送る
     const url = new URL(action ?? location.href, location.href);
     const page = await router.visit(url.pathname + url.search, {
-      method: 'POST',
+      method: "POST",
       // 押されたボタン（submitter）の name と value も、普通のフォーム送信と同じく含める
       body: new FormData(form, event.nativeEvent.submitter),
     });
@@ -405,11 +407,11 @@ export function Form({ action, onSubmit, ...rest }: FormProps) {
 <!-- diff: code/how-void-works/ch09/packages/react/src/runtime/index.ts code/how-void-works/ch10/packages/react/src/runtime/index.ts -->
 ```diff ts:packages/react/src/runtime/index.ts
 @@ -2,9 +2,15 @@
- import { useContext } from 'react';
- import { PageContext } from './context.ts';
+ import { useContext } from "react";
+ import { PageContext } from "./context.ts";
  
-+export { Form } from './form.tsx';
- export { Link } from './link.tsx';
++export { Form } from "./form.tsx";
+ export { Link } from "./link.tsx";
  
  /** URL パラメータ（例: pages/users/[id].tsx の id） */
  export function useParams(): Record<string, string> {
@@ -432,10 +434,10 @@ export function Form({ action, onSubmit, ...rest }: FormProps) {
 <!-- diff: code/how-void-works/ch09/playground/pages/users/index.server.ts code/how-void-works/ch10/playground/pages/users/index.server.ts -->
 ```diff ts:playground/pages/users/index.server.ts
 @@ -1,8 +1,17 @@
--import { defineHandler, type InferProps } from 'chibivoid';
--import { listUsers } from '../../src/users.ts';
-+import { defineHandler, ValidationError, type InferProps } from 'chibivoid';
-+import { addUser, listUsers } from '../../src/users.ts';
+-import { defineHandler, type InferProps } from "chibivoid";
+-import { listUsers } from "../../src/users.ts";
++import { defineHandler, ValidationError, type InferProps } from "chibivoid";
++import { addUser, listUsers } from "../../src/users.ts";
  
  export const loader = defineHandler(async () => {
    return { users: await listUsers() };
@@ -443,9 +445,9 @@ export function Form({ action, onSubmit, ...rest }: FormProps) {
  
 +export const action = defineHandler(async (c) => {
 +  const form = await c.req.formData();
-+  const name = String(form.get('name') ?? '').trim();
++  const name = String(form.get("name") ?? "").trim();
 +  if (!name) {
-+    throw new ValidationError({ name: '名前を入力してください' });
++    throw new ValidationError({ name: "名前を入力してください" });
 +  }
 +  await addUser(name);
 +});
@@ -461,9 +463,9 @@ export function Form({ action, onSubmit, ...rest }: FormProps) {
 <!-- diff: code/how-void-works/ch09/playground/pages/users/index.tsx code/how-void-works/ch10/playground/pages/users/index.tsx -->
 ```diff tsx:playground/pages/users/index.tsx
 @@ -1,7 +1,8 @@
--import { Link } from '@chibivoid/react';
-+import { Form, Link, useErrors } from '@chibivoid/react';
- import type { Props } from './index.server.ts';
+-import { Link } from "@chibivoid/react";
++import { Form, Link, useErrors } from "@chibivoid/react";
+ import type { Props } from "./index.server.ts";
  
  export default function Users({ users }: Props) {
 +  const errors = useErrors();
@@ -537,6 +539,6 @@ Void でも `packages/void/src/pages/protocol.ts` に chibivoid と同じ名前�
 - 名前付き action: 1 つのページに複数の action が必要な場合は、`export const actions = { create, delete: remove }` のように記述し、`/users?create` のようなクエリにより呼び分けます。この呼び分けは `runtime/routing/pages.ts` の `createPageMutationHandler()` がおこないます
 - CSRF のチェック: `isSameOriginAction()` は、`Origin` ヘッダーと `Sec-Fetch-Site` ヘッダーに加えて `Referer` ヘッダーも確かめています
 
-React のアダプターのフォーム（`packages/react/src/runtime/form.tsx`、`use-form.ts`）は、`useForm('/users', { name: '', email: '' })` のように呼び出して、入力値、エラー、送信中かどうかなどをまとめて管理する API になっています。
+React のアダプターのフォーム（`packages/react/src/runtime/form.tsx`、`use-form.ts`）は、`useForm("/users", { name: "", email: "" })` のように呼び出して、入力値、エラー、送信中かどうかなどをまとめて管理する API になっています。
 
 ただし、Void の `Form` は、この章の `Form` とは異なり、JavaScript が動いていることを前提にしています。`Form` は React 19 の「フォームアクション」により、`<form>` の `action` に関数を渡して送信するため、JavaScript が無効な場合はフォームを送信することができません。また、`useForm()` は入力値にファイルが含まれない限り、入力値を JSON で送信します。

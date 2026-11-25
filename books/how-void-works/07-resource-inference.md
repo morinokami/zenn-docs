@@ -13,11 +13,11 @@ Void の公式ドキュメント「[What is Void?](https://void.cloud/guide/)」
 - ソースコードを解析して、必要なバインディングを推論する
 - 推論結果から Worker の設定（`kv_namespaces`）を組み立てる
 - `AsyncLocalStorage` を使って、どこからでも「今のリクエストの `env`」を読むことができるようにする
-- `import { kv } from 'chibivoid/kv'` により KV を使うことができるようにする
+- `import { kv } from "chibivoid/kv"` により KV を使うことができるようにする
 
 ## 解決すべき 2 つの問題
 
-`import { kv } from 'chibivoid/kv'` と記述するだけで KV を使うことができるようにするには、次の 2 つの問題を解決する必要があります。
+`import { kv } from "chibivoid/kv"` と記述するだけで KV を使うことができるようにするには、次の 2 つの問題を解決する必要があります。
 
 ### 問題 1: どのバインディングが必要かを、起動前に知る（Node.js 側）
 
@@ -25,7 +25,7 @@ Void の公式ドキュメント「[What is Void?](https://void.cloud/guide/)」
 
 ### 問題 2: どこからでも `env` を取り出す（Worker 側）
 
-KV のバインディングは、Worker の `fetch(request, env, ctx)` が呼ばれる際に、`env.KV` として渡されます。一方、`import { kv } from 'chibivoid/kv'` の `kv` は、モジュールのトップレベルで作成された 1 つのオブジェクトです。では、`kv.get('key')` が呼ばれた際に、`kv` はどのようにして今のリクエストの `env.KV` を見つければよいのでしょうか。
+KV のバインディングは、Worker の `fetch(request, env, ctx)` が呼ばれる際に、`env.KV` として渡されます。一方、`import { kv } from "chibivoid/kv"` の `kv` は、モジュールのトップレベルで作成された 1 つのオブジェクトです。では、`kv.get("key")` が呼ばれた際に、`kv` はどのようにして今のリクエストの `env.KV` を見つければよいのでしょうか。
 
 それでは、この 2 つの問題を順に解決していきましょう。
 
@@ -52,9 +52,9 @@ mkdir -p packages/chibivoid/src/inference
 
 <!-- file: code/how-void-works/ch07/packages/chibivoid/src/inference/walk.ts -->
 ```ts:packages/chibivoid/src/inference/walk.ts
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { basename, join } from 'node:path';
-import { parseSync } from 'vite';
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { basename, join } from "node:path";
+import { parseSync } from "vite";
 
 /** アプリが必要としている Cloudflare リソース */
 export type InferredBindings = {
@@ -63,16 +63,16 @@ export type InferredBindings = {
 
 /** このインポートが見つかった場合は、このリソースが必要だと判断する */
 const MODULE_BINDINGS: Record<string, keyof InferredBindings> = {
-  'chibivoid/kv': 'needsKV',
+  "chibivoid/kv": "needsKV",
 };
 
 /** `env.KV` のようなアクセスが見つかった場合は、このリソースが必要だと判断する */
 const ENV_BINDINGS: Record<string, keyof InferredBindings> = {
-  KV: 'needsKV',
+  KV: "needsKV",
 };
 
 /** スキャンするディレクトリ（Void の DEFAULT_SCAN_DIRS を縮めたもの） */
-const SCAN_DIRS = ['routes', 'middleware', 'pages', 'src'];
+const SCAN_DIRS = ["routes", "middleware", "pages", "src"];
 const SOURCE_RE = /\.(ts|tsx|js|jsx|mts|mjs)$/;
 
 type AstNode = { type: string; [key: string]: unknown };
@@ -97,14 +97,14 @@ export function inferBindingsFromSource(code: string, filename: string): Inferre
 
   // 2. 構文木（AST）をたどって `env.KV`/`c.env.KV` のようなアクセスを探す
   visit(parsed.program as unknown as AstNode, (node) => {
-    if (node.type !== 'MemberExpression' || node.computed) {
+    if (node.type !== "MemberExpression" || node.computed) {
       return;
     }
     const object = node.object as AstNode;
     const property = node.property as AstNode & { name?: string };
     const isEnv =
-      (object.type === 'Identifier' && object.name === 'env') ||
-      (object.type === 'MemberExpression' && (object.property as AstNode).name === 'env');
+      (object.type === "Identifier" && object.name === "env") ||
+      (object.type === "MemberExpression" && (object.property as AstNode).name === "env");
     const key = property.name ? ENV_BINDINGS[property.name] : undefined;
     if (isEnv && key) {
       result[key] = true;
@@ -120,7 +120,7 @@ function visit(node: AstNode, callback: (node: AstNode) => void): void {
   for (const value of Object.values(node)) {
     const children = Array.isArray(value) ? value : [value];
     for (const child of children) {
-      if (child && typeof child === 'object' && typeof (child as AstNode).type === 'string') {
+      if (child && typeof child === "object" && typeof (child as AstNode).type === "string") {
         visit(child as AstNode, callback);
       }
     }
@@ -147,7 +147,7 @@ export function inferProjectBindings(root: string): InferredBindings {
   const result: InferredBindings = { needsKV: false };
   for (const dir of SCAN_DIRS) {
     for (const file of listSourceFiles(join(root, dir))) {
-      const found = inferBindingsFromSource(readFileSync(file, 'utf8'), file);
+      const found = inferBindingsFromSource(readFileSync(file, "utf8"), file);
       result.needsKV ||= found.needsKV;
     }
   }
@@ -160,7 +160,7 @@ export function inferProjectBindings(root: string): InferredBindings {
 
 ### 1. インポート文を調べる
 
-`parseSync()` が返す `module.staticImports` には、ファイルの中のすべてのインポート文が入っています。それぞれのインポート文の `moduleRequest.value` には、インポート元（`'chibivoid/kv'` など）が入っています。ただし、`import type { KVClient } from 'chibivoid/kv'` のような型だけのインポートは数えません。`import type` は実行時には消えてしまい、`kv` を実際に使うことはないためです。
+`parseSync()` が返す `module.staticImports` には、ファイルの中のすべてのインポート文が入っています。それぞれのインポート文の `moduleRequest.value` には、インポート元（`"chibivoid/kv"` など）が入っています。ただし、`import type { KVClient } from "chibivoid/kv"` のような型だけのインポートは数えません。`import type` は実行時には消えてしまい、`kv` を実際に使うことはないためです。
 
 ### 2. 抽象構文木をたどって `env.KV` を探す
 
@@ -187,15 +187,15 @@ MemberExpression            ← c.env.KV
 <!-- diff: code/how-void-works/ch06/packages/chibivoid/src/index.ts code/how-void-works/ch07/packages/chibivoid/src/index.ts -->
 ```diff ts:packages/chibivoid/src/index.ts
 @@ -2,6 +2,7 @@
- import { join } from 'node:path';
- import { cloudflare } from '@cloudflare/vite-plugin';
- import type { Plugin } from 'vite';
-+import { inferProjectBindings } from './inference/walk.ts';
- import { routingPlugin } from './plugin-routing.ts';
- import { compileWorkerEntry } from './router/compile.ts';
+ import { join } from "node:path";
+ import { cloudflare } from "@cloudflare/vite-plugin";
+ import type { Plugin } from "vite";
++import { inferProjectBindings } from "./inference/walk.ts";
+ import { routingPlugin } from "./plugin-routing.ts";
+ import { compileWorkerEntry } from "./router/compile.ts";
  
 @@ -22,6 +23,9 @@
-   const entryPath = join(outDir, 'entry.ts');
+   const entryPath = join(outDir, "entry.ts");
    writeFileSync(entryPath, compileWorkerEntry());
  
 +  // ソースコードを静的解析して、必要な Cloudflare リソースを推論する
@@ -207,16 +207,16 @@ MemberExpression            ← c.env.KV
 @@ -32,6 +36,8 @@
          name: readWorkerName(root),
          main: entryPath,
-         compatibility_date: '2026-10-01',
+         compatibility_date: "2026-10-01",
 +        // `chibivoid/kv` が使われていれば KV バインディングを追加する
-+        kv_namespaces: bindings.needsKV ? [{ binding: 'KV', id: 'local' }] : [],
++        kv_namespaces: bindings.needsKV ? [{ binding: "KV", id: "local" }] : [],
        },
      }),
    ];
 ```
 <!-- /diff -->
 
-この変更では、KV が必要な場合に、`kv_namespaces` に `{ binding: 'KV', id: 'local' }` を追加しています。第 3 章と同じく、ローカルの Miniflare では ID は何でもよいため、`id` には仮の値を入れています。Void もまったく同じ値（`id: 'local'`）を入れています。本物の ID はデプロイの際に作成します（第 12 章）。
+この変更では、KV が必要な場合に、`kv_namespaces` に `{ binding: "KV", id: "local" }` を追加しています。第 3 章と同じく、ローカルの Miniflare では ID は何でもよいため、`id` には仮の値を入れています。Void もまったく同じ値（`id: 'local'`）を入れています。本物の ID はデプロイの際に作成します（第 12 章）。
 
 推論は、`chibivoidPlugin()` が呼ばれた時点、つまり Vite が `vite.config.ts` を読み込む際におこなわれます。Cloudflare のプラグインは、ここで組み立てた設定により Miniflare を起動するため、推論はそれより前に済ませておく必要があります。開発サーバーであれば、`chibivoidPlugin()` が呼ばれるのは起動時の 1 回だけであるため、推論の結果は起動し直すまで変わりません。そのため、開発サーバーを起動した後で初めて `chibivoid/kv` を使い始めた場合は、開発サーバーを起動し直す必要があります（「動かしてみる」で確かめます）。
 
@@ -226,7 +226,7 @@ MemberExpression            ← c.env.KV
 
 ```ts
 export const GET = defineHandler(async (c) => {
-  const count = await getCount(c.env.KV);   // 使う場所まで、ずっと引数で渡していく
+  const count = await getCount(c.env.KV); // 使う場所まで、ずっと引数で渡していく
 });
 ```
 
@@ -240,7 +240,7 @@ Worker の `fetch` ハンドラーが呼ばれるたびに、`env` をグロー�
 let currentEnv;
 export default {
   fetch(request, env) {
-    currentEnv = env;   // ← 危ない
+    currentEnv = env; // ← 危ない
     return app.fetch(request, env);
   },
 };
@@ -257,7 +257,7 @@ const storage = new AsyncLocalStorage();
 
 storage.run(envA, async () => {
   await somethingSlow();
-  storage.getStore();   // ← 必ず envA が返る。途中で別の run が始まっても混ざらない
+  storage.getStore(); // ← 必ず envA が返る。途中で別の run が始まっても混ざらない
 });
 ```
 
@@ -271,7 +271,7 @@ storage.run(envA, async () => {
 
 <!-- file: code/how-void-works/ch07/packages/chibivoid/src/runtime/env.ts -->
 ```ts:packages/chibivoid/src/runtime/env.ts
-import { AsyncLocalStorage } from 'node:async_hooks';
+import { AsyncLocalStorage } from "node:async_hooks";
 
 type RuntimeEnv = Record<string, unknown>;
 
@@ -289,7 +289,7 @@ export function withRuntimeEnv<T>(env: RuntimeEnv, fn: () => T): T {
 export function getRuntimeEnv(): RuntimeEnv {
   const env = envContext.getStore();
   if (!env) {
-    throw new Error('env: リクエストの処理中以外では、バインディングにアクセスできません');
+    throw new Error("env: リクエストの処理中以外では、バインディングにアクセスできません");
   }
   return env;
 }
@@ -319,9 +319,9 @@ export function requireRuntimeBinding<T>(name: string): T {
 ```diff ts:packages/chibivoid/src/runtime/routing.ts
 @@ -1,5 +1,6 @@
  // 生成されたルートテーブル（virtual:chibivoid-routes）と Worker エントリから呼ばれる実行時の関数。
- import type { Context, ExecutionContext, Hono } from 'hono';
-+import { withRuntimeEnv } from './env.ts';
- import { convertReturnValue } from './response.ts';
+ import type { Context, ExecutionContext, Hono } from "hono";
++import { withRuntimeEnv } from "./env.ts";
+ import { convertReturnValue } from "./response.ts";
  
  type RouteModule = Record<string, ((c: Context) => unknown) | undefined>;
 @@ -33,9 +34,13 @@
@@ -351,9 +351,9 @@ export function requireRuntimeBinding<T>(name: string): T {
 
 <!-- file: code/how-void-works/ch07/packages/chibivoid/src/runtime/kv.ts -->
 ```ts:packages/chibivoid/src/runtime/kv.ts
-// `import { kv } from 'chibivoid/kv'` で使う KV クライアント。
-import { requireRuntimeBinding } from './env.ts';
-import type { KVNamespaceLike } from './handler.ts';
+// `import { kv } from "chibivoid/kv"` で使う KV クライアント。
+import { requireRuntimeBinding } from "./env.ts";
+import type { KVNamespaceLike } from "./handler.ts";
 
 export type KVClient = {
   get<T = unknown>(key: string): Promise<T | null>;
@@ -363,7 +363,7 @@ export type KVClient = {
 
 /** 呼ばれるたびに「今のリクエストの」KV バインディングを取り出す */
 function namespace(): KVNamespaceLike {
-  return requireRuntimeBinding<KVNamespaceLike>('KV');
+  return requireRuntimeBinding<KVNamespaceLike>("KV");
 }
 
 /** 値を JSON にして保存し、取り出す際に JSON から戻す KV クライアント */
@@ -386,7 +386,7 @@ export const kv: KVClient = {
 ```
 <!-- /file -->
 
-ここでは、`namespace()` が、呼ばれるたびに `requireRuntimeBinding('KV')` により今のリクエストのバインディングを取り出している点に注目してください。`kv` オブジェクト自体はモジュールのトップレベルで 1 つだけ作成されますが、KV のバインディングは `fetch` が呼ばれる際に `env` として渡されるものであるため、`kv` の中には保持しておきません。
+ここでは、`namespace()` が、呼ばれるたびに `requireRuntimeBinding("KV")` により今のリクエストのバインディングを取り出している点に注目してください。`kv` オブジェクト自体はモジュールのトップレベルで 1 つだけ作成されますが、KV のバインディングは `fetch` が呼ばれる際に `env` として渡されるものであるため、`kv` の中には保持しておきません。
 
 また、`kv` は値を JSON にして保存し、取り出す際に JSON から元に戻しています。KV に保存できるのは文字列やバイト列であり、オブジェクトをそのまま保存することはできません。しかし、JSON にしておけば、数値やオブジェクトもそのまま扱うことができます。Void の `void/kv` も、値を JSON で保存します。
 
@@ -410,8 +410,8 @@ export const kv: KVClient = {
 <!-- diff: code/how-void-works/ch06/packages/chibivoid/src/runtime/handler.ts code/how-void-works/ch07/packages/chibivoid/src/runtime/handler.ts -->
 ```diff ts:packages/chibivoid/src/runtime/handler.ts
 @@ -2,8 +2,21 @@
- // `import { defineHandler } from 'chibivoid'` は、Worker ではこのファイルに解決される。
- import type { Context, MiddlewareHandler, Next } from 'hono';
+ // `import { defineHandler } from "chibivoid"` は、Worker ではこのファイルに解決される。
+ import type { Context, MiddlewareHandler, Next } from "hono";
  
 -/** ハンドラーが受け取るコンテキスト（Hono の Context） */
 -export type CloudContext = Context;
@@ -444,7 +444,7 @@ export const kv: KVClient = {
 
 ```sh
 npm run build
-node -e "console.log(require('./playground/dist/chibivoid_worker/wrangler.json').kv_namespaces)"
+node -e 'console.log(require("./playground/dist/chibivoid_worker/wrangler.json").kv_namespaces)'
 # []
 ```
 
@@ -458,16 +458,16 @@ npm run dev
 
 <!-- file: code/how-void-works/ch07/playground/routes/api/counter.ts -->
 ```ts:playground/routes/api/counter.ts
-import { defineHandler } from 'chibivoid';
-import { kv } from 'chibivoid/kv';
+import { defineHandler } from "chibivoid";
+import { kv } from "chibivoid/kv";
 
 export const GET = defineHandler(async () => {
-  return { count: (await kv.get<number>('count')) ?? 0 };
+  return { count: (await kv.get<number>("count")) ?? 0 };
 });
 
 export const POST = defineHandler(async () => {
-  const count = ((await kv.get<number>('count')) ?? 0) + 1;
-  await kv.put('count', count);
+  const count = ((await kv.get<number>("count")) ?? 0) + 1;
+  await kv.put("count", count);
   return { count };
 });
 ```
@@ -503,11 +503,11 @@ playground をもう一度ビルドすると、今度は KV のバインディ�
 
 ```sh
 npm run build
-node -e "console.log(require('./playground/dist/chibivoid_worker/wrangler.json').kv_namespaces)"
+node -e 'console.log(require("./playground/dist/chibivoid_worker/wrangler.json").kv_namespaces)'
 # [ { binding: 'KV', id: 'local' } ]
 ```
 
-設定ファイルを 1 行も変更することなく、`import { kv } from 'chibivoid/kv'` と記述するだけで、KV を使うことができるようになりました。
+設定ファイルを 1 行も変更することなく、`import { kv } from "chibivoid/kv"` と記述するだけで、KV を使うことができるようになりました。
 
 :::message
 `routes/api/counter.ts` を消してビルドし直すと、KV のバインディングも設定から消えます。このように、推論には、アプリが実際に使っているリソースだけを用意することができるという利点があります。

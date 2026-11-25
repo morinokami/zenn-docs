@@ -17,7 +17,7 @@ title: "開発サーバーとの統合: ファイル監視とミドルウェア"
 
 ```sh
 cat > playground/routes/api/time.ts << 'EOF'
-import { defineHandler } from 'chibivoid';
+import { defineHandler } from "chibivoid";
 
 export const GET = defineHandler(() => ({ now: new Date().toISOString() }));
 EOF
@@ -31,12 +31,12 @@ curl -i http://localhost:5173/api/time
 一方、既存のルートの中身を書き換えた場合は、再起動しなくても反映されます:
 
 ```sh
-# playground/routes/api/hello.ts の 'Hello from chibivoid!' を 'Hello again!' に書き換えてから
+# playground/routes/api/hello.ts の "Hello from chibivoid!" を "Hello again!" に書き換えてから
 curl http://localhost:5173/api/hello
 # {"message":"Hello again!"}
 ```
 
-確かめ終えた後は、追加したルートを `rm playground/routes/api/time.ts` で消し、`hello.ts` のメッセージも `'Hello from chibivoid!'` に戻しておいてください。「動かしてみる」で、ルートの追加をもう一度試します。
+確かめ終えた後は、追加したルートを `rm playground/routes/api/time.ts` で消し、`hello.ts` のメッセージも `"Hello from chibivoid!"` に戻しておいてください。「動かしてみる」で、ルートの追加をもう一度試します。
 
 ルートの追加は反映されず、既存のルートの書き換えは反映されました。この違いはどこから来るのでしょうか。
 
@@ -86,8 +86,8 @@ app.get("/api/hello", createHttpRouteHandler(loadRoute0, "GET"));
   */
  export function routingPlugin(root: string): Plugin {
    const paths: ProjectPaths = {
-     routesDir: normalizePath(join(root, 'routes')),
-+    middlewareDir: normalizePath(join(root, 'middleware')),
+     routesDir: normalizePath(join(root, "routes")),
++    middlewareDir: normalizePath(join(root, "middleware")),
    };
    let scan: ScanResult | undefined;
    let dev = false;
@@ -98,7 +98,7 @@ app.get("/api/hello", createHttpRouteHandler(loadRoute0, "GET"));
 +
 +    configureServer(server) {
 +      const watched = [paths.routesDir, paths.middlewareDir];
-+      const isWatched = (file: string) => watched.some((dir) => file.startsWith(dir + '/'));
++      const isWatched = (file: string) => watched.some((dir) => file.startsWith(dir + "/"));
 +
 +      const onFileEvent = (rawFile: string) => {
 +        const file = normalizePath(rawFile);
@@ -118,14 +118,14 @@ app.get("/api/hello", createHttpRouteHandler(loadRoute0, "GET"));
 +            environment.moduleGraph.invalidateModule(mod);
 +          }
 +          // Worker 側のモジュールランナーとブラウザの両方に「全部読み直して」と伝える
-+          environment.hot.send({ type: 'full-reload' });
++          environment.hot.send({ type: "full-reload" });
 +        }
 +        server.config.logger.info(`[chibivoid] ルートを再生成しました`, { timestamp: true });
 +      };
 +
-+      server.watcher.on('add', onFileEvent);
-+      server.watcher.on('unlink', onFileEvent);
-+      server.watcher.on('change', onFileEvent);
++      server.watcher.on("add", onFileEvent);
++      server.watcher.on("unlink", onFileEvent);
++      server.watcher.on("change", onFileEvent);
 +    },
    };
  }
@@ -137,7 +137,7 @@ app.get("/api/hello", createHttpRouteHandler(loadRoute0, "GET"));
 1. イベントが起きたファイルが `routes/` と `middleware/` のどちらの下にもなければ、何もしない
 2. 変更前のスキャン結果とスキャンし直した結果を `JSON.stringify()` により文字列にして比べる。同じであれば何もしない（ハンドラーの中身だけの変更は、Vite の通常の更新に任せる）
 3. 違っていれば、すべての環境のモジュールグラフから `virtual:chibivoid-routes` を探して無効化する
-4. 各環境に `{ type: 'full-reload' }` を送る
+4. 各環境に `{ type: "full-reload" }` を送る
 
 ### なぜすべての環境を対象にするのか
 
@@ -145,7 +145,7 @@ app.get("/api/hello", createHttpRouteHandler(loadRoute0, "GET"));
 
 ### `full-reload` を送ると Worker 側で何が起きるのか
 
-`environment.hot.send({ type: 'full-reload' })` の意味は、環境によって異なります:
+`environment.hot.send({ type: "full-reload" })` の意味は、環境によって異なります:
 
 - `client` 環境: ブラウザにページ全体の再読み込みを指示する
 - `chibivoid_worker` 環境: workerd の中のモジュールランナーに、評価済みのモジュールをすべて捨てて評価し直すように指示する
@@ -179,9 +179,9 @@ Hono のミドルウェアは、`(c, next) => Promise<void | Response>` とい�
 
 ```ts
 app.use(async (c, next) => {
-  console.log('前');   // ハンドラーより前に動く
-  await next();        // ← ここでハンドラーが動く
-  console.log('後');   // ハンドラーの後に動く。c.res からレスポンスを参照できる
+  console.log("前"); // ハンドラーより前に動く
+  await next(); // ← ここでハンドラーが動く
+  console.log("後"); // ハンドラーの後に動く。c.res からレスポンスを参照できる
 });
 ```
 
@@ -228,7 +228,7 @@ chibivoid では、`middleware/` のファイルをファイル名の数字の�
 +/** middleware/ をスキャンする。`01.logger.ts` のような数字の接頭辞の順に並べる */
 +export function scanMiddleware(middlewareDir: string): MiddlewareDefinition[] {
 +  return listFiles(middlewareDir)
-+    .filter((file) => ROUTE_FILE_RE.test(file) && !file.includes('/'))
++    .filter((file) => ROUTE_FILE_RE.test(file) && !file.includes("/"))
 +    .map((filePath) => ({ filePath }));
 +}
 +
@@ -249,14 +249,16 @@ chibivoid では、`middleware/` のファイルをファイル名の数字の�
 
 <!-- diff: code/how-void-works/ch05/packages/chibivoid/src/router/compile.ts code/how-void-works/ch06/packages/chibivoid/src/router/compile.ts -->
 ```diff ts:packages/chibivoid/src/router/compile.ts
-@@ -37,7 +37,13 @@
+@@ -37,7 +37,15 @@
    // 本番ではロードしたモジュールをキャッシュし、開発中は毎回インポートし直す
    const cache = !options.dev;
  
 -  // サーバールート: ファイルは「最初にリクエストが来た際」に読み込む（遅延ロード）
 +  // 1. グローバルミドルウェア: すべてのリクエストで動くため、最初に読み込んで登録する
 +  scan.middleware.forEach((middleware, i) => {
-+    imports.push(`import middleware${i} from ${str(`${options.middlewareDir}/${middleware.filePath}`)};`);
++    imports.push(
++      `import middleware${i} from ${str(`${options.middlewareDir}/${middleware.filePath}`)};`,
++    );
 +    body.push(`app.use(middleware${i});`);
 +  });
 +
@@ -277,9 +279,9 @@ chibivoid では、`middleware/` のファイルをファイル名の数字の�
 ```diff ts:packages/chibivoid/src/runtime/handler.ts
 @@ -1,6 +1,6 @@
  // Worker の中で使われる軽量なランタイム。
- // `import { defineHandler } from 'chibivoid'` は、Worker ではこのファイルに解決される。
--import type { Context } from 'hono';
-+import type { Context, MiddlewareHandler, Next } from 'hono';
+ // `import { defineHandler } from "chibivoid"` は、Worker ではこのファイルに解決される。
+-import type { Context } from "hono";
++import type { Context, MiddlewareHandler, Next } from "hono";
  
  /** ハンドラーが受け取るコンテキスト（Hono の Context） */
  export type CloudContext = Context;
@@ -297,17 +299,17 @@ chibivoid では、`middleware/` のファイルをファイル名の数字の�
 ```
 <!-- /diff -->
 
-アプリのコードから `import { defineMiddleware } from 'chibivoid'` と記述することができるように、`index.ts` からも再エクスポートします:
+アプリのコードから `import { defineMiddleware } from "chibivoid"` と記述することができるように、`index.ts` からも再エクスポートします:
 
 <!-- diff: code/how-void-works/ch05/packages/chibivoid/src/index.ts code/how-void-works/ch06/packages/chibivoid/src/index.ts -->
 ```diff ts:packages/chibivoid/src/index.ts
 @@ -49,5 +49,5 @@
  
- // アプリのコードから `import { defineHandler } from 'chibivoid'` と記述することができるように再エクスポートする。
+ // アプリのコードから `import { defineHandler } from "chibivoid"` と記述することができるように再エクスポートする。
  // （Worker の中ではこの index.ts ではなく runtime/handler.ts に差し替えられる）
--export { defineHandler } from './runtime/handler.ts';
-+export { defineHandler, defineMiddleware } from './runtime/handler.ts';
- export type { CloudContext } from './runtime/handler.ts';
+-export { defineHandler } from "./runtime/handler.ts";
++export { defineHandler, defineMiddleware } from "./runtime/handler.ts";
+ export type { CloudContext } from "./runtime/handler.ts";
 ```
 <!-- /diff -->
 
@@ -323,13 +325,13 @@ mkdir -p playground/middleware
 
 <!-- file: code/how-void-works/ch06/playground/middleware/01.logger.ts -->
 ```ts:playground/middleware/01.logger.ts
-import { defineMiddleware } from 'chibivoid';
+import { defineMiddleware } from "chibivoid";
 
 // すべてのリクエストで動くミドルウェア
 export default defineMiddleware(async (c, next) => {
   const start = Date.now();
   await next();
-  c.header('X-Response-Time', `${Date.now() - start}ms`);
+  c.header("X-Response-Time", `${Date.now() - start}ms`);
   console.log(`${c.req.method} ${c.req.path} → ${c.res.status}`);
 });
 ```
@@ -355,7 +357,7 @@ x-response-time: 10ms
 ```sh
 # 1. ルートを追加する
 cat > playground/routes/api/time.ts << 'EOF'
-import { defineHandler } from 'chibivoid';
+import { defineHandler } from "chibivoid";
 
 export const GET = defineHandler(() => ({ now: new Date().toISOString() }));
 EOF

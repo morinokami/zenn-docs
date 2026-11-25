@@ -1,5 +1,5 @@
-// `import { fetch } from 'chibivoid/client'` で使う、型付きの fetch。
-import type { RouteMap } from './routes.ts';
+// `import { fetch } from "chibivoid/client"` で使う、型付きの fetch。
+import type { RouteMap } from "./routes.ts";
 
 type RoutePath = keyof RouteMap & string;
 type MethodOf<P extends RoutePath> = keyof RouteMap[P] & string;
@@ -32,14 +32,14 @@ type FetchOptions<M extends string> = {
 /**
  * パスとメソッドから、レスポンスの型が自動で決まる fetch。
  *
- *   const { message } = await fetch('/api/hello');
- *   const user = await fetch('/api/users/[id]', { params: { id: 1 } });
+ *   const { message } = await fetch("/api/hello");
+ *   const user = await fetch("/api/users/[id]", { params: { id: 1 } });
  */
-export function fetch<P extends DynamicPath, M extends MethodOf<P> = Extract<'GET', MethodOf<P>>>(
+export function fetch<P extends DynamicPath, M extends MethodOf<P> = Extract<"GET", MethodOf<P>>>(
   path: P,
   options: FetchOptions<M> & { params: Record<ParamNames<P>, string | number> },
 ): Promise<OutputOf<P, M>>;
-export function fetch<P extends StaticPath, M extends MethodOf<P> = Extract<'GET', MethodOf<P>>>(
+export function fetch<P extends StaticPath, M extends MethodOf<P> = Extract<"GET", MethodOf<P>>>(
   path: P,
   options?: FetchOptions<M>,
 ): Promise<OutputOf<P, M>>;
@@ -54,9 +54,9 @@ export async function fetch(
   );
   const hasBody = options.body !== undefined;
   const response = await globalThis.fetch(url, {
-    method: options.method ?? 'GET',
+    method: options.method ?? "GET",
     headers: {
-      ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
       ...options.headers,
     },
     body: hasBody ? JSON.stringify(options.body) : undefined,
@@ -67,6 +67,6 @@ export async function fetch(
   if (response.status === 204) {
     return undefined;
   }
-  const contentType = response.headers.get('Content-Type') ?? '';
-  return contentType.includes('application/json') ? response.json() : response.text();
+  const contentType = response.headers.get("Content-Type") ?? "";
+  return contentType.includes("application/json") ? response.json() : response.text();
 }

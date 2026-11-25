@@ -1,9 +1,9 @@
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { detectExports } from '../router/detect-exports.ts';
-import { parseRouteFilename } from '../router/parse-filename.ts';
-import { compareRouteSpecificity } from '../router/route-order.ts';
-import { listFiles } from '../shared/list-files.ts';
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { detectExports } from "../router/detect-exports.ts";
+import { parseRouteFilename } from "../router/parse-filename.ts";
+import { compareRouteSpecificity } from "../router/route-order.ts";
+import { listFiles } from "../shared/list-files.ts";
 
 export type PageDefinition = {
   /** URL パターン。例: "/users/:id" */
@@ -38,8 +38,8 @@ export type PageScanResult = {
 const COMPONENT_RE = /\.(tsx|jsx)$/;
 /** `.server.ts` などのコンパニオンファイル */
 const SERVER_RE = /\.server\.(ts|tsx|js|jsx|mts|mjs)$/;
-const SERVER_EXTENSIONS = ['ts', 'tsx', 'js', 'jsx', 'mts', 'mjs'];
-const PAGE_METHODS = new Set(['loader', 'action']);
+const SERVER_EXTENSIONS = ["ts", "tsx", "js", "jsx", "mts", "mjs"];
+const PAGE_METHODS = new Set(["loader", "action"]);
 
 /** pages/ をスキャンして、ページとレイアウトの一覧を返す */
 export function scanPages(pagesDir: string): PageScanResult {
@@ -50,10 +50,10 @@ export function scanPages(pagesDir: string): PageScanResult {
     if (SERVER_RE.test(file) || !COMPONENT_RE.test(file)) {
       continue;
     }
-    const componentId = file.replace(COMPONENT_RE, '');
-    const segments = componentId.split('/');
-    if (segments.at(-1) === 'layout') {
-      layouts.push({ id: componentId, filePath: file, directory: segments.slice(0, -1).join('/') });
+    const componentId = file.replace(COMPONENT_RE, "");
+    const segments = componentId.split("/");
+    if (segments.at(-1) === "layout") {
+      layouts.push({ id: componentId, filePath: file, directory: segments.slice(0, -1).join("/") });
       continue;
     }
 
@@ -87,10 +87,10 @@ export function scanPages(pagesDir: string): PageScanResult {
  * 例: "users/[id]" → ["layout", "users/layout"]（存在するものだけ）
  */
 export function resolveLayoutIds(page: PageDefinition, layouts: LayoutDefinition[]): string[] {
-  const directories = [''];
-  const segments = page.componentId.split('/').slice(0, -1);
+  const directories = [""];
+  const segments = page.componentId.split("/").slice(0, -1);
   for (let i = 1; i <= segments.length; i++) {
-    directories.push(segments.slice(0, i).join('/'));
+    directories.push(segments.slice(0, i).join("/"));
   }
   return directories.flatMap((directory) =>
     layouts.filter((layout) => layout.directory === directory).map((layout) => layout.id),

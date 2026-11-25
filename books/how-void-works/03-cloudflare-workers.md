@@ -22,7 +22,7 @@ Worker は、Node.js の `http` モジュールではなく、ブラウザと同
 ```ts
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    return new Response('Hello!');
+    return new Response("Hello!");
   },
 };
 ```
@@ -31,7 +31,7 @@ export default {
 
 ### 2. リソースは「バインディング」から受け取る
 
-`fetch` の 2 番目の引数 `env` には、その Worker が利用できるリソースが入っています。たとえば KV（キー・バリュー型ストレージ）を `KV` という名前で使うように設定すると、`env.KV.get('key')` のように使うことができます。この「名前でリソースにつなぐしくみ」をバインディング（[binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/)）と呼びます。KV、D1（SQLite のデータベース）、R2（オブジェクトストレージ）、Queues、環境変数やシークレット、そして静的アセットを配信する `ASSETS` も、すべてバインディングとして `env` に入ってきます。
+`fetch` の 2 番目の引数 `env` には、その Worker が利用できるリソースが入っています。たとえば KV（キー・バリュー型ストレージ）を `KV` という名前で使うように設定すると、`env.KV.get("key")` のように使うことができます。この「名前でリソースにつなぐしくみ」をバインディング（[binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/)）と呼びます。KV、D1（SQLite のデータベース）、R2（オブジェクトストレージ）、Queues、環境変数やシークレット、そして静的アセットを配信する `ASSETS` も、すべてバインディングとして `env` に入ってきます。
 
 バインディングは、Worker の設定で宣言します。データベースやストレージを使うために、コードの中で接続先の URL や API キーを渡して SDK のクライアントを作る必要はありません。「どのバインディングをもつか」は Worker の設定で決まっており、実行中に増やすことはできません。この性質が、第 7 章の「リソース推論」（resource inference）において重要になります。
 
@@ -134,7 +134,7 @@ mkdir src
 <!-- file: code/how-void-works/ch03/src/worker.ts -->
 ```ts:src/worker.ts
 // `virtual:build-info` は vite.config.ts のプラグインが生成する仮想モジュール
-import buildInfo from 'virtual:build-info';
+import buildInfo from "virtual:build-info";
 
 // Worker からアクセス可能な「バインディング」の型。KV は vite.config.ts で設定する
 type Env = {
@@ -146,10 +146,10 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname === '/count') {
+    if (url.pathname === "/count") {
       // KV に訪問回数を保存する
-      const count = Number((await env.KV.get('count')) ?? 0) + 1;
-      await env.KV.put('count', String(count));
+      const count = Number((await env.KV.get("count")) ?? 0) + 1;
+      await env.KV.put("count", String(count));
       return Response.json({ count });
     }
 
@@ -158,8 +158,8 @@ export default {
         `こんにちは！ このコードは ${navigator.userAgent} の上で動いています。`,
         `仮想モジュールを生成した Vite 環境: ${buildInfo.environment}`,
         `生成した時刻: ${buildInfo.generatedAt}`,
-      ].join('\n'),
-      { headers: { 'Content-Type': 'text/plain; charset=utf-8' } },
+      ].join("\n"),
+      { headers: { "Content-Type": "text/plain; charset=utf-8" } },
     );
   },
 };
@@ -170,7 +170,7 @@ export default {
 
 <!-- file: code/how-void-works/ch03/src/env.d.ts -->
 ```ts:src/env.d.ts
-declare module 'virtual:build-info' {
+declare module "virtual:build-info" {
   const buildInfo: { environment: string; generatedAt: string };
   export default buildInfo;
 }
@@ -183,20 +183,20 @@ declare module 'virtual:build-info' {
 
 <!-- file: code/how-void-works/ch03/vite.config.ts -->
 ```ts:vite.config.ts
-import { cloudflare } from '@cloudflare/vite-plugin';
-import { defineConfig, type Plugin } from 'vite';
+import { cloudflare } from "@cloudflare/vite-plugin";
+import { defineConfig, type Plugin } from "vite";
 
 /** Worker からインポート可能な仮想モジュールを提供する、小さなプラグイン */
 function buildInfoPlugin(): Plugin {
   return {
-    name: 'build-info',
+    name: "build-info",
     resolveId(id) {
-      if (id === 'virtual:build-info') {
-        return '\0virtual:build-info';
+      if (id === "virtual:build-info") {
+        return "\0virtual:build-info";
       }
     },
     load(id) {
-      if (id === '\0virtual:build-info') {
+      if (id === "\0virtual:build-info") {
         // this.environment.name により、どの Vite 環境のためのモジュールかがわかる
         return `export default ${JSON.stringify({
           environment: this.environment.name,
@@ -212,13 +212,13 @@ export default defineConfig({
     buildInfoPlugin(),
     cloudflare({
       // Worker を動かす Vite 環境の名前
-      viteEnvironment: { name: 'worker' },
+      viteEnvironment: { name: "worker" },
       // 本来 wrangler.jsonc に記述する Worker の設定を、ここで直接指定できる
       config: {
-        name: 'workers-basics',
-        main: './src/worker.ts',
-        compatibility_date: '2026-10-01',
-        kv_namespaces: [{ binding: 'KV', id: 'local' }],
+        name: "workers-basics",
+        main: "./src/worker.ts",
+        compatibility_date: "2026-10-01",
+        kv_namespaces: [{ binding: "KV", id: "local" }],
       },
     }),
   ],
@@ -228,10 +228,10 @@ export default defineConfig({
 
 ここでのポイントは、`cloudflare()` に渡しているオプションです:
 
-- `viteEnvironment: { name: 'worker' }`: Worker 用の Vite 環境の名前です
+- `viteEnvironment: { name: "worker" }`: Worker 用の Vite 環境の名前です
 - `config`: 本来は `wrangler.jsonc` に記述する Worker の設定を、ここで直接指定しています。`main` が Worker のエントリファイル、`kv_namespaces` が KV のバインディングです
 
-`kv_namespaces` の `id: 'local'` に注目してください。本番の KV ネームスペース（KV の 1 つの保存領域）には Cloudflare が発行した ID が必要ですが、ローカルの Miniflare では ID は何でもよいため、仮の値を入れています。
+`kv_namespaces` の `id: "local"` に注目してください。本番の KV ネームスペース（KV の 1 つの保存領域）には Cloudflare が発行した ID が必要ですが、ローカルの Miniflare では ID は何でもよいため、仮の値を入れています。
 
 Void にとって重要なことは、設定ファイルに記述する代わりに、プログラムで設定を組み立てて渡すことができるという点です。Void はソースコードを解析した結果から、この `config` を自動で組み立てています（第 4・7 章）。
 

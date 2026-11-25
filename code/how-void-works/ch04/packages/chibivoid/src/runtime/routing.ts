@@ -1,5 +1,5 @@
 // Worker エントリ（.chibivoid/entry.ts）から呼ばれる実行時の関数。
-import type { ExecutionContext, Hono } from 'hono';
+import type { ExecutionContext, Hono } from "hono";
 
 type WorkerEnv = Record<string, unknown>;
 

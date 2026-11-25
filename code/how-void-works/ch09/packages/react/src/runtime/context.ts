@@ -1,5 +1,5 @@
-import { createContext } from 'react';
-import type { PageObject, Router } from 'chibivoid/pages-client';
+import { createContext } from "react";
+import type { PageObject, Router } from "chibivoid/pages-client";
 
 /** クライアント遷移に使うルーター（サーバーでの描画中は null） */
 export const RouterContext = createContext<Router | null>(null);

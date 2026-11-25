@@ -1,9 +1,9 @@
-import { join } from 'node:path';
-import { scanPages, type PageScanResult } from '../pages/scan.ts';
-import { listFiles } from '../shared/list-files.ts';
-import { detectHttpExports } from './detect-exports.ts';
-import { parseRouteFilename, ROUTE_FILE_RE, type RouteDefinition } from './parse-filename.ts';
-import { compareRouteSpecificity } from './route-order.ts';
+import { join } from "node:path";
+import { scanPages, type PageScanResult } from "../pages/scan.ts";
+import { listFiles } from "../shared/list-files.ts";
+import { detectHttpExports } from "./detect-exports.ts";
+import { parseRouteFilename, ROUTE_FILE_RE, type RouteDefinition } from "./parse-filename.ts";
+import { compareRouteSpecificity } from "./route-order.ts";
 
 export type ProjectPaths = {
   routesDir: string;
@@ -36,7 +36,7 @@ export function scanRoutes(routesDir: string): RouteDefinition[] {
 /** middleware/ をスキャンする。`01.logger.ts` のような数字の接頭辞の順に並べる */
 export function scanMiddleware(middlewareDir: string): MiddlewareDefinition[] {
   return listFiles(middlewareDir)
-    .filter((file) => ROUTE_FILE_RE.test(file) && !file.includes('/'))
+    .filter((file) => ROUTE_FILE_RE.test(file) && !file.includes("/"))
     .map((filePath) => ({ filePath }));
 }
 

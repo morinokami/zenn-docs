@@ -1,6 +1,6 @@
 // Worker の中で使われる軽量なランタイム。
-// `import { defineHandler } from 'chibivoid'` は、Worker ではこのファイルに解決される。
-import type { Context, MiddlewareHandler, Next } from 'hono';
+// `import { defineHandler } from "chibivoid"` は、Worker ではこのファイルに解決される。
+import type { Context, MiddlewareHandler, Next } from "hono";
 
 /** KV ネームスペースのうち、chibivoid が使う部分だけの型 */
 export type KVNamespaceLike = {
@@ -50,8 +50,8 @@ export class ValidationError extends Error {
   readonly errors: Record<string, string>;
 
   constructor(errors: Record<string, string>) {
-    super('Validation failed');
-    this.name = 'ValidationError';
+    super("Validation failed");
+    this.name = "ValidationError";
     this.errors = errors;
   }
 }

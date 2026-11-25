@@ -1,5 +1,5 @@
-import { Link } from '@chibivoid/react';
-import type { Props } from './index.server.ts';
+import { Link } from "@chibivoid/react";
+import type { Props } from "./index.server.ts";
 
 export default function Users({ users }: Props) {
   return (

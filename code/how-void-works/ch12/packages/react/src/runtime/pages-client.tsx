@@ -1,9 +1,9 @@
 // ブラウザで、サーバーが描画した HTML を React に引き継がせ（ハイドレーション）、
 // 以後のページ遷移をクライアント側でおこなう。
-import { flushSync } from 'react-dom';
-import { hydrateRoot } from 'react-dom/client';
-import { createRouter, readInitialPage } from 'chibivoid/pages-client';
-import { loadPageModules, PageView, type ComponentMap, type LayoutTree } from './page-view.tsx';
+import { flushSync } from "react-dom";
+import { hydrateRoot } from "react-dom/client";
+import { createRouter, readInitialPage } from "chibivoid/pages-client";
+import { loadPageModules, PageView, type ComponentMap, type LayoutTree } from "./page-view.tsx";
 
 export async function startReactPages(options: {
   components: ComponentMap;
@@ -29,7 +29,7 @@ export async function startReactPages(options: {
 
   // 3. サーバーと同じものを描画して、既存の DOM を React に引き継がせる
   const root = hydrateRoot(
-    document.getElementById('app')!,
+    document.getElementById("app")!,
     <PageView page={initialPage} modules={initialModules} router={router} />,
   );
 }
