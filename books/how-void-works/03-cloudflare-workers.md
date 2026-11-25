@@ -2,7 +2,7 @@
 title: "Cloudflare Workers と Vite"
 ---
 
-Void のアプリは、デフォルトでは Cloudflare Workers の上で動きます。しかも開発中であっても、本番と同じランタイムでコードを実行できます。この章ではまだ Void を使わず、Cloudflare 公式の Vite プラグインにより Worker を動かし、Void の土台になっているしくみについて確認します。
+Void のアプリは、デフォルトでは Cloudflare Workers の上で動きます。また、開発中であっても、本番と同じランタイムによりコードを実行できます。この章ではまだ Void を使わず、Cloudflare 公式の Vite プラグインにより Worker を動かし、Void の土台になっているしくみについて確認します。
 
 ## この章のゴール
 
@@ -13,7 +13,7 @@ Void のアプリは、デフォルトでは Cloudflare Workers の上で動き�
 
 ## Cloudflare Workers とは何か
 
-[Cloudflare Workers](https://developers.cloudflare.com/workers/) は、Cloudflare の世界中のデータセンターでコードを動かすことができるサーバーレスの実行環境です。その特徴を 3 つ挙げます。
+[Cloudflare Workers](https://developers.cloudflare.com/workers/) は、Cloudflare の世界中のデータセンターでコードを動かすことができるサーバーレスの実行環境です。以下にその特徴を 3 つ挙げます。
 
 ### 1. ウェブ標準の API を使う
 
@@ -27,21 +27,21 @@ export default {
 };
 ```
 
-「`fetch` メソッドをもつオブジェクトをデフォルトエクスポートする」のが Worker の基本の書き方です。リクエストが来るたびに `fetch` が呼ばれ、そこから返された `Response` がクライアントに届きます。
+「`fetch` メソッドをもつオブジェクトをデフォルトエクスポートする」というのが Worker の基本的な書き方です。リクエストが来るたびに `fetch` が呼ばれ、そこから返された `Response` がクライアントに届きます。
 
 ### 2. リソースは「バインディング」から受け取る
 
-`fetch` の 2 番目の引数 `env` には、その Worker が利用できるリソースが入っています。たとえば KV（キー・バリュー型ストレージ）を `KV` という名前で使うように設定すると、`env.KV.get("key")` のように使うことができます。この「名前でリソースにつなぐしくみ」をバインディング（[binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/)）と呼びます。KV、D1（SQLite のデータベース）、R2（オブジェクトストレージ）、Queues、環境変数やシークレット、そして静的アセットを配信する `ASSETS` も、すべてバインディングとして `env` に入ってきます。
+`fetch` の 2 番目の引数 `env` には、その Worker が利用できるリソースが入っています。たとえば KV（キー・バリュー型ストレージ）を `KV` という名前で使うように設定すると、`env.KV.get("key")` のようにして使うことができます。この「名前をリソースにつなぐしくみ」をバインディング（[binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/)）と呼びます。KV、D1（SQLite のデータベース）、R2（オブジェクトストレージ）、Queues、環境変数やシークレット、そして静的アセットを配信する `ASSETS` も、すべてバインディングとして `env` に入ってきます。
 
-バインディングは、Worker の設定で宣言します。データベースやストレージを使うために、コードの中で接続先の URL や API キーを渡して SDK のクライアントを作る必要はありません。「どのバインディングをもつか」は Worker の設定で決まっており、実行中に増やすことはできません。この性質が、第 7 章の「リソース推論」（resource inference）において重要になります。
+バインディングは、Worker の設定から宣言します。データベースやストレージを使うために、コードの中で接続先の URL や API キーを渡して SDK のクライアントを作る必要はありません。「どのバインディングをもつか」については Worker の設定で決まっており、実行中に増やすことはできません。この性質が、第 7 章の「リソース推論」（resource inference）において重要になります。
 
 ### 3. ランタイムの挙動を日付で固定する
 
-Workers のランタイムは継続的に更新されていますが、勝手に挙動が変わると既存の Worker が壊れるかもしれません。そこで、設定の [`compatibility_date`](https://developers.cloudflare.com/workers/configuration/compatibility-dates/) に日付を指定しておくと、Worker をその日付時点の挙動に固定することができます。また [`compatibility_flags`](https://developers.cloudflare.com/workers/configuration/compatibility-flags/) により、個別の機能を有効にできます。たとえば `nodejs_compat` を付けると Node.js 互換の API を利用できるようになります。ただし、多くのフラグにはデフォルトで有効になる日付が決まっており、`nodejs_compat` は、`compatibility_date` が `2026-08-04` 以降であれば[デフォルトで有効になります](https://developers.cloudflare.com/workers/runtime-apis/nodejs/)。本書では `compatibility_date` を `2026-10-01` にしているため、第 7 章で使う `node:async_hooks` の `AsyncLocalStorage` も、フラグを付けずに使うことができます。
+Workers のランタイムは継続的に更新されていますが、勝手に挙動が変わると既存の Worker が壊れてしまう可能性があります。そこで、設定の [`compatibility_date`](https://developers.cloudflare.com/workers/configuration/compatibility-dates/) に日付を指定しておくと、Worker をその日付時点の挙動に固定することができます。また [`compatibility_flags`](https://developers.cloudflare.com/workers/configuration/compatibility-flags/) により、個別の機能を有効化できます。たとえば `nodejs_compat` を付けると Node.js 互換の API を利用できるようになります。ただし、多くのフラグにはデフォルトで有効になる日付が決まっており、`nodejs_compat` は、`compatibility_date` が `2026-08-04` 以降であれば[デフォルトで有効になります](https://developers.cloudflare.com/workers/runtime-apis/nodejs/)。本書では `compatibility_date` を `2026-10-01` にしているため、第 7 章で使う `node:async_hooks` の `AsyncLocalStorage` も、フラグを付けずに使うことができます。
 
 ## workerd、Miniflare、Wrangler
 
-Workers の周辺には、似た名前のツールがいくつか出てくるため、ここで整理しておきます:
+Workers の周辺には似た名前のツールがいくつか出てくるため、ここで整理しておきます:
 
 | 名前 | 何をするものか |
 | --- | --- |
@@ -88,6 +88,8 @@ mkdir workers-basics
 cd workers-basics
 ```
 
+`package.json` を作成します:
+
 <!-- file: code/how-void-works/ch03/package.json -->
 ```json:package.json
 {
@@ -111,13 +113,13 @@ cd workers-basics
 ```
 <!-- /file -->
 
-次の点を押さえておいてください:
+ここでは次の点を押さえておいてください:
 
 - `@cloudflare/vite-plugin` が Cloudflare の Vite プラグインです
 - `wrangler` はビルドしたものをデプロイする際に使います（この章ではデプロイまではしません）
 - `@cloudflare/workers-types` は、`KVNamespace` などの Workers の型定義です
 
-パッケージをインストールします:
+パッケージをインストールしておきます:
 
 ```sh
 npm install
@@ -125,11 +127,13 @@ npm install
 
 ### Worker のコード
 
-`src/worker.ts` を作成します。このファイルには、`/count` にアクセスするたびに KV のカウンターを増やし、それ以外のパスでは挨拶を返す Worker を記述します。まずは、`src` ディレクトリを作成しておきます:
+続いて `src/worker.ts` を作成します。このファイルには、`/count` にアクセスするたびに KV のカウンターを増やし、それ以外のパスでは挨拶を返す Worker を記述します。まずは、`src` ディレクトリを作成しておきます:
 
 ```sh
 mkdir src
 ```
+
+`worker.ts` を作成します:
 
 <!-- file: code/how-void-works/ch03/src/worker.ts -->
 ```ts:src/worker.ts
@@ -333,7 +337,7 @@ dist/worker/index.js             0.86 kB │ gzip: 0.59 kB │ map: 1.69 kB
 {"configPath":"../../dist/worker/wrangler.json","auxiliaryWorkers":[]}
 ```
 
-これは Wrangler に「設定ファイルは `dist/worker/wrangler.json` を使って」と伝える[リダイレクト設定](https://developers.cloudflare.com/workers/wrangler/configuration/#generated-wrangler-configuration)です。このおかげで、プロジェクトのルートで引数なしに `npx wrangler deploy` を実行するだけで、ビルド結果がデプロイされます（第 12 章で使います）。
+これは Wrangler に「設定ファイルは `dist/worker/wrangler.json` を使って」と伝える[リダイレクト設定](https://developers.cloudflare.com/workers/wrangler/configuration/#generated-wrangler-configuration)です。このおかげで、プロジェクトのルートで引数なしに `npx wrangler deploy` を実行するだけで、ビルド結果がデプロイされます（第 12 章で使用します）。
 
 ビルド結果をローカルの workerd で動かすには、`vite preview` を使います:
 
@@ -353,7 +357,7 @@ curl http://localhost:4173/
 
 - Worker のエントリファイルは、基本的に「`fetch(request, env, ctx)` をもつオブジェクト」をデフォルトエクスポートする。`fetch` は、リソースを `env` のバインディングとして受け取る
 - バインディングは設定で宣言するもので、実行中に増やすことはできない
-- `@cloudflare/vite-plugin` は Vite に Worker 用の環境を追加し、開発中もビルド後も workerd でコードを実行する
+- `@cloudflare/vite-plugin` は Vite に Worker 用の環境を追加し、開発中もビルド後も workerd 上でコードを実行する
 - Worker の設定は `wrangler.jsonc` に記述する代わりに、`cloudflare({ config })` によりプログラムから渡すことができる
 - ビルドすると、Worker のコードと `wrangler.json` が `dist/<環境名>/` に出力される
 
@@ -366,4 +370,4 @@ curl http://localhost:4173/
 
 Void ではさらに、Worker のビルド出力先を `dist/ssr` に変える設定（`createDefaultWorkerEnvironmentPlugin()`）も加わっています。
 
-次の章から、いよいよ chibivoid を作り始めます。Worker 用の環境名は、Void の `void_worker` にならって `chibivoid_worker` にします。
+次の章から、いよいよ chibivoid を作り始めます。Worker 用の環境名は、Void の `void_worker` にならって `chibivoid_worker` を使っていきます。
