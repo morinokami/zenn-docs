@@ -2,13 +2,13 @@
 title: "chibivoid の骨組み"
 ---
 
-いよいよこの章から chibivoid を作り始めます。ルーティング（第 5 章）やページ（第 8 章）にはまだ手を付けず、「`chibivoidPlugin()` を Vite に登録すると、Worker が動き出す」という一番外側の骨組みだけをまず作成します。小さな章ですが、ここで準備する構造が本書を通じた土台となります。
+いよいよこの章から chibivoid を作り始めます。ルーティング（第 5 章）やページ（第 8 章）にはまだ手を付けず、「`chibivoidPlugin()` を Vite に登録すると、Worker が動き出す」という一番外側の骨組みだけをまず作成します。小さな章ですが、ここで準備する構造が本書を通じた土台となっていきます。
 
 ## この章のゴール
 
-- Void と同じかたちのモノレポ（`packages/chibivoid` と `playground`）を理解する
-- TypeScript のパッケージを、ビルドせずに workspace から使う方法について知る
-- `chibivoidPlugin()` が Worker のエントリファイル（`.chibivoid/entry.ts`）を生成し、仮想モジュール `virtual:chibivoid-routes` を提供し、Cloudflare のプラグインを包んでいることを理解する
+- Void と同じ構造のモノレポ（`packages/chibivoid` と `playground`）を作成する
+- TypeScript のパッケージを、ビルドせずに workspace から使う方法について理解する
+- `chibivoidPlugin()` が、Worker のエントリファイル（`.chibivoid/entry.ts`）の生成と仮想モジュール `virtual:chibivoid-routes` の提供をおこない、Cloudflare のプラグインを包んでいることを理解する
 - リクエストが、どのファイルをどの順番で通るかを確かめる
 
 ## これから作るもの
@@ -17,22 +17,22 @@ title: "chibivoid の骨組み"
 
 ```
 chibivoid/
-├── .gitignore                    Git に入れないファイルの指定
-├── package.json                  npm workspaces の設定
+├── .gitignore                     Git に入れないファイルの指定
+├── package.json                   npm workspaces の設定
 ├── packages/
-│   └── chibivoid/                chibivoid 本体
+│   └── chibivoid/                 chibivoid 本体
 │       ├── package.json
 │       └── src/
-│           ├── index.ts          chibivoidPlugin()
-│           ├── plugin-routing.ts 仮想モジュール virtual:chibivoid-routes を提供する
+│           ├── index.ts           chibivoidPlugin()
+│           ├── plugin-routing.ts  仮想モジュール virtual:chibivoid-routes を提供する
 │           ├── router/
-│           │   └── compile.ts    エントリとルートテーブルのコードを生成する
+│           │   └── compile.ts     エントリとルートテーブルのコードを生成する
 │           └── runtime/
-│               └── routing.ts    Worker の中で動く関数
-└── playground/                   chibivoid を使うアプリ
+│               └── routing.ts     Worker の中で動く関数
+└── playground/                    chibivoid を使うアプリ
     ├── package.json
     ├── tsconfig.json
-    └── vite.config.ts            plugins: [chibivoidPlugin()]
+    └── vite.config.ts             plugins: [chibivoidPlugin()]
 ```
 
 `npm run dev` により `playground` を起動すると、Worker が「Hello from chibivoid!」と返すようになります。そのために `chibivoidPlugin()` は次の 3 つの仕事をします:
@@ -41,13 +41,13 @@ chibivoid/
 2. Hono アプリを、仮想モジュール `virtual:chibivoid-routes` として提供する
 3. Cloudflare の Vite プラグインに、1. のファイルをエントリ（`main`）として渡す
 
-リクエストは workerd の中で `.chibivoid/entry.ts` に届き、そこからインポートされた Hono アプリが応答します。実際にどの順番で何が起きるのかは、「動かしてみる」で動かした後に、図を使って確かめます。
+リクエストは workerd の中で `.chibivoid/entry.ts` に届き、そこからインポートされた Hono アプリが応答します。実際にどの順番で何が起きるのかは、「動かしてみる」にてアプリを動かした後に、図を使って確かめます。
 
 ## Void をまねたモノレポを作成する
 
-Void のリポジトリは、複数のパッケージを 1 つのリポジトリで管理するモノレポです。フレームワーク本体は `packages/void`（npm では `void` という名前で公開）、React のアダプターは `packages/react`（`@void/react`）にあり、動作確認用のアプリが `playground/` に並んでいます。
+Void のリポジトリは、複数のパッケージを 1 つのリポジトリで管理するモノレポになっています。フレームワーク本体は `packages/void`（npm では `void` という名前で公開）、React のアダプターは `packages/react`（`@void/react`）にあり、動作確認用のアプリが `playground/` に並んでいます。
 
-chibivoid も同じ構造にします。ただし、Void は pnpm と [Vite+](https://viteplus.dev)（VoidZero が開発している統合ツールチェーン）でモノレポを管理していますが、本書では Node.js に付属する npm の [workspaces](https://docs.npmjs.com/cli/using-npm/workspaces) 機能を使います。
+chibivoid も同じ構造にします。ただし、Void は pnpm と [Vite+](https://viteplus.dev)（VoidZero が開発している統合ツールチェーン）でモノレポを管理していますが、本書では簡単のため Node.js に付属する npm の [workspaces](https://docs.npmjs.com/cli/using-npm/workspaces) 機能を使います。
 
 第 3 章の `workers-basics` の外に、新しいディレクトリ `chibivoid` を作り、その直下に `package.json` を作成します:
 
@@ -77,7 +77,7 @@ cd chibivoid
 
 `workspaces` に並べたディレクトリが、それぞれ 1 つのパッケージになります。モノレポのルートで `npm install` を実行すると、workspace のパッケージは `node_modules/` にシンボリックリンクとして置かれます。つまり、`playground` から `import { chibivoidPlugin } from "chibivoid"` と記述すると、`node_modules/chibivoid` のリンクをたどって、`packages/chibivoid` の中身がそのまま読み込まれます。
 
-ルートの `name` を `chibivoid-root` にしているのは、`packages/chibivoid` のパッケージ名 `chibivoid` と区別するためです。
+なお、ルートの `name` を `chibivoid-root` にしているのは、`packages/chibivoid` のパッケージ名 `chibivoid` と区別するためです。
 
 生成物を Git に入れないための `.gitignore` も追加しておきます:
 
@@ -94,7 +94,7 @@ dist
 
 ## TypeScript をビルドせずにパッケージにする
 
-`packages/chibivoid/package.json` を作成します:
+chibivoid パッケージのための `packages/chibivoid/package.json` を作成します:
 
 ```sh
 mkdir -p packages/chibivoid/src/router packages/chibivoid/src/runtime
@@ -132,7 +132,7 @@ mkdir -p packages/chibivoid/src/router packages/chibivoid/src/runtime
 chibivoid では、学習の手間を減らすためにビルドの過程を省き、`exports` が `src/*.ts` を直接指すようにしています。それでも動くのは、次の 2 つの理由からです:
 
 1. Worker やブラウザで動くコードは、Vite が読み込む際に TypeScript を変換してくれます。workspace のパッケージ（`node_modules` の外に実体があるもの）は、Vite から見るとアプリのソースコードと同じ扱いになります
-2. Node.js で動くコード（`vite.config.ts` から読み込まれるプラグイン本体など）は、Node.js 24 以降の [type stripping](https://nodejs.org/api/typescript.html#type-stripping)（型注釈を取り除いてそのまま実行する機能）で動きます
+2. Node.js で動くコード（`vite.config.ts` から読み込まれるプラグイン本体など）は、Node.js 24 以降の [type stripping](https://nodejs.org/api/typescript.html#type-stripping)（型注釈を取り除いてそのまま実行する機能）により動きます
 
 ただし、type stripping は型注釈を消すだけであるため、次のルールを守る必要があります:
 
@@ -160,10 +160,10 @@ export default app;
 このコードで押さえておきたいポイントは、次の 3 つです:
 
 - `app.get(パス, ハンドラー)` によりルートを登録します。`:id` のような書き方で URL のパラメータを受け取ることができます
-- ハンドラーは `c`（`Context`）を受け取り、`c.text()` や `c.json()` により `Response` を返します。`c.req` がリクエスト、`c.env` が Worker の `env` です
-- 最後の `export default app` により、このコードは Worker として動きます。`app` 自身が `fetch(request, env, ctx)` というメソッドをもっており、第 3 章で見た Workers の `fetch` ハンドラーとまったく同じかたちをしているためです
+- ハンドラーは `c`（`Context`）を受け取り、`c.text()` や `c.json()` により `Response` を返します。`c.req` がリクエスト、`c.env` が Worker の `env` に対応します
+- 最後の `export default app` により、このコードは Worker として振る舞います。第 3 章の「Cloudflare Workers とは何か」で見たように、Worker は「`fetch` メソッドをもつオブジェクト」をデフォルトエクスポートします。Hono の `app` はまさに `fetch(request, env, ctx)` というメソッドをもつオブジェクトであり、`export default { fetch: app.fetch }` と書いたのと同じように動きます
 
-chibivoid は、`routes/` のファイルからこの `app.get(...)` を並べたコードを生成することで、ファイルベースルーティングを実現します（第 5 章）。この章では、まず固定の Hono アプリのコードを生成するところから始めます。
+chibivoid は、`routes/` のファイルからこの `app.get(...)` を並べたコードを生成することにより、ファイルベースルーティングを実現します（第 5 章）。この章では、まず固定の Hono アプリのコードを生成するところから始めます。
 
 ## chibivoid 本体を作成する
 
