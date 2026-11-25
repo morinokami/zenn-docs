@@ -57,7 +57,26 @@ app.get("/api/hello", createHttpRouteHandler(loadRoute0, "GET"));
 
 `createModuleLoader()` に渡している `() => import(...)` が、ここでいう動的インポートです。Vite は、仮想モジュールのコードを変換する際に、インポート文と同じようにこの `import()` のパスも読み取り、`virtual:chibivoid-routes` が `hello.ts` をインポートしていることをモジュールグラフに記録します。起動時のスキャン結果から生成されたこのコードには、後から追加した `time.ts` の `import()` は含まれていません。
 
-`/api/hello` に一度アクセスしてから `hello.ts` を書き換えると、Vite は `hello.ts` を無効化し、それをインポートしているモジュールを順にたどって、更新を受け入れるモジュール（第 2 章の「HMR と依存の事前バンドル」で触れた HMR の境界）を探します。ここでは、Cloudflare のプラグインが内部で生成している `virtual:cloudflare/worker-entry`（`.chibivoid/entry.ts` をインポートして、Worker のエントリとして実際に読み込まれるモジュール）が境界になり、ターミナルに `hmr update virtual:cloudflare/worker-entry` と表示されます。Worker 側のモジュールランナーはそこから評価し直すため、`virtual:chibivoid-routes` も評価し直されます。ただし、このとき `load` は呼ばれず、Vite にキャッシュされたコードがそのまま使われるため、ルートテーブルの中身は変わりません。それでも、`hello.ts` 自体は無効化されているため、次のリクエストでは新しい `hello.ts` が読み込まれます。なお、開発サーバーの起動後に `/api/hello` に一度もアクセスしていない場合は、`hello.ts` がまだ読み込まれていないため、このログは表示されず、最初のリクエストで書き換えた後の `hello.ts` が読み込まれます。
+`time.ts` を追加した後のモジュールグラフを、第 2 章と同じように図にすると、次のようになります:
+
+```mermaid
+flowchart LR
+  subgraph G["chibivoid_worker 環境のモジュールグラフ"]
+    E["virtual:cloudflare/<br/>worker-entry"] --> C[".chibivoid/<br/>entry.ts"]
+    C --> R["virtual:chibivoid-routes<br/>（変換結果をキャッシュ）"]
+    R -->|"import()"| H["routes/api/<br/>hello.ts"]
+  end
+  T["routes/api/time.ts<br/>（後から追加）"]
+  %% time.ts を hello.ts の真下に置くための見えないノード
+  Z[" "]
+  H ~~~ Z
+  T ~~~ Z
+  style Z fill:none,stroke:none
+```
+
+後から追加した `time.ts` は、どこからもインポートされていないため、モジュールグラフに入っていません。
+
+`/api/hello` に一度アクセスしてから `hello.ts` を書き換えると、Vite は `hello.ts` を無効化し、それをインポートしているモジュールを図の右から左へ順にたどって、更新を受け入れるモジュール（第 2 章の「HMR と依存の事前バンドル」で触れた HMR の境界）を探します。ここでは、Cloudflare のプラグインが内部で生成している `virtual:cloudflare/worker-entry`（`.chibivoid/entry.ts` をインポートして、Worker のエントリとして実際に読み込まれるモジュール）が境界になり、ターミナルに `hmr update virtual:cloudflare/worker-entry` と表示されます。Worker 側のモジュールランナーはそこから評価し直すため、`virtual:chibivoid-routes` も評価し直されます。ただし、このとき `load` は呼ばれず、Vite にキャッシュされたコードがそのまま使われるため、ルートテーブルの中身は変わりません。それでも、`hello.ts` 自体は無効化されているため、次のリクエストでは新しい `hello.ts` が読み込まれます。なお、開発サーバーの起動後に `/api/hello` に一度もアクセスしていない場合は、`hello.ts` がまだ読み込まれていないため、このログは表示されず、最初のリクエストで書き換えた後の `hello.ts` が読み込まれます。
 
 では、ルートテーブルを作り直す必要があるのは、どのような場合でしょうか。変更の種類ごとに整理すると、次のようになります:
 
@@ -71,7 +90,7 @@ app.get("/api/hello", createHttpRouteHandler(loadRoute0, "GET"));
 
 ## ファイルを監視してルートテーブルを作り直す
 
-`plugin-routing.ts` に `configureServer` フックを追加し、スキャン結果が変わった場合にルートテーブルを作り直すようにします。「グローバルミドルウェアを実装する」で作るミドルウェア用の `middleware/` ディレクトリも、ここで監視対象に入れておきます:
+`plugin-routing.ts` に `configureServer` フックを追加し、スキャン結果が変わった場合にルートテーブルを作り直すようにします。後で「グローバルミドルウェアを実装する」で作るミドルウェア用の `middleware/` ディレクトリも、ここで監視対象に入れておきます:
 
 <!-- diff: code/how-void-works/ch05/packages/chibivoid/src/plugin-routing.ts code/how-void-works/ch06/packages/chibivoid/src/plugin-routing.ts -->
 ```diff ts:packages/chibivoid/src/plugin-routing.ts
@@ -269,7 +288,7 @@ chibivoid では、`middleware/` のファイルをファイル名の数字の�
 ```
 <!-- /diff -->
 
-ルートのファイルは遅延ロードしていましたが、ミドルウェアは静的なインポート文で読み込んでいる点に注意してください。ミドルウェアはすべてのリクエストで必ず動き、読み込みを遅延させる意味がないためです。また、`app.use(...)` は、ルートの登録（`app.get(...)` など）よりも前に呼ぶ必要があります。Hono は、リクエストにマッチしたミドルウェアとルートのハンドラーを区別せず、登録した順に実行します。ルートのハンドラーは `next()` を呼ばずにレスポンスを返すため、ルートより後に登録したミドルウェアは、そのルートへのリクエストでは呼ばれません。
+ルートのファイルは遅延ロードしていましたが、ミドルウェアは静的なインポート文により読み込んでいる点に注意してください。ミドルウェアはすべてのリクエストで必ず動き、読み込みを遅延させる意味がないためです。また、`app.use(...)` は、ルートの登録（`app.get(...)` など）よりも前に呼ぶ必要があります。Hono は、リクエストにマッチしたミドルウェアとルートのハンドラーを区別せず、登録した順に実行します。ルートのハンドラーは `next()` を呼ばずにレスポンスを返すため、ルートより後に登録したミドルウェアは、そのルートへのリクエストでは呼ばれません。
 
 ### `defineMiddleware()`: ミドルウェアに型を付ける関数
 
@@ -315,7 +334,7 @@ chibivoid では、`middleware/` のファイルをファイル名の数字の�
 
 ### ミドルウェアを作成する
 
-最後に、playground にミドルウェアを 1 つ作成します。ミドルウェアを置くディレクトリを用意しておきましょう:
+最後に、playground にミドルウェアを 1 つ作成してみます。まずミドルウェアを置くためのディレクトリを用意しておきましょう:
 
 ```sh
 mkdir -p playground/middleware
