@@ -163,7 +163,7 @@ export default app;
 - ハンドラーは `c`（`Context`）を受け取り、`c.text()` や `c.json()` により `Response` を返します。`c.req` がリクエスト、`c.env` が Worker の `env` に対応します
 - 最後の `export default app` により、このコードは Worker として振る舞います。第 3 章の「Cloudflare Workers とは何か」で見たように、Worker は「`fetch` メソッドをもつオブジェクト」をデフォルトエクスポートします。Hono の `app` はまさに `fetch(request, env, ctx)` というメソッドをもつオブジェクトであり、`export default { fetch: app.fetch }` と書いたのと同じように動きます
 
-chibivoid は、`routes/` のファイルからこの `app.get(...)` を並べたコードを生成することにより、ファイルベースルーティングを実現します（第 5 章）。この章では、まず固定の Hono アプリのコードを生成するところから始めます。
+chibivoid は、`routes/` 以下のファイルからこの `app.get(...)` を並べたコードを生成することにより、ファイルベースルーティングを実現します（第 5 章）。この章では、まず固定の Hono アプリのコードを生成するところから始めます。
 
 ## chibivoid 本体を作成する
 
@@ -189,9 +189,9 @@ export function createWorkerFetch(app: Hono) {
 ```
 <!-- /file -->
 
-`createWorkerFetch()` は、Hono アプリを受け取って Workers の `fetch` ハンドラーを返します。3 つ目の引数 `ctx` の型 `ExecutionContext` は、Hono がエクスポートしているもので、`app.fetch()` が受け取る型と同じです。今は `app.fetch()` を呼ぶだけですが、第 7 章でここに「リクエストごとの `env` を覚えておく」処理を追加します。
+`createWorkerFetch()` は、Hono アプリを受け取って Workers の `fetch` ハンドラーを返します。3 つ目の引数 `ctx` の型 `ExecutionContext` は Hono がエクスポートしているもので、`app.fetch()` が受け取る型と同じです。今は `app.fetch()` を呼ぶだけですが、第 7 章でここに「リクエストごとの `env` を覚えておく」処理を追加します。
 
-`runtime/` には、Worker の中で動くコード（第 11 章からは、ブラウザで動くコードも）を置くことにします。Node.js の上でしか意味をもたない処理（`node:fs` によりプロジェクトのファイルを読むなど）をここに記述しないように注意してください。
+`runtime/` には、Worker の中で動くコード（第 11 章からは、ブラウザで動くコードも）を置くことにします。Worker はプロジェクトのディレクトリとは切り離された環境で動くため、`node:fs` でプロジェクトのファイルを読むといった処理はここには書けません。そうした処理は、Node.js で動くプラグインの側に書きます。
 
 ### `router/compile.ts`: コードを生成する関数
 
@@ -335,7 +335,7 @@ export function readWorkerName(root: string): string {
 ```
 <!-- /file -->
 
-`chibivoidPlugin()` は、Vite のプラグインの配列を返します。`plugins: [chibivoidPlugin()]` のように配列が入れ子になっても、Vite はそれを上手く展開して 1 つの配列として扱ってくれます。
+`chibivoidPlugin()` は、Vite のプラグインの配列を返します。`plugins: [chibivoidPlugin()]` のように配列が入れ子になっていても、Vite はそれを上手く展開して 1 つの配列として扱ってくれます。
 
 `chibivoidPlugin()` の中身を順に見ていきましょう。
 
@@ -513,7 +513,7 @@ app.get("/", (c) => c.text("Hello from chibivoid!"));
 export default app;
 ```
 
-生成されたコードを自分の目で確かめたい場合は、`plugin-routing.ts` の `load` の中で、返す前の文字列を `console.log()` で出力してみてください。`vite.config.ts` がパッケージ名（`chibivoid`）から読み込んでいるプラグインのコードは、書き換えても、動いている開発サーバーには反映されないため、開発サーバーをいったん止めて（Ctrl+C）起動し直します。`virtual:chibivoid-routes` は起動時に読み込まれるため、リクエストを送らなくても、開発サーバーのターミナルに文字列が表示されます。
+生成されたコードを自分の目で確かめたい場合は、`plugin-routing.ts` の `load` の中で、`return` する前の文字列を `console.log()` で出力してみてください。`vite.config.ts` がパッケージ名（`chibivoid`）から読み込んでいるプラグインのコードは、書き換えても動いている開発サーバーには反映されないため、開発サーバーをいったん止めて（Ctrl+C）起動し直します。`virtual:chibivoid-routes` は起動時に読み込まれるため、リクエストを送らなくても、開発サーバーのターミナルに文字列が表示されます。
 
 ### ビルド
 
