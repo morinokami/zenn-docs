@@ -31,7 +31,7 @@ KV のバインディングは、Worker の `fetch(request, env, ctx)` が呼ば
 
 ## 問題 1: ソースコードからバインディングを推論する
 
-1 つ目の問題は、第 5 章の「ステップ 3: エクスポートを『実行せずに』調べる」と同じ方法により解決できます。つまり、ソースコードを実行せずに解析し、`chibivoid/kv` をインポートしているファイルがあるかどうかを調べればよいのです。
+1 つ目の問題は、第 5 章の「エクスポートを『実行せずに』調べる」と同じ方法により解決できます。つまり、ソースコードを実行せずに解析し、`chibivoid/kv` をインポートしているファイルがあるかどうかを調べればよいのです。
 
 Void のドキュメントの「[Resource Inference](https://void.cloud/reference/resource-inference)」のページによると、Void は次の 2 種類の書き方からリソースの利用を検出しています:
 
@@ -178,7 +178,7 @@ MemberExpression            ← c.env.KV
 
 ここまでは、1 つのファイルについての処理です。プロジェクト全体については、`inferProjectBindings()` が `routes/`、`middleware/`、`pages/`、`src/` の下にあるすべてのソースファイルについて推論し、その結果をまとめます。
 
-ファイルの列挙に、第 5 章の「ステップ 4: `routes/` をスキャンする」で作成した `listFiles()` ではなく、専用の `listSourceFiles()` を使っている点に注意してください。ルーティングでは `_` で始まるファイルを無視しましたが、`_utils.ts` のようなヘルパーの中で KV を使うこともあります。ヘルパーを見落とすと、バインディングが用意されずにエラーになってしまうため、推論では `_` で始まるファイルも含めてすべてのソースファイルを調べます。Void も、ルートとして扱うファイルを選ぶ処理（`packages/void/src/shared/convention-files.ts`）と、推論のためにファイルを集める処理（`packages/void/src/plugin-inference.ts`）を分けています。
+ファイルの列挙に、第 5 章の「`routes/` をスキャンする」で作成した `listFiles()` ではなく、専用の `listSourceFiles()` を使っている点に注意してください。ルーティングでは `_` で始まるファイルを無視しましたが、`_utils.ts` のようなヘルパーの中で KV を使うこともあります。ヘルパーを見落とすと、バインディングが用意されずにエラーになってしまうため、推論では `_` で始まるファイルも含めてすべてのソースファイルを調べます。Void も、ルートとして扱うファイルを選ぶ処理（`packages/void/src/shared/convention-files.ts`）と、推論のためにファイルを集める処理（`packages/void/src/plugin-inference.ts`）を分けています。
 
 ### 推論結果を設定に反映する
 
@@ -546,4 +546,4 @@ Void は、`AsyncLocalStorage` を使うためのフラグも自動で追加し�
 
 また、Void には、開発サーバーを起動した後で新しいリソースの利用を見つけると、再起動を促すしくみ（`packages/void/src/index.ts` の `bindingWatchPlugin`）もあります。ターミナルに `New KV (void/kv) binding detected. Restart to apply.` と表示し、さらにブラウザにもトーストで通知します。
 
-最後に、chibivoid にはない、Void の大事なしくみをもう 1 つ紹介しておきます。それは、ブラウザ用の環境において、`void/kv` や `void/db` などを空のスタブに差し替えるプラグイン（`plugin-client-stubs.ts` の `createClientStubsPlugin()`）です。このプラグインにより、ブラウザ用のコードから誤って `void/kv` などをインポートしてしまった場合でも、`node:async_hooks` などがブラウザ向けのバンドルに入り込まずに済みます。第 5 章の「ステップ 7: プラグインにつなぐ」で `chibivoid` のインポートを差し替えたのと同じく、`resolveId` により環境ごとにインポートの解決先を変えています。
+最後に、chibivoid にはない、Void の大事なしくみをもう 1 つ紹介しておきます。それは、ブラウザ用の環境において、`void/kv` や `void/db` などを空のスタブに差し替えるプラグイン（`plugin-client-stubs.ts` の `createClientStubsPlugin()`）です。このプラグインにより、ブラウザ用のコードから誤って `void/kv` などをインポートしてしまった場合でも、`node:async_hooks` などがブラウザ向けのバンドルに入り込まずに済みます。第 5 章の「プラグインにつなぐ」で `chibivoid` のインポートを差し替えたのと同じく、`resolveId` により環境ごとにインポートの解決先を変えています。

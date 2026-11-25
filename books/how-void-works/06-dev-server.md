@@ -47,7 +47,7 @@ curl http://localhost:5173/api/hello
 - `virtual:chibivoid-routes` の中身は、開発サーバーの起動時（`buildStart`）のスキャン結果から生成され、Vite のモジュールグラフにキャッシュされます
 - `routes/api/time.ts` を追加しても、それをインポートしているモジュールはまだありません。Vite から見ると、新しいファイルと `virtual:chibivoid-routes` の間に関係はないため、キャッシュはそのまま使われます
 
-一方、中身の書き換えが反映されるのは、`routes/api/hello.ts` がすでに `virtual:chibivoid-routes` から動的にインポートされており、Vite がそのモジュールを知っているためです。第 5 章の「ステップ 6: Hono アプリのコードを生成する」で見たように、開発サーバーで生成される `virtual:chibivoid-routes` には、ルートごとに次のような行が含まれています:
+一方、中身の書き換えが反映されるのは、`routes/api/hello.ts` がすでに `virtual:chibivoid-routes` から動的にインポートされており、Vite がそのモジュールを知っているためです。第 5 章の「Hono アプリのコードを生成する」で見たように、開発サーバーで生成される `virtual:chibivoid-routes` には、ルートごとに次のような行が含まれています:
 
 ```js
 const loadRoute0 = createModuleLoader(() => import("/path/to/chibivoid/playground/routes/api/hello.ts"), false);

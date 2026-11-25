@@ -48,7 +48,7 @@ flowchart LR
 
 ① と ② は Vite のプラグインの中で、③ は Worker の中で動きます。以降はこの区別を意識しながら読み進めていってください。
 
-## ステップ 1: ファイル名を URL パターンに変換する
+## ファイル名を URL パターンに変換する
 
 `routes/` からの相対パスを、Hono の URL パターンに変換します。基本的なルールは Void と同じです:
 
@@ -131,9 +131,9 @@ export function parseRouteFilename(relativePath: string): RouteDefinition {
 ```
 <!-- /file -->
 
-`RouteDefinition` は、1 つのルートを表わすデータです。`methods`（エクスポートされている HTTP メソッド）はファイルの中身を見ないとわからないため、ここでは空にしておき、後でスキャナー（「ステップ 4: `routes/` をスキャンする」）によって埋めます。
+`RouteDefinition` は、1 つのルートを表わすデータです。`methods`（エクスポートされている HTTP メソッド）はファイルの中身を見ないとわからないため、ここでは空にしておき、後で「`routes/` をスキャンする」で作成するスキャナーによって埋めます。
 
-## ステップ 2: ルートの優先順位
+## ルートの優先順位
 
 `routes/api/users/[id].ts` と `routes/api/users/me.ts` がある場合、`/api/users/me` へのリクエストにはどちらが応えるべきでしょうか。直感的には、より具体的な `me.ts` です。
 
@@ -192,7 +192,7 @@ export function compareRouteSpecificity(
 
 たとえば、`/api/users/me` と `/api/users/:id` は 3 番目のセグメントで初めて違い、`me`（固定）が `:id`（パラメータ）より優先されます。
 
-## ステップ 3: エクスポートを「実行せずに」調べる
+## エクスポートを「実行せずに」調べる
 
 次は、各ファイルがどの HTTP メソッド（`GET`、`POST` など）をエクスポートしているかについて調べます。
 
@@ -245,7 +245,7 @@ export function detectHttpExports(absPath: string): string[] {
 
 この「実行せずに解析する」という方針は、Void の様々な箇所で採用されています。たとえば、第 7 章のリソース推論でも、同じ `parseSync()` を使います。
 
-## ステップ 4: `routes/` をスキャンする
+## `routes/` をスキャンする
 
 まずは、ディレクトリを再帰的にたどって、ファイルの一覧を返す関数を作成します。この関数を置くディレクトリを用意しておきましょう:
 
@@ -318,7 +318,7 @@ export function scanApp(paths: ProjectPaths): ScanResult {
 
 `scanRoutes()` は、ファイルごとに「パスから作成した `RouteDefinition`」と「エクスポートから調べた `methods`」を合わせ、より具体的なルートが先に来るように並べて返します。`scanApp()` はアプリ全体のスキャン結果をまとめる関数で、第 6 章以降でミドルウェアやページのスキャンを追加していきます。
 
-## ステップ 5: Worker の中で動く関数
+## Worker の中で動く関数
 
 生成するコードやルートのファイルから呼び出す関数を用意します。
 
@@ -451,7 +451,7 @@ export function createWorkerFetch(app: Hono) {
 
 `createHttpRouteHandler()` は、Hono のハンドラーを作成します。このハンドラーは、リクエストが来るとモジュールを読み込んで、指定されたメソッド名のエクスポート（`GET` など）を呼び、戻り値を `convertReturnValue()` により `Response` に変換します。
 
-## ステップ 6: Hono アプリのコードを生成する
+## Hono アプリのコードを生成する
 
 スキャン結果から、`virtual:chibivoid-routes` のソースコードを生成します。`router/compile.ts` を次のように書き換えます:
 
@@ -541,7 +541,7 @@ export default app;
 
 仮想モジュールはディスク上の場所をもたないため、`import("./routes/...")` のような相対パスには、基準になるディレクトリがありません。そのため、ルートのファイルは絶対パスでインポートしています。
 
-## ステップ 7: プラグインにつなぐ
+## プラグインにつなぐ
 
 `plugin-routing.ts` を書き換えて、スキャンとコード生成をつなぎます:
 

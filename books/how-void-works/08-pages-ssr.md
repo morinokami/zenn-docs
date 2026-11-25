@@ -42,7 +42,7 @@ Void の公式ドキュメント「[Pages Routing](https://void.cloud/guide/page
 
 ### 1. コンポーネントと loader の組
 
-1 つのページは、基本的に UI を表わすコンポーネントとデータを用意する `loader` の組からなります。たとえば、`pages/about.tsx` が `/about` ページの UI になり、`pages/about.server.ts` がエクスポートする `loader` がそのページのデータを用意します。`loader` はサーバーだけで動くため、KV やデータベースに直接アクセスすることができます。`.server.ts` がないページは、データなしで描画されます。また、URL の決め方は、`[id]` や `index` の扱いも含めて `routes/` とまったく同じです（第 5 章の「ステップ 1: ファイル名を URL パターンに変換する」）。
+1 つのページは、基本的に UI を表わすコンポーネントとデータを用意する `loader` の組からなります。たとえば、`pages/about.tsx` が `/about` ページの UI になり、`pages/about.server.ts` がエクスポートする `loader` がそのページのデータを用意します。`loader` はサーバーだけで動くため、KV やデータベースに直接アクセスすることができます。`.server.ts` がないページは、データなしで描画されます。また、URL の決め方は、`[id]` や `index` の扱いも含めて `routes/` とまったく同じです（第 5 章の「ファイル名を URL パターンに変換する」）。
 
 ### 2. ページオブジェクト
 
@@ -213,8 +213,8 @@ export function resolveLayoutIds(page: PageDefinition, layouts: LayoutDefinition
 このコードで押さえておきたいポイントは、次の 4 つです:
 
 - `componentId` は、拡張子を除いたパス（`users/[id]` など）です。この ID は、ページオブジェクトの `component` に入り、どのコンポーネントを描画するかを表わします
-- URL パターンの作り方と並べ方は、`routes/` のルートと同じです。第 5 章の「ステップ 1: ファイル名を URL パターンに変換する」の `parseRouteFilename()` と、第 5 章の「ステップ 2: ルートの優先順位」の `compareRouteSpecificity()` をそのまま使っています
-- コンパニオンがエクスポートしているもの（`loader` と、第 10 章で使う `action`）を、第 5 章の「ステップ 3: エクスポートを『実行せずに』調べる」で作成した `detectExports()` により調べています
+- URL パターンの作り方と並べ方は、`routes/` のルートと同じです。第 5 章の「ファイル名を URL パターンに変換する」の `parseRouteFilename()` と、第 5 章の「ルートの優先順位」の `compareRouteSpecificity()` をそのまま使っています
+- コンパニオンがエクスポートしているもの（`loader` と、第 10 章で使う `action`）を、第 5 章の「エクスポートを『実行せずに』調べる」で作成した `detectExports()` により調べています
 - `resolveLayoutIds()` は、ページを包むレイアウトの ID を外側から順に返します。たとえば `users/[id]` であれば、`pages/layout.tsx` と `pages/users/layout.tsx` のうち存在するものの ID（`layout`、`users/layout`）を返します
 
 ## コア: コンポーネントの対応表を生成する
