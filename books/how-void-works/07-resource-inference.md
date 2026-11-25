@@ -546,4 +546,4 @@ Void は、`AsyncLocalStorage` を使うためのフラグも自動で追加し�
 
 また、Void には、開発サーバーを起動した後で新しいリソースの利用を見つけると、再起動を促すしくみ（`packages/void/src/index.ts` の `bindingWatchPlugin`）もあります。ターミナルに `New KV (void/kv) binding detected. Restart to apply.` と表示し、さらにブラウザにもトーストで通知します。
 
-最後に、chibivoid にはない、Void の大事なしくみをもう 1 つ紹介しておきます。それは、ブラウザ用の環境において、`void/kv` や `void/db` などを空のスタブに差し替えるプラグイン（`plugin-client-stubs.ts` の `createClientStubsPlugin()`）です。このプラグインにより、ブラウザ用のコードから誤って `void/kv` などをインポートしてしまった場合でも、`node:async_hooks` などがブラウザ向けのバンドルに入り込まずに済みます。第 5 章の「ステップ 7: プラグインにつなぐ」で `chibivoid` のインポートを差し替えたのと同じく、`resolveId` により環境ごとにインポートの行き先を変えています。
+最後に、chibivoid にはない、Void の大事なしくみをもう 1 つ紹介しておきます。それは、ブラウザ用の環境において、`void/kv` や `void/db` などを空のスタブに差し替えるプラグイン（`plugin-client-stubs.ts` の `createClientStubsPlugin()`）です。このプラグインにより、ブラウザ用のコードから誤って `void/kv` などをインポートしてしまった場合でも、`node:async_hooks` などがブラウザ向けのバンドルに入り込まずに済みます。第 5 章の「ステップ 7: プラグインにつなぐ」で `chibivoid` のインポートを差し替えたのと同じく、`resolveId` により環境ごとにインポートの解決先を変えています。

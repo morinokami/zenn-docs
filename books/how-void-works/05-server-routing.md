@@ -658,11 +658,11 @@ Build failed with 1 error:
 
 `defineHandler()` を使いたかっただけにもかかわらず、Wrangler の CLI まで Worker にバンドルしようとして失敗しています。試した場合は、コメントアウトを外しておいてください。そのままにしておくと、開発サーバーでもルートのレスポンスが 500 Internal Server Error になります。
 
-`resolveId` の差し替えが効くのは、プラグインに `enforce: "pre"` を付けているためです。第 2 章で見たように、インポートの行き先を探す Vite の組み込みプラグイン（`builtin:vite-resolve`）は、`enforce` を付けないプラグインより先に動きます。`chibivoid` は実在するパッケージであるため、`enforce: "pre"` がないと、`routingPlugin()` の `resolveId` が呼ばれる前に Vite が `src/index.ts` に解決してしまいます。
+`resolveId` の差し替えが効くのは、プラグインに `enforce: "pre"` を付けているためです。第 2 章で見たように、インポートの解決先を探す Vite の組み込みプラグイン（`builtin:vite-resolve`）は、`enforce` を付けないプラグインより先に動きます。`chibivoid` は実在するパッケージであるため、`enforce: "pre"` がないと、`routingPlugin()` の `resolveId` が呼ばれる前に Vite が `src/index.ts` に解決してしまいます。
 
 そこで、`resolveId` では、サーバー側の環境（`consumer` が `"server"`）において `chibivoid` がインポートされた場合に、軽量な `runtime/handler.ts` に差し替えています。この節の最後で追加するように、`index.ts` は `defineHandler()` を `runtime/handler.ts` から再エクスポートするだけであるため、差し替えても利用者のコードは同じように動きます。差し替えた後のビルド結果は 60 KB ほどで、Wrangler は含まれていません。
 
-ここでは、`resolveId` は `\0` 付きの ID ではなく、実在するファイルの絶対パスを返しています。Vite では、通常のファイルのモジュール ID は、そのファイルの絶対パスです。この ID に対して `load` で値を返すプラグインはないため、第 2 章の「プラグインとフック」で見たように、最後に Vite がこのパスのファイルを読み込みます。その後は普通のファイルと同じように、TypeScript から JavaScript に変換されます。つまり、`resolveId` が `\0` 付きの ID を返せば仮想モジュールを作成でき、実在するファイルのパスを返せばインポートの行き先を別のファイルに差し替えることができます。
+ここでは、`resolveId` は `\0` 付きの ID ではなく、実在するファイルの絶対パスを返しています。Vite では、通常のファイルのモジュール ID は、そのファイルの絶対パスです。この ID に対して `load` で値を返すプラグインはないため、第 2 章の「プラグインとフック」で見たように、最後に Vite がこのパスのファイルを読み込みます。その後は普通のファイルと同じように、TypeScript から JavaScript に変換されます。つまり、`resolveId` が `\0` 付きの ID を返せば仮想モジュールを作成でき、実在するファイルのパスを返せばインポートの解決先を別のファイルに差し替えることができます。
 
 この差し替えは、Void の `packages/void/AGENTS.md`（AI エージェントやコントリビューター向けの設計メモ）でも、重要な設計判断（Key Design Decisions）の 1 つ「Import redirection」として説明されています。これがないと、ルートのファイルからプラグイン全体（`vite` や `@cloudflare/vite-plugin` など）が Worker のバンドルに引き込まれてしまう、という内容です。
 
