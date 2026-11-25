@@ -263,7 +263,7 @@ storage.run(envA, async () => {
 
 `storage.run(値, 関数)` の中で実行された処理は、その先で `await` をまたいだ場合でも、`storage.getStore()` により同じ値を取り出すことができます。並行して実行されている別の `storage.run()` の値と混ざることはありません。よって、リクエストごとに `storage.run()` を呼べば、「今のリクエストの `env`」をどこからでも安全に読むことができます。Void はこの方法を採用しており、chibivoid でもこの方法を使います。
 
-`AsyncLocalStorage` は、Node.js と同じく `node:async_hooks` からインポートします。第 3 章の「Cloudflare Workers とは何か」で触れたように、chibivoid の `compatibility_date`（`2026-10-01`）では `nodejs_compat` が既定で有効になっているため、Workers でもこのモジュールを使うことができます。
+`AsyncLocalStorage` は、Node.js と同じく `node:async_hooks` からインポートします。第 3 章の「Cloudflare Workers とは何か」で触れたように、chibivoid の `compatibility_date`（`2026-10-01`）では `nodejs_compat` がデフォルトで有効になっているため、Workers でもこのモジュールを使うことができます。
 
 ### `runtime/env.ts`: リクエストごとの `env` を保存する
 
@@ -540,7 +540,7 @@ if (bindings.needsKV && !hasBinding(resolved.kv_namespaces, kvName)) {
 
 `env` の取り出しは、`packages/void/src/runtime/env/runtime.ts` と `env/raw.ts` が担当しています。`withRuntimeEnv()` と `requireRuntimeBinding()` という名前も、chibivoid と同じです。ただし、Void は `AsyncLocalStorage` を、`Symbol.for('void.envContext.v1')` をキーとして `globalThis` に保存しています。Vite の依存の事前バンドル（第 2 章の「HMR と依存の事前バンドル」）などにより同じモジュールが 2 回評価されても、同じ `AsyncLocalStorage` を使うためです。
 
-Void は、`AsyncLocalStorage` を使うためのフラグも自動で追加します。`voidPlugin()` は、`packages/void/src/cli/wrangler.ts` の `normalizeWranglerCompatibilityFlags()` により、`compatibility_flags` に `nodejs_compat` も `nodejs_als` もなければ `nodejs_als` を追加します。認証、PostgreSQL や MySQL、Sandbox SDK を使うアプリでは、他の Node.js の API も必要になるため、代わりに `nodejs_compat` を追加します。`void init` が `void.config.ts` に書き込む `compatibility_date` は、既定では `2026-02-24`（`LATEST_KNOWN_COMPAT_DATE`）です。この日付は `nodejs_compat` が既定で有効になる `2026-08-04` より前であるため、Void では chibivoid と違って、`AsyncLocalStorage` を使うためにフラグが必要になります。
+Void は、`AsyncLocalStorage` を使うためのフラグも自動で追加します。`voidPlugin()` は、`packages/void/src/cli/wrangler.ts` の `normalizeWranglerCompatibilityFlags()` により、`compatibility_flags` に `nodejs_compat` も `nodejs_als` もなければ `nodejs_als` を追加します。認証、PostgreSQL や MySQL、Sandbox SDK を使うアプリでは、他の Node.js の API も必要になるため、代わりに `nodejs_compat` を追加します。`void init` が `void.config.ts` に書き込む `compatibility_date` は、デフォルトでは `2026-02-24`（`LATEST_KNOWN_COMPAT_DATE`）です。この日付は `nodejs_compat` がデフォルトで有効になる `2026-08-04` より前であるため、Void では chibivoid と違って、`AsyncLocalStorage` を使うためにフラグが必要になります。
 
 `void/kv`（`packages/void/src/runtime/kv/index.ts`）は、chibivoid と同じく値を JSON で保存し、`requireRuntimeBinding('KV')` によりネームスペースを取り出します。
 

@@ -20,7 +20,7 @@ title: "はじめに"
 | Void CLI | アプリのビルド、必要な Cloudflare リソースの作成、マイグレーション、デプロイを 1 コマンドでおこなう |
 | Void Platform | チームで共有するデプロイ環境を、自分の Cloudflare アカウントに構築する |
 
-本書では、このうち SDK のコア部分と、CLI のデプロイの流れについて扱います。なお、Void は設定ファイル（`void.config.ts`）の `target` を変えると、Node.js、Bun、Deno で動くサーバーとしてもビルドできます。ただし、その場合は KV などの Cloudflare リソースを使うことができなくなるため、本書では既定の Cloudflare Workers 向けの場合のみを想定します。
+本書では、このうち SDK のコア部分と、CLI のデプロイの流れについて扱います。なお、Void は設定ファイル（`void.config.ts`）の `target` を変えると、Node.js、Bun、Deno で動くサーバーとしてもビルドできます。ただし、その場合は KV などの Cloudflare リソースを使うことができなくなるため、本書ではデフォルトの Cloudflare Workers 向けの場合のみを想定します。
 
 ### ミニマルな Void アプリ
 
@@ -185,7 +185,7 @@ flowchart LR
   # v24.x.x などと表示されれば OK
   ```
 
-  本書では、chibivoid の TypeScript のソースコードをビルドせずにそのまま Node.js で読み込みます。Node.js 24 以降は、TypeScript の型注釈を取り除いて実行する機能（type stripping）が既定で有効になっているため、それを利用します。
+  本書では、chibivoid の TypeScript のソースコードをビルドせずにそのまま Node.js で読み込みます。Node.js 24 以降は、TypeScript の型注釈を取り除いて実行する機能（type stripping）がデフォルトで有効になっているため、それを利用します。
 
 - npm（Node.js に付属しています）
 - エディター（TypeScript の補完が効くもの。VS Code など）

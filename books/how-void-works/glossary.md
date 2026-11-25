@@ -21,7 +21,7 @@ title: "用語集"
 | workerd | Workers のランタイム（実行エンジン） | [第 3 章](/morinokami/books/how-void-works/viewer/03-cloudflare-workers) |
 | Miniflare/Wrangler | Workers をローカルで動かすシミュレーター/Workers の公式 CLI | [第 3 章](/morinokami/books/how-void-works/viewer/03-cloudflare-workers) |
 | モノレポ（monorepo） | 複数のパッケージを 1 つのリポジトリで管理する構成。chibivoid は npm の workspaces 機能で、`packages/*` と `playground` をまとめている | [第 4 章](/morinokami/books/how-void-works/viewer/04-skeleton) |
-| type stripping | Node.js が、TypeScript の型注釈を取り除いてそのまま実行する機能。Node.js 24 以降は既定で有効で、chibivoid のプラグインや CLI はこれによりビルドせずに動く | [第 4 章](/morinokami/books/how-void-works/viewer/04-skeleton)・[第 12 章](/morinokami/books/how-void-works/viewer/12-build-deploy) |
+| type stripping | Node.js が、TypeScript の型注釈を取り除いてそのまま実行する機能。Node.js 24 以降はデフォルトで有効で、chibivoid のプラグインや CLI はこれによりビルドせずに動く | [第 4 章](/morinokami/books/how-void-works/viewer/04-skeleton)・[第 12 章](/morinokami/books/how-void-works/viewer/12-build-deploy) |
 | Hono | ウェブ標準 API の上で動く軽量なウェブフレームワーク。Void 内部のルーターとして使われる | [第 4 章](/morinokami/books/how-void-works/viewer/04-skeleton) |
 | ルートテーブル | ルートを登録した Hono アプリのコード。chibivoid では仮想モジュール `virtual:chibivoid-routes` として生成する | [第 4 章](/morinokami/books/how-void-works/viewer/04-skeleton)・[第 5 章](/morinokami/books/how-void-works/viewer/05-server-routing)・[第 6 章](/morinokami/books/how-void-works/viewer/06-dev-server) |
 | ファイルベースルーティング | ファイルの置き場所と名前から URL を決めるしくみ。chibivoid は `routes/` や `pages/` をスキャンし、ルートを登録するコードを生成して実現する | [第 5 章](/morinokami/books/how-void-works/viewer/05-server-routing)・[第 8 章](/morinokami/books/how-void-works/viewer/08-pages-ssr) |

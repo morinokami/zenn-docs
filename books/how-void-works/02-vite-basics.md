@@ -213,7 +213,7 @@ flowchart LR
 
 ここで注意したいのは、Vite 本体の処理の多くも組み込みのプラグインとして実装されており、利用者のプラグインと一緒に順に呼ばれることです。たとえば、インポートの解決先をファイルやパッケージから探す処理は、`builtin:vite-resolve` という組み込みのプラグインの `resolveId` がおこなっており、利用者のプラグインは、特に指定しなければその後に呼ばれます。そのため、ファイルやパッケージとして見つかるインポートでは、利用者のプラグインの `resolveId` は呼ばれません。なお、`load` では、どのプラグインも値を返さなければ、最後に Vite がファイルを読み込みます。
 
-プラグインの順番は `plugins` に並べた順ですが、[`enforce: "pre"`](https://vite.dev/guide/api-plugin#plugin-ordering) を付けると Vite 本体の処理より前に回されます。Void のルーティングプラグインは `enforce: 'pre'` を指定しています（その理由は第 5 章でわかります）。
+利用者のプラグインは `plugins` に並べた順に呼ばれますが、[`enforce: "pre"`](https://vite.dev/guide/api-plugin#plugin-ordering) を付けると Vite 本体の処理より前に回されます。Void のルーティングプラグインは `enforce: 'pre'` を指定しています（その理由は第 5 章でわかります）。
 
 :::message
 上の `logPlugin()` は説明用です。この章の完成形には含まれていないため、試した場合は消しておいてください。
@@ -413,7 +413,7 @@ const list = document.querySelector("#notes");
 `import notes from "virtual:notes"` が `import notes from "/@id/__x00__virtual:notes"` に書き換わっています。ブラウザは URL しか扱うことができないため、Vite はインポートの指定子をブラウザが要求できる URL に置き換えます（インポート解析と呼ばれる Vite の内部処理です）:
 
 - `/@id/` は「ファイルパスではなく、モジュール ID で要求する」ための Vite の特別なパス
-- [`__x00__`](https://vite.dev/guide/api-plugin#importing-a-virtual-file) は `\0` を URL で表わしたもの（URL にはヌル文字を入れることができないため）
+- [`__x00__`](https://vite.dev/guide/api-plugin#importing-a-virtual-file) は `\0` を URL の中で表わすための文字列（URL にはヌル文字を入れることができないため）
 
 その URL を直接開くと、`load` が返したコードが表示されます:
 
@@ -454,13 +454,13 @@ flowchart LR
 
 一度読み込んで変換したモジュールは、キャッシュされた結果が使い回されます。ファイルが変更されると、Vite はそのファイルに対応するモジュールを無効化してキャッシュを捨て、変更を HMR でブラウザに伝えます。
 
-ところが、`\0virtual:notes` は `notes/*.txt` をインポートしているわけではありません。プラグインが `load` の中でこっそり `readdirSync()` により読んでいるだけです。Vite から見ると、`notes/plugin.txt` が増えたことと `\0virtual:notes` の間には何の関係もありません。そのため、何もしなければ古いキャッシュが返され続けます。
+ところが、`\0virtual:notes` は `notes/*.txt` をインポートしているわけではありません（上のモジュールグラフの中にも `notes/*.txt` は含まれていません）。プラグインが `load` の中でこっそり `readdirSync()` により読んでいるだけです。Vite から見ると、`notes/plugin.txt` が増えたことと `\0virtual:notes` の間には何の関係もありません。そのため、何もしなければ古いキャッシュが返され続けます。
 
 ### 自分で監視して、自分で無効化する
 
 そこで `configureServer` フックで開発サーバーに手を入れています:
 
-- `server.watcher` は、Vite がプロジェクトのファイルを監視するために使っているウォッチャーです。`add`（追加）、`change`（変更）、`unlink`（削除）のイベントを受け取ることができます。Vite は既定でプロジェクトのルート以下（`node_modules` などを除く）を監視しているため、`notes/` も最初から監視対象です
+- `server.watcher` は、Vite がプロジェクトのファイルを監視するために使っているウォッチャーです。`add`（追加）、`change`（変更）、`unlink`（削除）のイベントを受け取ることができます。Vite はデフォルトでプロジェクトのルート以下（`node_modules` などを除く）を監視しているため、`notes/` も最初から監視対象です
 - `server.environments.client.moduleGraph.getModuleById(RESOLVED_ID)` により、モジュールグラフから仮想モジュールのノードを探します
 - `invalidateModule(mod)` によりキャッシュを捨てます。次に要求された際には、もう一度 `load` が呼ばれます
 - `client.hot.send({ type: "full-reload" })` により、ブラウザにページ全体の再読み込みを指示します
@@ -473,7 +473,7 @@ flowchart LR
 rm notes/plugin.txt
 ```
 
-今度は `unlink` イベントで再読み込みされ、メモが 2 つに戻ります。
+今度は `unlink` イベントで再読み込みされ、メモが 2 つに戻るはずです。
 
 ## HMR と依存の事前バンドル
 
@@ -489,7 +489,7 @@ HMR は、変更の影響を受けるモジュールだけを差し替えて、�
 
 `node_modules` の中のパッケージは、何百ものファイルに分かれていたり、CommonJS 形式で書かれていたりします。そのままブラウザに読ませると遅い上に動かないことがあるため、Vite は開発サーバーの起動時に、使われている依存パッケージを Rolldown により ESM の少数のファイルにまとめておきます。これを[依存の事前バンドル](https://vite.dev/guide/dep-pre-bundling)と呼び、結果は `node_modules/.vite/deps` に置かれます。事前バンドルの設定は、`optimizeDeps` というオプションにまとめられています。
 
-どの依存が使われているかは、開発サーバーの起動時に `index.html` からインポートをたどって調べます（これを[依存スキャン](https://vite.dev/guide/dep-pre-bundling#automatic-dependency-discovery)と呼びます）。ページを表示している途中で新しい依存が見つかると、Vite はバンドルをやり直してページを再読み込みします。Void のようにサーバーが HTML を描画するアプリには `index.html` がないため、事前にどの依存を使うかを `optimizeDeps.include` により指定しておくことになります（第 8・9 章）。
+どの依存が使われているかについては、開発サーバーの起動時に `index.html` からインポートをたどって調べます（これを[依存スキャン](https://vite.dev/guide/dep-pre-bundling#automatic-dependency-discovery)と呼びます）。ページを表示している途中で新しい依存が見つかると、Vite はバンドルをやり直してページを再読み込みします。Void のようにサーバーが HTML を描画するアプリには `index.html` がないため、事前にどの依存を使うかを `optimizeDeps.include` により指定しておくことになります（第 8・9 章）。
 
 ## ビルドとプレビュー
 
@@ -513,7 +513,7 @@ dist/assets/index-CAaqpRjc.js  0.92 kB │ gzip: 0.55 kB
 npm run preview
 ```
 
-ブラウザで `http://localhost:4173/` を開くと、ビルドしたファイルでメモの一覧が表示されます（`vite preview` は既定で、開発サーバーの 5173 番ではなく 4173 番のポートを使います）。
+ブラウザで `http://localhost:4173/` を開くと、ビルドしたファイルでメモの一覧が表示されます（`vite preview` はデフォルトで、開発サーバーの 5173 番ではなく 4173 番のポートを使います）。
 
 ## Environment API: 複数の実行環境をまとめて扱う
 
@@ -542,7 +542,7 @@ flowchart TB
 - `this.environment.config.consumer` は、その環境のコードを実行するのがブラウザ（`"client"`）かサーバー（`"server"`）かを表わします
 - ブラウザ以外の環境のコードは、開発中はモジュールランナー（[module runner](https://vite.dev/guide/api-environment-runtimes#modulerunner)）というしくみで実行されます。モジュールランナーは、開発サーバーから変換済みのモジュールを取ってきて評価する小さな部品で、Node.js 以外のランタイムの中でも動かすことができます
 
-この章の `load` で表示した `"client" 環境` の `client` は、ブラウザ向けの既定の環境の名前です。次の章では、Cloudflare の Vite プラグインが追加する Worker 用の環境を使い、同じ `this.environment.name` が別の値になることを確かめます。開発サーバーの `server.environments` が環境の一覧で、「モジュールグラフと無効化」の `server.environments.client` はその中の 1 つを取り出していたわけです。
+この章の `load` で表示した `"client" 環境` の `client` は、ブラウザ向けのデフォルトの環境名です。次の章では、Cloudflare の Vite プラグインが追加する Worker 用の環境を使い、同じ `this.environment.name` が別の値になることを確かめます。開発サーバーの `server.environments` が環境の一覧で、「モジュールグラフと無効化」の `server.environments.client` はその中の 1 つを取り出していたわけです。
 
 ## まとめ
 
@@ -559,6 +559,6 @@ flowchart TB
 細かい違いとして、Void では次のような書き方も使われています:
 
 - [フックのフィルター](https://vite.dev/guide/api-plugin#hook-filters): `resolveId: { filter: { id: /.../ }, handler(id) { ... } }` のように、どの ID の場合にだけフックを呼ぶかを正規表現により宣言しています。Rolldown は Rust で書かれているため、フィルターに合わない ID では JavaScript の関数を呼び出すこと自体を省略でき、速くなります。本書では読みやすさを優先して、普通の関数のかたちで記述します
-- `\0` の有無: `virtual:void-routes` は `\0` の付かないそのままの ID に解決される一方、Pages のプラグイン（`packages/void/src/pages/plugin.ts`）は `'\0' + id` を返しています。本書ではすべて `\0` 付きに統一します
+- `\0` の有無: `virtual:void-routes` などは `\0` の付かないそのままの ID に解決される一方、Pages のプラグイン（`packages/void/src/pages/plugin.ts`）は `'\0' + id` を返しています。本書ではすべて `\0` 付きに統一します
 
 Void では、ファイルの変更を監視して仮想モジュールを無効化する処理も、`plugin-routing.ts` の `configureServer` にあります。本書では第 6 章で、この章の `notes-plugin.ts` と同じ考え方により実装します。

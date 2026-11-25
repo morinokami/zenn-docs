@@ -2,7 +2,7 @@
 title: "Cloudflare Workers と Vite"
 ---
 
-Void のアプリは、既定では Cloudflare Workers の上で動きます。しかも開発中であっても、本番と同じランタイムでコードを実行できます。この章ではまだ Void を使わず、Cloudflare 公式の Vite プラグインにより Worker を動かし、Void の土台になっているしくみについて確認します。
+Void のアプリは、デフォルトでは Cloudflare Workers の上で動きます。しかも開発中であっても、本番と同じランタイムでコードを実行できます。この章ではまだ Void を使わず、Cloudflare 公式の Vite プラグインにより Worker を動かし、Void の土台になっているしくみについて確認します。
 
 ## この章のゴール
 
@@ -37,7 +37,7 @@ export default {
 
 ### 3. ランタイムの挙動を日付で固定する
 
-Workers のランタイムは継続的に更新されていますが、勝手に挙動が変わると既存の Worker が壊れるかもしれません。そこで、設定の [`compatibility_date`](https://developers.cloudflare.com/workers/configuration/compatibility-dates/) に日付を指定しておくと、Worker をその日付時点の挙動に固定することができます。また [`compatibility_flags`](https://developers.cloudflare.com/workers/configuration/compatibility-flags/) により、個別の機能を有効にできます。たとえば `nodejs_compat` を付けると Node.js 互換の API を利用できるようになります。ただし、多くのフラグには既定で有効になる日付が決まっており、`nodejs_compat` は、`compatibility_date` が `2026-08-04` 以降であれば[既定で有効になります](https://developers.cloudflare.com/workers/runtime-apis/nodejs/)。本書では `compatibility_date` を `2026-10-01` にしているため、第 7 章で使う `node:async_hooks` の `AsyncLocalStorage` も、フラグを付けずに使うことができます。
+Workers のランタイムは継続的に更新されていますが、勝手に挙動が変わると既存の Worker が壊れるかもしれません。そこで、設定の [`compatibility_date`](https://developers.cloudflare.com/workers/configuration/compatibility-dates/) に日付を指定しておくと、Worker をその日付時点の挙動に固定することができます。また [`compatibility_flags`](https://developers.cloudflare.com/workers/configuration/compatibility-flags/) により、個別の機能を有効にできます。たとえば `nodejs_compat` を付けると Node.js 互換の API を利用できるようになります。ただし、多くのフラグにはデフォルトで有効になる日付が決まっており、`nodejs_compat` は、`compatibility_date` が `2026-08-04` 以降であれば[デフォルトで有効になります](https://developers.cloudflare.com/workers/runtime-apis/nodejs/)。本書では `compatibility_date` を `2026-10-01` にしているため、第 7 章で使う `node:async_hooks` の `AsyncLocalStorage` も、フラグを付けずに使うことができます。
 
 ## workerd、Miniflare、Wrangler
 

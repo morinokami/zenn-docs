@@ -402,7 +402,7 @@ export async function fetch(
 
 `fetch()` には 2 つのオーバーロードがあります。オーバーロードとは、同じ関数に対する、引数の型が異なる複数の宣言のことです。1 つ目のオーバーロードは、パラメータのあるルート（`DynamicPath`）のためのもので、`params` を含むオプションを必須にしています。一方、2 つ目のオーバーロードは、パラメータのないルート（`StaticPath`）のためのもので、オプション自体を省略することができます。
 
-メソッドの型 `M` は、オプションの `method` から推論されます。`method` を省略した場合は、既定の型である `Extract<"GET", MethodOf<P>>` が使われるため、そのルートが `GET` をエクスポートしていれば、`M` は `"GET"` になります。
+メソッドの型 `M` は、オプションの `method` から推論されます。`method` を省略した場合は、デフォルトの型である `Extract<"GET", MethodOf<P>>` が使われるため、そのルートが `GET` をエクスポートしていれば、`M` は `"GET"` になります。
 
 最後に、`package.json` の `exports` に `./client` と `./routes` を追加し、`chibivoid/client` と `chibivoid/routes` からインポートできるようにします:
 
