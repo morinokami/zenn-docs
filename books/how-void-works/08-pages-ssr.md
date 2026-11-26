@@ -96,7 +96,7 @@ Void でも、コアの共通部分は `packages/void/src/pages/` に、各フ�
 mkdir -p packages/chibivoid/src/pages
 ```
 
-chibivoid は、ユーザーのアプリケーション側の `pages/` に置かれたファイルを次のように扱います:
+chibivoid は、ユーザーのアプリケーション内の `pages/` に置かれたファイルを次のように扱います:
 
 | ファイル | 扱い |
 | --- | --- |
@@ -254,7 +254,7 @@ export function generateComponentManifest(scan: PageScanResult, pagesDir: string
 ```
 <!-- /file -->
 
-「ページを作成する」で作る playground のページ構成の場合、生成されるコードは次のようになります（パスは環境によって変わります）:
+後で「ページを作成する」で作成する playground のページ構成の場合、生成されるコードは次のようになります（パスは環境によって変わります）:
 
 ```js
 const components = {
@@ -598,7 +598,7 @@ export async function handlePageGet(
 ```
 <!-- /diff -->
 
-「ページを作成する」で作る playground のページ構成の場合、開発サーバーで生成されるコードのうち、ページに関する部分は次のようになります:
+後で「ページを作成する」で作成する playground のページ構成の場合、開発サーバーで生成されるコードのうち、ページに関する部分は次のようになります:
 
 ```js
 import { renderPage } from "virtual:chibivoid-pages-renderer";
@@ -612,7 +612,7 @@ app.get("/users", createPageGetHandler({ componentId: "users/index", load: loadP
 // ...
 ```
 
-コアが生成するルートテーブル（`virtual:chibivoid-routes`）が、アダプターが提供する仮想モジュール（`virtual:chibivoid-pages-renderer`）をインポートしている点に注目してください。このように、仮想モジュールが別の仮想モジュールをインポートすることで、コアとアダプターがつながります。
+コアが生成するルートテーブル（`virtual:chibivoid-routes`）が、アダプターが提供する仮想モジュール（`virtual:chibivoid-pages-renderer`）をインポートしている点に注目してください。このように、仮想モジュールが別の仮想モジュールをインポートすることにより、コアとアダプターがつながります。
 
 また、ページが追加・削除された際にルートテーブルを作り直すようにするため、`plugin-routing.ts` で `pages/` も監視対象に加えます:
 
@@ -714,7 +714,7 @@ app.get("/users", createPageGetHandler({ componentId: "users/index", load: loadP
 
 ここでは、幽霊型（phantom type）と呼ばれるテクニックを使っています:
 
-- `defineHandler()` の戻り値の型を `TypedHandler` にします。`TypedHandler<R>` は、「関数であり、かつ `__output: R` というプロパティをもつ」ことを表わす型です
+- `defineHandler()` の戻り値の型に `TypedHandler` を指定します。`TypedHandler<R>` は、「関数であり、かつ `__output: R` というプロパティをもつ」ことを表わす型です
 - しかし、実行時には `defineHandler()` は受け取った関数をそのまま返すだけであり、`__output` というプロパティは存在しません。このプロパティは型の上にだけ存在するため、「幽霊」と呼ばれます
 - `InferProps<typeof loader>` は、`loader` の型から `__output` の型を取り出します
 
@@ -978,7 +978,7 @@ chibivoid では簡単のため、`stream.allReady` により描画が終わる�
 
 ### `Link` と `useParams()`
 
-最後に、アプリケーションのコンポーネントから使う API として、`Link` と `useParams()` を作成します。`Link` は、ページ間のリンクを表わすコンポーネントです。第 9 章では、リンクのクリックをブラウザ側で処理し、ページ全体を読み込み直さずに画面を切り替えるように変更しますが、この章ではまだ普通の `<a>` を返すだけです:
+最後に、アプリケーションのコンポーネントから使う API として、`Link` と `useParams()` を作成します。`Link` は、ページ間のリンクを表わすためのコンポーネントです。第 9 章では、リンクのクリックをブラウザ側で処理し、ページ全体を読み込み直さずに画面を切り替えるように変更しますが、この章ではまだ普通の `<a>` を返すだけにしておきます:
 
 <!-- file: code/how-void-works/ch08/packages/react/src/runtime/link.tsx -->
 ```tsx:packages/react/src/runtime/link.tsx
@@ -1101,7 +1101,7 @@ export async function addUser(name: string): Promise<User> {
 ```
 <!-- /file -->
 
-第 7 章の「ソースコードからバインディングを推論する」で見たように、`src/` も推論の対象のディレクトリであるため、このファイルが `chibivoid/kv` をインポートしていることも検出されます。
+第 7 章の「ソースコードからバインディングを推論する」で見たように、`src/` も推論の対象のディレクトリであるため、このファイルが `chibivoid/kv` をインポートしていることもリソース推論により検出されます。
 
 ### レイアウトとページ
 
@@ -1162,7 +1162,7 @@ export default function Home({ title, renderedAt }: Props) {
 ```
 <!-- /file -->
 
-コンポーネントが、`import type { Props } from "./index.server.ts"` のように型だけをインポートしている点に注目してください。`import type` は JavaScript に変換される際に完全に消えるため、KV へのアクセスなど、サーバーだけで動くべき `.server.ts` のコードがブラウザ向けのコードに紛れ込むことはありません。その一方で、props の型はサーバー側の `loader` の戻り値の型と常に一致します。
+コンポーネントが、`import type { Props } from "./index.server.ts"` のように型だけをインポートしている点に注目してください。`import type` は JavaScript に変換される際に取り除かれるため、KV へのアクセスなど、サーバーだけで動くべき `.server.ts` のコードがブラウザ向けのコードに紛れ込むことはありません。その一方で、props の型はサーバー側の `loader` の戻り値の型と常に一致します。
 
 また、`.server.ts` のないページとして、About ページも作成しておきます:
 
@@ -1320,4 +1320,4 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:5173/users/999
 
 React のアダプターでは、`packages/react/src/plugin.ts` と `plugin-pages.ts` が、`@chibivoid/react` の `plugin.ts` にあたります。`plugin-pages.ts` の `generateRendererModule()` は、chibivoid とほぼ同じ構造の `renderPage()` を生成しています。一方、ページを HTML に描画する `packages/react/src/runtime/pages-server.ts` は、chibivoid とは異なり、`stream.allReady` により描画が終わるのを待ちません。HTML の前半、React のストリーム、後半をつなげて、ストリーミングで返しています。また、遅延 props にも対応しています。
 
-Void の Pages は、この章で作成したものと同じ基本的なしくみの上に、遅延 props、`<head>` の管理、アイランド、事前レンダリングなどの機能を追加したものです。
+Void の Pages は、この章で作成したものと同じ基本的なしくみの上に、遅延 props や `<head>` の管理、アイランド、事前レンダリングなどの機能を追加したものとなります。
