@@ -47,7 +47,7 @@ curl http://localhost:5173/api/hello
 - `virtual:chibivoid-routes` の中身は、開発サーバーの起動時（`buildStart`）のスキャン結果から生成され、Vite のモジュールグラフにキャッシュされます
 - `routes/api/time.ts` を追加しても、それをインポートしているモジュールはまだありません。Vite から見ると、新しいファイルと `virtual:chibivoid-routes` の間に関係はないため、キャッシュはそのまま使われます
 
-一方、中身の書き換えが反映されるのは、`routes/api/hello.ts` がすでに `virtual:chibivoid-routes` から動的にインポートされており、Vite がそのモジュールを知っているためです。第 5 章の「Hono アプリのコードを生成する」で見たように、開発サーバーで生成される `virtual:chibivoid-routes` には、ルートごとに次のような行が含まれています:
+一方、中身の書き換えが反映されるのは、`routes/api/hello.ts` がすでに `virtual:chibivoid-routes` から動的にインポートされており、Vite がそのモジュールを知っているためです。第 5 章の「Hono アプリケーションのコードを生成する」で見たように、開発サーバーで生成される `virtual:chibivoid-routes` には、ルートごとに次のような行が含まれています:
 
 ```js
 const loadRoute0 = createModuleLoader(() => import("/path/to/chibivoid/playground/routes/api/hello.ts"), false);
@@ -100,7 +100,7 @@ flowchart LR
   * ファイルベースルーティングを担当するプラグイン。
 - * - routes/ をスキャンする
 + * - routes/、middleware/ をスキャンする
-  * - スキャン結果から仮想モジュール `virtual:chibivoid-routes`（Hono アプリ）を生成する
+  * - スキャン結果から仮想モジュール `virtual:chibivoid-routes`（Hono アプリケーション）を生成する
 + * - ファイルの変更を監視して、スキャン結果が変わった場合は仮想モジュールを作り直す
   */
  export function routingPlugin(root: string): Plugin {
@@ -169,7 +169,7 @@ flowchart LR
 - `client` 環境: ブラウザにページ全体の再読み込みを指示する
 - `chibivoid_worker` 環境: workerd の中のモジュールランナーに、評価済みのモジュールをすべて捨てて評価し直すように指示する
 
-Worker 側では、`full-reload` を受け取ったモジュールランナーが評価済みのモジュールを捨て、すぐに Worker のエントリから評価し直します。その際に `virtual:chibivoid-routes` が Vite に要求されますが、すでに無効化されているため、`load` がもう一度呼ばれ、新しいスキャン結果から Hono アプリが作り直されます。
+Worker 側では、`full-reload` を受け取ったモジュールランナーが評価済みのモジュールを捨て、すぐに Worker のエントリから評価し直します。その際に `virtual:chibivoid-routes` が Vite に要求されますが、すでに無効化されているため、`load` がもう一度呼ばれ、新しいスキャン結果から Hono アプリケーションが作り直されます。
 
 たとえばなんらかのルートを追加すると、開発サーバーのターミナルには次のように表示されます:
 
@@ -192,9 +192,9 @@ middleware/
   02.auth.ts     ← 2 番目
 ```
 
-それぞれのファイルは、Hono のミドルウェアをデフォルトエクスポートします。Void は Worker の中で動くルーターとして Hono を使っており（第 4 章の「Hono の基本」）、ミドルウェアもルートと同じ Hono アプリに登録されるためです。そこで、まずは Hono のミドルウェアのしくみを確認しておきましょう。
+それぞれのファイルは、Hono のミドルウェアをデフォルトエクスポートします。Void は Worker の中で動くルーターとして Hono を使っており（第 4 章の「Hono の基本」）、ミドルウェアもルートと同じ Hono アプリケーションに登録されるためです。そこで、まずは Hono のミドルウェアのしくみを確認しておきましょう。
 
-Hono のミドルウェアは、`(c, next) => Promise<void | Response>` という型の関数で、`app.use()` により Hono アプリに登録して使います。ミドルウェアの中で `await next()` を呼ぶと、次のミドルウェア（最後はルートのハンドラー）が実行され、その実行が終わると、`await next()` の後ろに記述した処理が動きます:
+Hono のミドルウェアは、`(c, next) => Promise<void | Response>` という型の関数で、`app.use()` により Hono アプリケーションに登録して使います。ミドルウェアの中で `await next()` を呼ぶと、次のミドルウェア（最後はルートのハンドラー）が実行され、その実行が終わると、`await next()` の後ろに記述した処理が動きます:
 
 ```ts
 app.use(async (c, next) => {
@@ -318,13 +318,13 @@ chibivoid では、`middleware/` のファイルをファイル名の数字の�
 ```
 <!-- /diff -->
 
-アプリのコードから `import { defineMiddleware } from "chibivoid"` と記述することができるように、`index.ts` からも再エクスポートします:
+アプリケーションのコードから `import { defineMiddleware } from "chibivoid"` と記述することができるように、`index.ts` からも再エクスポートします:
 
 <!-- diff: code/how-void-works/ch05/packages/chibivoid/src/index.ts code/how-void-works/ch06/packages/chibivoid/src/index.ts -->
 ```diff ts:packages/chibivoid/src/index.ts
 @@ -49,5 +49,5 @@
  
- // アプリのコードから `import { defineHandler } from "chibivoid"` と記述することができるように再エクスポートする。
+ // アプリケーションのコードから `import { defineHandler } from "chibivoid"` と記述することができるように再エクスポートする。
  // （Worker の中ではこの index.ts ではなく runtime/handler.ts に差し替えられる）
 -export { defineHandler } from "./runtime/handler.ts";
 +export { defineHandler, defineMiddleware } from "./runtime/handler.ts";

@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { parseSync } from "vite";
 
-/** アプリが必要としている Cloudflare リソース */
+/** アプリケーションが必要としている Cloudflare リソース */
 export type InferredBindings = {
   needsKV: boolean;
 };

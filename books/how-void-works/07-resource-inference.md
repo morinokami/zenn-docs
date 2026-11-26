@@ -21,7 +21,7 @@ Void の公式ドキュメント「[What is Void?](https://void.cloud/guide/)」
 
 ### 問題 1: どのバインディングが必要か、起動前にはわからない（Node.js 側）
 
-第 3 章の「Cloudflare Workers とは何か」で見たように、Worker のバインディングは設定で宣言するものであり、実行中に増やすことはできません。開発中も、Miniflare は起動時の設定に従って KV を用意します。つまり、アプリのコードを動かす前に、「このアプリは KV を使う」ということを知っておく必要があります。
+第 3 章の「Cloudflare Workers とは何か」で見たように、Worker のバインディングは設定で宣言するものであり、実行中に増やすことはできません。開発中も、Miniflare は起動時の設定に従って KV を用意します。つまり、アプリケーションのコードを動かす前に、「このアプリケーションは KV を使う」ということを知っておく必要があります。
 
 ### 問題 2: `kv` は、今のリクエストの `env` を見つけられない（Worker 側）
 
@@ -56,7 +56,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { parseSync } from "vite";
 
-/** アプリが必要としている Cloudflare リソース */
+/** アプリケーションが必要としている Cloudflare リソース */
 export type InferredBindings = {
   needsKV: boolean;
 };
@@ -328,9 +328,9 @@ export function requireRuntimeBinding<T>(name: string): T {
  
  type WorkerEnv = Record<string, unknown>;
  
--/** Hono アプリを Workers の `fetch` ハンドラーに変換する */
+-/** Hono アプリケーションを Workers の `fetch` ハンドラーに変換する */
 +/**
-+ * Hono アプリを Workers の `fetch` ハンドラーに変換する。
++ * Hono アプリケーションを Workers の `fetch` ハンドラーに変換する。
 + * リクエストの処理全体を withRuntimeEnv で包むことで、
 + * `chibivoid/kv` などがどこからでも今のリクエストの env を読むことができるようになる。
 + */
@@ -390,7 +390,7 @@ export const kv: KVClient = {
 
 また、`kv` は値を JSON にして保存し、取り出す際に JSON から元に戻しています。KV に保存できるのは文字列やバイト列であり、オブジェクトをそのまま保存することはできません。しかし、JSON にしておけば、数値やオブジェクトもそのまま扱うことができます。Void の `void/kv` も、値を JSON で保存します。
 
-アプリのコードで `chibivoid/kv` からインポートできるように、`package.json` の `exports` に `./kv` を追加します:
+アプリケーションのコードで `chibivoid/kv` からインポートできるように、`package.json` の `exports` に `./kv` を追加します:
 
 <!-- diff: code/how-void-works/ch06/packages/chibivoid/package.json code/how-void-works/ch07/packages/chibivoid/package.json -->
 ```diff json:packages/chibivoid/package.json
@@ -508,7 +508,7 @@ node -e 'console.log(require("./playground/dist/chibivoid_worker/wrangler.json")
 設定ファイルを 1 行も変更することなく、`import { kv } from "chibivoid/kv"` と記述するだけで、KV を使うことができるようになりました。
 
 :::message
-`routes/api/counter.ts` を消してビルドし直すと、KV のバインディングも設定から消えます。このように、推論には、アプリが実際に使っているリソースだけを用意することができるという利点があります。
+`routes/api/counter.ts` を消してビルドし直すと、KV のバインディングも設定から消えます。このように、推論には、アプリケーションが実際に使っているリソースだけを用意することができるという利点があります。
 :::
 
 ## まとめ
@@ -522,7 +522,7 @@ node -e 'console.log(require("./playground/dist/chibivoid_worker/wrangler.json")
 
 推論（`packages/void/src/inference/walk.ts`）は、chibivoid とほぼ同じ構造をしています。`inferBindingsFromSource()` は、インポート（静的なインポート、`export ... from`、引数が文字列リテラルの `import()`）と、`env.XXX` へのアクセス（分割代入の `const { KV } = c.env` も含む）を調べ、`needsD1`、`needsKV`、`needsR2`、`needsAI`、`needsQueues` などのフラグを返します。AST をたどる処理には、estree-walker を使っています。
 
-スキャンするディレクトリとしては、`packages/void/src/plugin-inference.ts` の `DEFAULT_SCAN_DIRS` に、`routes`、`middleware`、`queues`、`pages`、`crons`、`email`、`durable-objects`、`src` の 8 つが定義されています。推論の結果は、`application-analysis.ts` によりアプリ全体の解析結果にまとめられ、プラグインやデプロイの処理で共有されます。
+スキャンするディレクトリとしては、`packages/void/src/plugin-inference.ts` の `DEFAULT_SCAN_DIRS` に、`routes`、`middleware`、`queues`、`pages`、`crons`、`email`、`durable-objects`、`src` の 8 つが定義されています。推論の結果は、`application-analysis.ts` によりアプリケーション全体の解析結果にまとめられ、プラグインやデプロイの処理で共有されます。
 
 設定への反映は、`packages/void/src/plugin-worker-bindings.ts` の `mergeWorkerBindings()` がおこないます。KV のバインディングを追加する処理は、次のようになっています:
 
@@ -538,7 +538,7 @@ if (bindings.needsKV && !hasBinding(resolved.kv_namespaces, kvName)) {
 
 `env` の取り出しは、`packages/void/src/runtime/env/runtime.ts` と `env/raw.ts` が担当しています。`withRuntimeEnv()` と `requireRuntimeBinding()` という名前も、chibivoid と同じです。ただし、Void は `AsyncLocalStorage` を、`Symbol.for('void.envContext.v1')` をキーとして `globalThis` に保存しています。Vite の依存の事前バンドル（第 2 章の「HMR と依存の事前バンドル」）などにより同じモジュールが 2 回評価されても、同じ `AsyncLocalStorage` を使うためです。
 
-Void は、`AsyncLocalStorage` を使うためのフラグも自動で追加します。`voidPlugin()` は、`packages/void/src/cli/wrangler.ts` の `normalizeWranglerCompatibilityFlags()` により、`compatibility_flags` に `nodejs_compat` も `nodejs_als` もなければ `nodejs_als` を追加します。認証、PostgreSQL や MySQL、Sandbox SDK を使うアプリでは、他の Node.js の API も必要になるため、代わりに `nodejs_compat` を追加します。`void init` が `void.config.ts` に書き込む `compatibility_date` は、デフォルトでは `2026-02-24`（`LATEST_KNOWN_COMPAT_DATE`）です。この日付は `nodejs_compat` がデフォルトで有効になる `2026-08-04` より前であるため、Void では chibivoid とは異なり、`AsyncLocalStorage` を使うためにフラグが必要になります。
+Void は、`AsyncLocalStorage` を使うためのフラグも自動で追加します。`voidPlugin()` は、`packages/void/src/cli/wrangler.ts` の `normalizeWranglerCompatibilityFlags()` により、`compatibility_flags` に `nodejs_compat` も `nodejs_als` もなければ `nodejs_als` を追加します。認証、PostgreSQL や MySQL、Sandbox SDK を使うアプリケーションでは、他の Node.js の API も必要になるため、代わりに `nodejs_compat` を追加します。`void init` が `void.config.ts` に書き込む `compatibility_date` は、デフォルトでは `2026-02-24`（`LATEST_KNOWN_COMPAT_DATE`）です。この日付は `nodejs_compat` がデフォルトで有効になる `2026-08-04` より前であるため、Void では chibivoid とは異なり、`AsyncLocalStorage` を使うためにフラグが必要になります。
 
 `void/kv`（`packages/void/src/runtime/kv/index.ts`）は、chibivoid と同じく値を JSON で保存し、`requireRuntimeBinding('KV')` によりネームスペースを取り出します。
 

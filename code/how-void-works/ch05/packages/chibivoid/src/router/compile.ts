@@ -10,7 +10,7 @@ const str = (value: string) => JSON.stringify(value);
 
 /**
  * `.chibivoid/entry.ts`（Worker のエントリ）のソースコードを生成する。
- * 仮想モジュール `virtual:chibivoid-routes` がエクスポートする Hono アプリを、
+ * 仮想モジュール `virtual:chibivoid-routes` がエクスポートする Hono アプリケーションを、
  * Workers の `fetch` ハンドラーとして公開するだけの薄いファイル。
  */
 export function compileWorkerEntry(): string {
@@ -26,7 +26,7 @@ export default {
 
 /**
  * スキャン結果から、仮想モジュール `virtual:chibivoid-routes` のソースコードを生成する。
- * 中身は「ファイルベースのルートを登録した Hono アプリ」をデフォルトエクスポートする ES モジュール。
+ * 中身は「ファイルベースのルートを登録した Hono アプリケーション」をデフォルトエクスポートする ES モジュール。
  */
 export function compileRouteTable(scan: ScanResult, options: CompileOptions): string {
   const imports: string[] = [

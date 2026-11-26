@@ -2,14 +2,14 @@
 title: "Cloudflare Workers と Vite"
 ---
 
-Void のアプリは、デフォルトでは Cloudflare Workers の上で動きます。また、開発中であっても、本番と同じランタイムによりコードを実行できます。この章ではまだ Void を使わず、Cloudflare 公式の Vite プラグインにより Worker を動かし、Void の土台になっているしくみについて確認します。
+Void のアプリケーションは、デフォルトでは Cloudflare Workers の上で動きます。また、開発中であっても、本番と同じランタイムによりコードを実行できます。この章ではまだ Void を使わず、Cloudflare 公式の Vite プラグインにより Worker を動かし、Void の土台になっているしくみについて確認します。
 
 ## この章のゴール
 
 - Cloudflare Workers の実行モデル（`fetch` ハンドラーと `env`）を理解する
 - workerd、Miniflare、Wrangler の関係を整理する
 - `@cloudflare/vite-plugin` が、Vite の「Worker 用の環境」の中で Worker を動かしていることを確かめる
-- アプリのビルド時に出力される `index.js` と `wrangler.json` の役割を理解する
+- アプリケーションのビルド時に出力される `index.js` と `wrangler.json` の役割を理解する
 
 ## Cloudflare Workers とは何か
 
@@ -75,7 +75,7 @@ sequenceDiagram
 - リクエストは Vite の開発サーバーが受け取り、Worker に転送します
 - バインディングは Miniflare がローカルに用意します
 
-開発中から本番と同じ workerd によってコードが動くため、「ローカルでは動いたのに本番では動かない」という事態が起きにくくなります。Void はこのプラグインを内部で使っており、`void dev` のような独自の開発サーバーはもっていません。Void のアプリは `vite dev` によりそのまま起動します。
+開発中から本番と同じ workerd によってコードが動くため、「ローカルでは動いたのに本番では動かない」という事態が起きにくくなります。Void はこのプラグインを内部で使っており、`void dev` のような独自の開発サーバーはもっていません。Void のアプリケーションは `vite dev` によりそのまま起動します。
 
 ビルドでは、Worker のコードをバンドルし、デプロイに必要な設定を `wrangler.json` として一緒に出力します。`wrangler deploy` は、その出力をそのまま Cloudflare にアップロードできます。
 
@@ -363,7 +363,7 @@ curl http://localhost:4173/
 
 ## Void の実装
 
-`packages/void/src/plugin-cloudflare.ts` は、`@cloudflare/vite-plugin`（執筆時点では 2.0 のリリース候補版）を包む関数 `cloudflare()` を定義しています。`voidPlugin()` は、メタフレームワークを使わないアプリでこれを呼ぶ際に、次のものを渡しています:
+`packages/void/src/plugin-cloudflare.ts` は、`@cloudflare/vite-plugin`（執筆時点では 2.0 のリリース候補版）を包む関数 `cloudflare()` を定義しています。`voidPlugin()` は、メタフレームワークを使わないアプリケーションでこれを呼ぶ際に、次のものを渡しています:
 
 - `viteEnvironment: { name: 'void_worker' }`（`plugin-worker-environment.ts` の `DEFAULT_WORKER_ENVIRONMENT_NAME`）
 - `config: mergeBindings`（推論したバインディングを、利用者が記述した設定とマージする関数。中身は `plugin-worker-bindings.ts` の `mergeWorkerBindings()`）

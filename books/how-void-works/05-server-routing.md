@@ -19,7 +19,7 @@ export const GET = defineHandler(() => {
 
 - ファイルのパスを URL パターンに変換するルールを実装する（`[id]` → `:id` など）
 - ファイルを実行せずに、どの HTTP メソッドがエクスポートされているかを調べる
-- スキャン結果から Hono アプリのコードを生成する
+- スキャン結果から Hono アプリケーションのコードを生成する
 - `defineHandler()` と、ハンドラーの戻り値を `Response` に変換するしくみを実装する
 - `import { defineHandler } from "chibivoid"` を Worker の中で別のファイルに差し替える理由を理解する
 
@@ -30,7 +30,7 @@ export const GET = defineHandler(() => {
 ```mermaid
 flowchart LR
   subgraph node["Node.js（Vite のプラグイン）"]
-    S["① スキャン<br/>routes/ を読んで<br/>ルート定義の一覧を作る"] --> C["② コード生成<br/>Hono アプリの<br/>ソースコードを作る"]
+    S["① スキャン<br/>routes/ を読んで<br/>ルート定義の一覧を作る"] --> C["② コード生成<br/>Hono アプリケーションの<br/>ソースコードを作る"]
   end
   subgraph worker["workerd（Worker）"]
     R["③ 実行<br/>生成されたコードと<br/>runtime/ の関数が動く"]
@@ -316,7 +316,7 @@ export function scanApp(paths: ProjectPaths): ScanResult {
 ```
 <!-- /file -->
 
-`scanRoutes()` は、ファイルごとに「パスから作成した `RouteDefinition`」と「エクスポートから調べた `methods`」を合わせ、より具体的なルートが先に来るように並べて返します。`scanApp()` はアプリ全体のスキャン結果をまとめる関数で、第 6 章以降でミドルウェアやページのスキャンを追加していきます。
+`scanRoutes()` は、ファイルごとに「パスから作成した `RouteDefinition`」と「エクスポートから調べた `methods`」を合わせ、より具体的なルートが先に来るように並べて返します。`scanApp()` はアプリケーション全体のスキャン結果をまとめる関数で、第 6 章以降でミドルウェアやページのスキャンを追加していきます。
 
 ## Worker の中で動く関数
 
@@ -436,7 +436,7 @@ export function createHttpRouteHandler(load: () => Promise<RouteModule>, method:
 
 type WorkerEnv = Record<string, unknown>;
 
-/** Hono アプリを Workers の `fetch` ハンドラーに変換する */
+/** Hono アプリケーションを Workers の `fetch` ハンドラーに変換する */
 export function createWorkerFetch(app: Hono) {
   return (request: Request, env: WorkerEnv, ctx: ExecutionContext): Promise<Response> => {
     return Promise.resolve(app.fetch(request, env, ctx));
@@ -451,7 +451,7 @@ export function createWorkerFetch(app: Hono) {
 
 `createHttpRouteHandler()` は、Hono のハンドラーを作成します。このハンドラーは、リクエストが来るとモジュールを読み込んで、指定されたメソッド名のエクスポート（`GET` など）を呼び、戻り値を `convertReturnValue()` により `Response` に変換します。
 
-## Hono アプリのコードを生成する
+## Hono アプリケーションのコードを生成する
 
 スキャン結果から、`virtual:chibivoid-routes` のソースコードを生成します。`router/compile.ts` を次のように書き換えます:
 
@@ -469,7 +469,7 @@ const str = (value: string) => JSON.stringify(value);
 
 /**
  * `.chibivoid/entry.ts`（Worker のエントリ）のソースコードを生成する。
- * 仮想モジュール `virtual:chibivoid-routes` がエクスポートする Hono アプリを、
+ * 仮想モジュール `virtual:chibivoid-routes` がエクスポートする Hono アプリケーションを、
  * Workers の `fetch` ハンドラーとして公開するだけの薄いファイル。
  */
 export function compileWorkerEntry(): string {
@@ -485,7 +485,7 @@ export default {
 
 /**
  * スキャン結果から、仮想モジュール `virtual:chibivoid-routes` のソースコードを生成する。
- * 中身は「ファイルベースのルートを登録した Hono アプリ」をデフォルトエクスポートする ES モジュール。
+ * 中身は「ファイルベースのルートを登録した Hono アプリケーション」をデフォルトエクスポートする ES モジュール。
  */
 export function compileRouteTable(scan: ScanResult, options: CompileOptions): string {
   const imports: string[] = [
@@ -562,7 +562,7 @@ const HANDLER_PATH = fileURLToPath(new URL("./runtime/handler.ts", import.meta.u
 /**
  * ファイルベースルーティングを担当するプラグイン。
  * - routes/ をスキャンする
- * - スキャン結果から仮想モジュール `virtual:chibivoid-routes`（Hono アプリ）を生成する
+ * - スキャン結果から仮想モジュール `virtual:chibivoid-routes`（Hono アプリケーション）を生成する
  */
 export function routingPlugin(root: string): Plugin {
   const paths: ProjectPaths = {
@@ -676,7 +676,7 @@ export function routingPlugin(root: string): Plugin {
    return name || "chibivoid-app";
  }
 +
-+// アプリのコードから `import { defineHandler } from "chibivoid"` と記述することができるように再エクスポートする。
++// アプリケーションのコードから `import { defineHandler } from "chibivoid"` と記述することができるように再エクスポートする。
 +// （Worker の中ではこの index.ts ではなく runtime/handler.ts に差し替えられる）
 +export { defineHandler } from "./runtime/handler.ts";
 +export type { CloudContext } from "./runtime/handler.ts";
@@ -769,7 +769,7 @@ curl -i -X POST http://localhost:5173/api/hello
 - `parse-filename.ts`: `.dev`/`.prod` の接尾辞により、開発中だけ、または本番だけのルートを作成することができます。また、WebSocket のルート（`.ws.ts`）の解析もおこなっています
 - `route-order.ts`: ほぼ同じアルゴリズムですが、「セグメントがすべて固定のルートを最優先する」というルールが加わっています
 - `detect-exports.ts`: 同じく `parseSync()` を使っていますが、`module.staticExports` ではなく、AST（`program.body`）を自分でたどってエクスポートを調べています
-- `scan.ts`: スキャン結果には、ルート以外にも cron、キュー、メール、WebSocket などが含まれます。これらのスキャンは `packages/void/src/application-analysis.ts` がまとめておこない、その結果はアプリ全体の解析結果として共有されます
+- `scan.ts`: スキャン結果には、ルート以外にも cron、キュー、メール、WebSocket などが含まれます。これらのスキャンは `packages/void/src/application-analysis.ts` がまとめておこない、その結果はアプリケーション全体の解析結果として共有されます
 - `compile.ts`: `compileRouteTable()` は、ルートの他にも、認証、WebSocket、キュー、cron、メール、マイグレーション、Void の内部エンドポイント（`/__void/*`）など、多くの機能のコードを生成します
 
 「Worker の中で動く関数」で作成した関数は、Void では `packages/void/src/runtime/` の下にあります。`createModuleLoader()` と `createHttpRouteHandler()` は `runtime/routing/index.ts` にあり、chibivoid とほぼ同じかたちをしています。同じファイルには、リライトなどのための `createRoutingRuntime()` もあります。`defineHandler()` は `runtime/handler/index.ts` にあり、`defineHandler.withValidator()` により入力のバリデーションもできるようになっています。同じディレクトリの `response.ts` にある `convertReturnValue()` は、本文で触れた通り、chibivoid と同じルールで戻り値を変換します。

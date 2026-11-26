@@ -29,7 +29,7 @@ title: "Pages (2): ハイドレーションとクライアント遷移"
 
 ## コア: ブラウザ用のエントリ
 
-まずは、ブラウザでアプリの処理を始める JavaScript、つまりブラウザ用のエントリを仮想モジュール `virtual:chibivoid-pages-client` として用意します。サーバー用のレンダラー（`virtual:chibivoid-pages-renderer`）と同じく、この仮想モジュールの中身はアダプターが生成し、コアの `createPagesPlugin()` が配信します。そこで、`pages/plugin.ts` を変更し、アダプターから受け取った `generateClient` によりブラウザ用のエントリの中身を生成するようにします:
+まずは、ブラウザでアプリケーションの処理を始める JavaScript、つまりブラウザ用のエントリを仮想モジュール `virtual:chibivoid-pages-client` として用意します。サーバー用のレンダラー（`virtual:chibivoid-pages-renderer`）と同じく、この仮想モジュールの中身はアダプターが生成し、コアの `createPagesPlugin()` が配信します。そこで、`pages/plugin.ts` を変更し、アダプターから受け取った `generateClient` によりブラウザ用のエントリの中身を生成するようにします:
 
 <!-- diff: code/how-void-works/ch08/packages/chibivoid/src/pages/plugin.ts code/how-void-works/ch09/packages/chibivoid/src/pages/plugin.ts -->
 ```diff ts:packages/chibivoid/src/pages/plugin.ts

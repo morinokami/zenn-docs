@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { normalizePath, type Plugin } from "vite";
 
-// アプリのコードがインポートする ID と、プラグインの内部で使う ID
+// アプリケーションのコードがインポートする ID と、プラグインの内部で使う ID
 const VIRTUAL_ID = "virtual:notes";
 const RESOLVED_ID = "\0" + VIRTUAL_ID;
 

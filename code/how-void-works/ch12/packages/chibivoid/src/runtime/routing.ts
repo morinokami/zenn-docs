@@ -69,7 +69,7 @@ export function createPageMutationHandler(config: PageRouteConfig) {
 type WorkerEnv = Record<string, unknown>;
 
 /**
- * Hono アプリを Workers の `fetch` ハンドラーに変換する。
+ * Hono アプリケーションを Workers の `fetch` ハンドラーに変換する。
  * リクエストの処理全体を withRuntimeEnv で包むことで、
  * `chibivoid/kv` などがどこからでも今のリクエストの env を読むことができるようになる。
  */

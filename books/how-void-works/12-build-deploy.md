@@ -2,7 +2,7 @@
 title: "ビルド、プレビュー、デプロイ"
 ---
 
-第 11 章までは、chibivoid を開発サーバーの上で動かしながら機能の追加をおこなってきました。この章では、chibivoid のアプリを本番用にビルドし、Cloudflare にデプロイできるようにします。Void では、「推論 → プロビジョニング → ビルド → 公開」という一連の流れを、[`void deploy`](https://void.cloud/guide/deployment) という 1 つのコマンドでおこないます。この章では、その骨格を `chibivoid deploy` コマンドとして実装していきます。
+第 11 章までは、chibivoid を開発サーバーの上で動かしながら機能の追加をおこなってきました。この章では、chibivoid のアプリケーションを本番用にビルドし、Cloudflare にデプロイできるようにします。Void では、「推論 → プロビジョニング → ビルド → 公開」という一連の流れを、[`void deploy`](https://void.cloud/guide/deployment) という 1 つのコマンドでおこないます。この章では、その骨格を `chibivoid deploy` コマンドとして実装していきます。
 
 ## この章のゴール
 
@@ -289,7 +289,7 @@ curl -s http://localhost:4173/ | grep -o '<script type="module" src="[^"]*"></sc
 
 ## デプロイの流れ
 
-ビルドしたものをデプロイするだけであれば、第 3 章の「ビルドとプレビュー」で見たように、`npx wrangler deploy` コマンドを実行するだけで済みます。しかし、playground のように KV を使うアプリでは、それだけではデプロイすることができません。`wrangler.json` の KV の ID がまだ仮の値（`local`）のままであるためです。そのため、本物の KV ネームスペースを作成し、その ID を設定に入れる必要があります。第 3 章の「ビルドとプレビュー」で触れた Wrangler の自動プロビジョニングを使う方法もありますが、chibivoid は Void の `void deploy` と同じく、リソースを自分で作成します。
+ビルドしたものをデプロイするだけであれば、第 3 章の「ビルドとプレビュー」で見たように、`npx wrangler deploy` コマンドを実行するだけで済みます。しかし、playground のように KV を使うアプリケーションでは、それだけではデプロイすることができません。`wrangler.json` の KV の ID がまだ仮の値（`local`）のままであるためです。そのため、本物の KV ネームスペースを作成し、その ID を設定に入れる必要があります。第 3 章の「ビルドとプレビュー」で触れた Wrangler の自動プロビジョニングを使う方法もありますが、chibivoid は Void の `void deploy` と同じく、リソースを自分で作成します。
 
 Void の `void deploy` コマンドは、Cloudflare に直接デプロイする場合（`void deploy --platform cloudflare`）、概ね次の流れで処理を進めます:
 
@@ -601,10 +601,10 @@ npm run deploy
 `npm run deploy` を実行すると、次の順に処理が進みます:
 
 1. KV ネームスペース `chibivoid-app-kv` が作成され、その ID が `chibivoid.lock.json` に記録されます
-2. その ID を Worker の設定に入れて、アプリがビルドされます
+2. その ID を Worker の設定に入れて、アプリケーションがビルドされます
 3. Worker がアップロードされ、`https://chibivoid-app.<あなたのサブドメイン>.workers.dev` のような URL が表示されます
 
-表示された URL を開くと、ローカルで動かしていたものと同じアプリが、Cloudflare の上で動いているはずです。作成された `chibivoid.lock.json` は、リポジトリにコミットしておきましょう。2 回目以降のデプロイでは、KV ネームスペースを新たに作成せず、同じ KV ネームスペースを使い続けます。
+表示された URL を開くと、ローカルで動かしていたものと同じアプリケーションが、Cloudflare の上で動いているはずです。作成された `chibivoid.lock.json` は、リポジトリにコミットしておきましょう。2 回目以降のデプロイでは、KV ネームスペースを新たに作成せず、同じ KV ネームスペースを使い続けます。
 
 後片付けをする場合は、`npx wrangler delete --name chibivoid-app` により Worker を、`npx wrangler kv namespace delete --namespace-id <ID>` により KV ネームスペースを削除することができます。`wrangler delete` は、`wrangler deploy` とは異なり、リダイレクト設定を参照しないため、Worker の名前を指定する必要があります。また、KV ネームスペースを削除した場合は、`chibivoid.lock.json` も削除しておいてください。`chibivoid.lock.json` を残しておくと、次の `npm run deploy` は、KV ネームスペースを作成し直さずに、削除した KV ネームスペースの ID のままデプロイしようとしてしまいます。
 
@@ -621,7 +621,7 @@ npm run deploy
 
 Void では、`packages/void/src/runtime/routing/assets.ts` の `createManifestLoader()` がマニフェストを読み込みます。chibivoid と同じく、`env.ASSETS.fetch()` により `/.vite/manifest.json` を取得していますが、読み込みに失敗した結果はキャッシュせず、次のリクエストで読み込みをやり直します。そして、同じファイルの `createClientAssetTags()` が、エントリの `<script>` タグだけでなく、そのページで必要な CSS の `<link rel="stylesheet">` タグや、先読みするファイルの `<link rel="modulepreload">` タグも作成します。
 
-静的アセットをどのように配信するかは、`packages/void/src/asset-routing.ts` が決めています。Pages のアプリでは 404 のページも含めてページの HTML を Worker が返すため、すべてのリクエストをまず Worker に通す設定（`run_worker_first: ['/**']`）にしています。そのため、「マニフェストを Worker から読む」で見た chibivoid とは異なり、静的アセットへのリクエストでもまず Worker が呼ばれます（条件を満たす場合に、ハッシュ付きのファイルを Worker を経由せずに配信する最適化も、`asset-worker-bypass.ts` に入っています）。
+静的アセットをどのように配信するかは、`packages/void/src/asset-routing.ts` が決めています。Pages のアプリケーションでは 404 のページも含めてページの HTML を Worker が返すため、すべてのリクエストをまず Worker に通す設定（`run_worker_first: ['/**']`）にしています。そのため、「マニフェストを Worker から読む」で見た chibivoid とは異なり、静的アセットへのリクエストでもまず Worker が呼ばれます（条件を満たす場合に、ハッシュ付きのファイルを Worker を経由せずに配信する最適化も、`asset-worker-bypass.ts` に入っています）。
 
 デプロイの処理は、`packages/void/src/cli/deploy.ts` の `runDeploy()` から始まります。Cloudflare に直接デプロイする場合は、`cli/deploy-cloudflare.ts` の `runCloudflareDeploy()` が「デプロイの流れ」で見た各段階を順に呼び出します。それぞれの段階は、次のファイルに実装されています:
 

@@ -1,6 +1,6 @@
 /**
  * `.chibivoid/entry.ts`（Worker のエントリ）のソースコードを生成する。
- * 仮想モジュール `virtual:chibivoid-routes` がエクスポートする Hono アプリを、
+ * 仮想モジュール `virtual:chibivoid-routes` がエクスポートする Hono アプリケーションを、
  * Workers の `fetch` ハンドラーとして公開するだけの薄いファイル。
  */
 export function compileWorkerEntry(): string {
@@ -16,7 +16,7 @@ export default {
 
 /**
  * 仮想モジュール `virtual:chibivoid-routes` のソースコードを生成する。
- * 今はまだ固定の Hono アプリを返す（第 5 章で routes/ から生成するように変える）。
+ * 今はまだ固定の Hono アプリケーションを返す（第 5 章で routes/ から生成するように変える）。
  */
 export function compileRouteTable(): string {
   return `import { Hono } from "hono";

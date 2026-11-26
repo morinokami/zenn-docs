@@ -471,7 +471,7 @@ export async function handlePageGet(
 
 ### ルートテーブルにページを登録する
 
-ここからは、ページをルートテーブルに登録していきます。まずは、`router/scan.ts` を変更し、アプリ全体のスキャン結果にページを加えます:
+ここからは、ページをルートテーブルに登録していきます。まずは、`router/scan.ts` を変更し、アプリケーション全体のスキャン結果にページを加えます:
 
 <!-- diff: code/how-void-works/ch07/packages/chibivoid/src/router/scan.ts code/how-void-works/ch08/packages/chibivoid/src/router/scan.ts -->
 ```diff ts:packages/chibivoid/src/router/scan.ts
@@ -624,7 +624,7 @@ app.get("/users", createPageGetHandler({ componentId: "users/index", load: loadP
   * ファイルベースルーティングを担当するプラグイン。
 - * - routes/、middleware/ をスキャンする
 + * - routes/、middleware/、pages/ をスキャンする
-  * - スキャン結果から仮想モジュール `virtual:chibivoid-routes`（Hono アプリ）を生成する
+  * - スキャン結果から仮想モジュール `virtual:chibivoid-routes`（Hono アプリケーション）を生成する
   * - ファイルの変更を監視して、スキャン結果が変わった場合は仮想モジュールを作り直す
   */
 @@ -20,6 +20,7 @@
@@ -732,12 +732,12 @@ export type Props = InferProps<typeof loader>; // { users: User[] }
 
 この「型の上だけに存在するプロパティに型をもたせる」技法は、第 11 章で API ルートの型を生成する際にも使います。
 
-最後に、アプリのコードからインポートできるように、`index.ts` からもこれらの型を再エクスポートしておきます:
+最後に、アプリケーションのコードからインポートできるように、`index.ts` からもこれらの型を再エクスポートしておきます:
 
 <!-- diff: code/how-void-works/ch07/packages/chibivoid/src/index.ts code/how-void-works/ch08/packages/chibivoid/src/index.ts -->
 ```diff ts:packages/chibivoid/src/index.ts
 @@ -56,4 +56,4 @@
- // アプリのコードから `import { defineHandler } from "chibivoid"` と記述することができるように再エクスポートする。
+ // アプリケーションのコードから `import { defineHandler } from "chibivoid"` と記述することができるように再エクスポートする。
  // （Worker の中ではこの index.ts ではなく runtime/handler.ts に差し替えられる）
  export { defineHandler, defineMiddleware } from "./runtime/handler.ts";
 -export type { CloudContext } from "./runtime/handler.ts";
@@ -784,7 +784,7 @@ mkdir -p packages/react/src/runtime
 
 - `./plugin`: Node.js で動く Vite のプラグイン
 - `./pages-server`: サーバー（Worker）でページを描画する部分
-- `.`: アプリのコンポーネントから使う API（`Link` など）
+- `.`: アプリケーションのコンポーネントから使う API（`Link` など）
 
 ### `plugin.ts`: React 用の Vite プラグイン
 
@@ -978,7 +978,7 @@ chibivoid では簡単のため、`stream.allReady` により描画が終わる�
 
 ### `Link` と `useParams()`
 
-最後に、アプリのコンポーネントから使う API として、`Link` と `useParams()` を作成します。`Link` は、ページ間のリンクを表わすコンポーネントです。第 9 章では、リンクのクリックをブラウザ側で処理し、ページ全体を読み込み直さずに画面を切り替えるように変更しますが、この章ではまだ普通の `<a>` を返すだけです:
+最後に、アプリケーションのコンポーネントから使う API として、`Link` と `useParams()` を作成します。`Link` は、ページ間のリンクを表わすコンポーネントです。第 9 章では、リンクのクリックをブラウザ側で処理し、ページ全体を読み込み直さずに画面を切り替えるように変更しますが、この章ではまだ普通の `<a>` を返すだけです:
 
 <!-- file: code/how-void-works/ch08/packages/react/src/runtime/link.tsx -->
 ```tsx:packages/react/src/runtime/link.tsx
@@ -997,7 +997,7 @@ export function Link(props: LinkProps) {
 
 <!-- file: code/how-void-works/ch08/packages/react/src/runtime/index.ts -->
 ```ts:packages/react/src/runtime/index.ts
-// `import { Link } from "@chibivoid/react"` でアプリから使う API。
+// `import { Link } from "@chibivoid/react"` でアプリケーションから使う API。
 import { useContext } from "react";
 import { PageContext } from "./context.ts";
 

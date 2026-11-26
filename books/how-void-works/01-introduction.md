@@ -17,14 +17,14 @@ title: "はじめに"
 | ツール | 役割 |
 | --- | --- |
 | Void SDK | ファイルベースの API ルート、サーバーで描画するページ、データベースやストレージを使うための型付き API |
-| Void CLI | アプリのビルド、必要な Cloudflare リソースの作成、マイグレーション、デプロイを 1 コマンドでおこなう |
+| Void CLI | アプリケーションのビルド、必要な Cloudflare リソースの作成、マイグレーション、デプロイを 1 コマンドでおこなう |
 | Void Platform | チームで共有するデプロイ環境を、自分の Cloudflare アカウントに構築する |
 
 本書では、このうち SDK のコア部分と、CLI のデプロイの流れについて扱います。なお、Void は設定ファイル（`void.config.ts`）の `target` を変えると、Node.js、Bun、Deno で動くサーバーとしてもビルドできます。ただし、その場合は KV などの Cloudflare リソースを使うことができなくなるため、本書ではデフォルトの Cloudflare Workers 向けの場合のみを想定します。
 
-### ミニマルな Void アプリ
+### ミニマルな Void アプリケーション
 
-まずは、Void のアプリのコードを簡単に眺めてみましょう。以下の 4 つのファイルを作成するだけで、API とページをもつ Void アプリを作成できます:
+まずは、Void のアプリケーションのコードを簡単に眺めてみましょう。以下の 4 つのファイルを作成するだけで、API とページをもつ Void アプリケーションを作成できます:
 
 ```ts:routes/api/hello.ts
 // GET /api/hello
@@ -80,7 +80,7 @@ export default defineConfig({
 - `http://localhost:5173/users` がサーバーで描画された HTML を返し、ブラウザでは React が動く
 - `void/kv` をインポートしたことにより、ローカルに KV（キー・バリュー型ストレージ）が自動的に用意される
 
-さらに `void deploy --platform cloudflare` コマンドを実行すると、Cloudflare 上に KV を作成し、アプリをビルドして公開まで済ませてくれます（`--platform cloudflare` は、Void Platform を経由せず、自分の Cloudflare アカウントに直接デプロイするための指定です）。設定ファイルのどこにも「KV を使う」とは記述していないにもかかわらず、Void は KV が必要だと自ら判断し、リソースを用意してくれるのです。
+さらに `void deploy --platform cloudflare` コマンドを実行すると、Cloudflare 上に KV を作成し、アプリケーションをビルドして公開まで済ませてくれます（`--platform cloudflare` は、Void Platform を経由せず、自分の Cloudflare アカウントに直接デプロイするための指定です）。設定ファイルのどこにも「KV を使う」とは記述していないにもかかわらず、Void は KV が必要だと自ら判断し、リソースを用意してくれるのです。
 
 この裏側で何が起きているのかについて、実際に chibivoid を作りながら確かめていくのが本書の目的です。
 
@@ -90,7 +90,7 @@ chibivoid を作り始める前に、まずはその全体像を見ておきま�
 
 1. Void は Vite プラグインである: `voidPlugin()` は Vite のプラグインの配列を返す関数です。開発サーバーもビルドも、Vite のしくみの上で動きます（第 2・4 章）。
 2. 開発中も Cloudflare の本物のランタイムで動かす: Cloudflare 公式の Vite プラグインを使い、開発中のコードを本番と同じランタイム（workerd）で実行します（第 3・4 章）。
-3. ファイルベースルーティングは「コード生成」で実現する: `routes/` をスキャンして、Hono アプリのソースコードを生成し、それを「仮想モジュール」（virtual module）として Vite に渡します（第 5・6 章）。
+3. ファイルベースルーティングは「コード生成」で実現する: `routes/` をスキャンして、Hono アプリケーションのソースコードを生成し、それを「仮想モジュール」（virtual module）として Vite に渡します（第 5・6 章）。
 4. インポートからリソースを推論する: ソースコードを実行せずに解析し、`void/kv` がインポートされていれば KV バインディング（binding）を用意します（第 7 章）。
 5. Pages は「ページオブジェクト」（page object）のプロトコル: 初回は HTML を返し、画面遷移では同じ URL からページオブジェクトを JSON で返す、Inertia.js に似たしくみです。描画は React などのアダプターに任せます（第 8 章から第 10 章）。
 6. 型は TypeScript に計算させる: ファイル構成から、`routes/` のファイルの型を参照するだけの型定義を生成し、実際の型の計算は TypeScript に任せます（第 11 章）。
@@ -115,7 +115,7 @@ chibivoid/                         npm workspaces のモノレポ
 │   │       ├── runtime/           Worker やブラウザの中で動くコード
 │   │       └── cli/               chibivoid deploy
 │   └── react/                     React アダプター（Void の packages/react、"@void/react" に相当）
-└── playground/                    chibivoid を使うサンプルアプリ
+└── playground/                    chibivoid を使うサンプルアプリケーション
 ```
 
 ただし、`runtime/` の中は Void とは異なります。Void では、`runtime/routing/index.ts` や `runtime/handler/index.ts` のように機能ごとのディレクトリに分かれていますが、chibivoid はファイルが少ないため、`runtime/routing.ts` や `runtime/handler.ts` のように 1 つのディレクトリに並べています。
@@ -133,7 +133,7 @@ flowchart LR
     RA["chibivoidReact()"] --> PP["pages プラグイン<br/>React 用のコードを生成"]
   end
   subgraph Worker["workerd（Cloudflare Workers のランタイム）"]
-    E[".chibivoid/entry.ts"] --> VR["virtual:chibivoid-routes<br/>（生成された Hono アプリ）"]
+    E[".chibivoid/entry.ts"] --> VR["virtual:chibivoid-routes<br/>（生成された Hono アプリケーション）"]
     VR --> R["routes/*.ts"]
     VR --> SV["pages/*.server.ts"]
     VR --> REN["virtual:chibivoid-pages-renderer<br/>（React で SSR）"]
@@ -148,9 +148,9 @@ flowchart LR
   CF -. 実行 .-> E
 ```
 
-ところで、chibivoid はフレームワークであるため、動作を確かめるには、それを使うアプリが必要です。そこで本書では、chibivoid 本体と並行して、冒頭の「ミニマルな Void アプリ」に似たサンプルアプリを `playground/` に作り、各章で chibivoid に加えた機能をこのアプリ上で動かして確かめていきます。
+ところで、chibivoid はフレームワークであるため、動作を確かめるには、それを使うアプリケーションが必要です。そこで本書では、chibivoid 本体と並行して、冒頭の「ミニマルな Void アプリケーション」に似たサンプルアプリケーションを `playground/` に作り、各章で chibivoid に加えた機能をこのアプリケーション上で動かして確かめていきます。
 
-完成したサンプルアプリでは、次のことができるようになります:
+完成したサンプルアプリケーションでは、次のことができるようになります:
 
 - `routes/api/*.ts` に作成した API が動く（`GET`/`POST` などを名前付きエクスポートで定義）
 - `middleware/` に置いたミドルウェアが、API やページなど Worker に届くすべてのリクエストで動く

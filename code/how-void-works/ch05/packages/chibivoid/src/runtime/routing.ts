@@ -33,7 +33,7 @@ export function createHttpRouteHandler(load: () => Promise<RouteModule>, method:
 
 type WorkerEnv = Record<string, unknown>;
 
-/** Hono アプリを Workers の `fetch` ハンドラーに変換する */
+/** Hono アプリケーションを Workers の `fetch` ハンドラーに変換する */
 export function createWorkerFetch(app: Hono) {
   return (request: Request, env: WorkerEnv, ctx: ExecutionContext): Promise<Response> => {
     return Promise.resolve(app.fetch(request, env, ctx));

@@ -29,7 +29,7 @@ chibivoid/
 │           │   └── compile.ts     エントリとルートテーブルのコードを生成する
 │           └── runtime/
 │               └── routing.ts     Worker の中で動く関数
-└── playground/                    chibivoid を使うアプリ
+└── playground/                    chibivoid を使うアプリケーション
     ├── package.json
     ├── tsconfig.json
     └── vite.config.ts             plugins: [chibivoidPlugin()]
@@ -38,14 +38,14 @@ chibivoid/
 `npm run dev` により `playground` を起動すると、Worker が「Hello from chibivoid!」と返すようになります。そのために `chibivoidPlugin()` は次の 3 つの仕事をします:
 
 1. Worker のエントリとなるファイル `.chibivoid/entry.ts` を書き出す
-2. Hono アプリを、仮想モジュール `virtual:chibivoid-routes` として提供する
+2. Hono アプリケーションを、仮想モジュール `virtual:chibivoid-routes` として提供する
 3. Cloudflare の Vite プラグインに、1. のファイルをエントリ（`main`）として渡す
 
-リクエストは workerd の中で `.chibivoid/entry.ts` に届き、そこからインポートされた Hono アプリが応答します。実際にどの順番で何が起きるのかは、「動かしてみる」にてアプリを動かした後に、図を使って確かめます。
+リクエストは workerd の中で `.chibivoid/entry.ts` に届き、そこからインポートされた Hono アプリケーションが応答します。実際にどの順番で何が起きるのかは、「動かしてみる」にてアプリケーションを動かした後に、図を使って確かめます。
 
 ## Void をまねたモノレポを作成する
 
-Void のリポジトリは、複数のパッケージを 1 つのリポジトリで管理するモノレポになっています。フレームワーク本体は `packages/void`（npm では `void` という名前で公開）、React のアダプターは `packages/react`（`@void/react`）にあり、動作確認用のアプリが `playground/` に並んでいます。
+Void のリポジトリは、複数のパッケージを 1 つのリポジトリで管理するモノレポになっています。フレームワーク本体は `packages/void`（npm では `void` という名前で公開）、React のアダプターは `packages/react`（`@void/react`）にあり、動作確認用のアプリケーションが `playground/` に並んでいます。
 
 chibivoid も同じ構造にします。ただし、Void は pnpm と [Vite+](https://viteplus.dev)（VoidZero が開発している統合ツールチェーン）でモノレポを管理していますが、本書では簡単のため Node.js に付属する npm の [workspaces](https://docs.npmjs.com/cli/using-npm/workspaces) 機能を使います。
 
@@ -131,7 +131,7 @@ mkdir -p packages/chibivoid/src/router packages/chibivoid/src/runtime
 
 chibivoid では、学習の手間を減らすためにビルドの過程を省き、`exports` が `src/*.ts` を直接指すようにしています。それでも動くのは、次の 2 つの理由からです:
 
-1. Worker やブラウザで動くコードは、Vite が読み込む際に TypeScript を変換してくれます。workspace のパッケージ（`node_modules` の外に実体があるもの）は、Vite から見るとアプリのソースコードと同じ扱いになります
+1. Worker やブラウザで動くコードは、Vite が読み込む際に TypeScript を変換してくれます。workspace のパッケージ（`node_modules` の外に実体があるもの）は、Vite から見るとアプリケーションのソースコードと同じ扱いになります
 2. Node.js で動くコード（`vite.config.ts` から読み込まれるプラグイン本体など）は、Node.js 24 以降の [type stripping](https://nodejs.org/api/typescript.html#type-stripping)（型注釈を取り除いてそのまま実行する機能）により動きます
 
 ただし、type stripping は型注釈を消すだけであるため、次のルールを守る必要があります:
@@ -163,7 +163,7 @@ export default app;
 - ハンドラーは `c`（`Context`）を受け取り、`c.text()` や `c.json()` により `Response` を返します。`c.req` がリクエスト、`c.env` が Worker の `env` に対応します
 - 最後の `export default app` により、このコードは Worker として振る舞います。第 3 章の「Cloudflare Workers とは何か」で見たように、Worker は「`fetch` メソッドをもつオブジェクト」をデフォルトエクスポートします。Hono の `app` はまさに `fetch(request, env, ctx)` というメソッドをもつオブジェクトであり、`export default { fetch: app.fetch }` と書いたのと同じように動きます
 
-chibivoid は、`routes/` 以下のファイルからこの `app.get(...)` を並べたコードを生成することにより、ファイルベースルーティングを実現します（第 5 章）。この章では、まず固定の Hono アプリのコードを生成するところから始めます。
+chibivoid は、`routes/` 以下のファイルからこの `app.get(...)` を並べたコードを生成することにより、ファイルベースルーティングを実現します（第 5 章）。この章では、まず固定の Hono アプリケーションのコードを生成するところから始めます。
 
 ## chibivoid 本体を作成する
 
@@ -180,7 +180,7 @@ import type { ExecutionContext, Hono } from "hono";
 
 type WorkerEnv = Record<string, unknown>;
 
-/** Hono アプリを Workers の `fetch` ハンドラーに変換する */
+/** Hono アプリケーションを Workers の `fetch` ハンドラーに変換する */
 export function createWorkerFetch(app: Hono) {
   return (request: Request, env: WorkerEnv, ctx: ExecutionContext): Promise<Response> => {
     return Promise.resolve(app.fetch(request, env, ctx));
@@ -189,7 +189,7 @@ export function createWorkerFetch(app: Hono) {
 ```
 <!-- /file -->
 
-`createWorkerFetch()` は、Hono アプリを受け取って Workers の `fetch` ハンドラーを返します。3 つ目の引数 `ctx` の型 `ExecutionContext` は Hono がエクスポートしているもので、`app.fetch()` が受け取る型と同じです。今は `app.fetch()` を呼ぶだけですが、第 7 章でここに「リクエストごとの `env` を覚えておく」処理を追加します。
+`createWorkerFetch()` は、Hono アプリケーションを受け取って Workers の `fetch` ハンドラーを返します。3 つ目の引数 `ctx` の型 `ExecutionContext` は Hono がエクスポートしているもので、`app.fetch()` が受け取る型と同じです。今は `app.fetch()` を呼ぶだけですが、第 7 章でここに「リクエストごとの `env` を覚えておく」処理を追加します。
 
 `runtime/` には、Worker の中で動くコード（第 11 章からは、ブラウザで動くコードも）を置くことにします。Worker はプロジェクトのディレクトリとは切り離された環境で動くため、`node:fs` でプロジェクトのファイルを読むといった処理はここには書けません。そうした処理は、Node.js で動くプラグインの側に書きます。
 
@@ -201,7 +201,7 @@ export function createWorkerFetch(app: Hono) {
 ```ts:packages/chibivoid/src/router/compile.ts
 /**
  * `.chibivoid/entry.ts`（Worker のエントリ）のソースコードを生成する。
- * 仮想モジュール `virtual:chibivoid-routes` がエクスポートする Hono アプリを、
+ * 仮想モジュール `virtual:chibivoid-routes` がエクスポートする Hono アプリケーションを、
  * Workers の `fetch` ハンドラーとして公開するだけの薄いファイル。
  */
 export function compileWorkerEntry(): string {
@@ -217,7 +217,7 @@ export default {
 
 /**
  * 仮想モジュール `virtual:chibivoid-routes` のソースコードを生成する。
- * 今はまだ固定の Hono アプリを返す（第 5 章で routes/ から生成するように変える）。
+ * 今はまだ固定の Hono アプリケーションを返す（第 5 章で routes/ から生成するように変える）。
  */
 export function compileRouteTable(): string {
   return `import { Hono } from "hono";
@@ -233,8 +233,8 @@ export default app;
 
 2 つの関数が、それぞれ JavaScript のソースコードを文字列で返しています:
 
-- `compileWorkerEntry()` は、Worker のエントリ `.chibivoid/entry.ts` の中身を作成します。`virtual:chibivoid-routes` から Hono アプリをインポートし、`createWorkerFetch()` により `fetch` ハンドラーにしてエクスポートします
-- `compileRouteTable()` は、仮想モジュール `virtual:chibivoid-routes` の中身を作成します。今は固定の Hono アプリを返します
+- `compileWorkerEntry()` は、Worker のエントリ `.chibivoid/entry.ts` の中身を作成します。`virtual:chibivoid-routes` から Hono アプリケーションをインポートし、`createWorkerFetch()` により `fetch` ハンドラーにしてエクスポートします
+- `compileRouteTable()` は、仮想モジュール `virtual:chibivoid-routes` の中身を作成します。今は固定の Hono アプリケーションを返します
 
 `compile.ts` は Node.js の上で（Vite のプラグインの中で）動きますが、生成するコードは Worker の上で動きます。「Node.js で動くコード」が「Worker で動くコード」を生成する、という 2 段構えは、この先ずっと続きます。混乱しそうになった場合は、「このコードはどこで実行されるのか」を確認するようにしてください。
 
@@ -252,7 +252,7 @@ const RESOLVED_VIRTUAL_ROUTES_ID = "\0" + VIRTUAL_ROUTES_ID;
 
 /**
  * ルーティングを担当するプラグイン。
- * 今はまだ、固定の Hono アプリを仮想モジュール `virtual:chibivoid-routes` として提供するだけ。
+ * 今はまだ、固定の Hono アプリケーションを仮想モジュール `virtual:chibivoid-routes` として提供するだけ。
  */
 export function routingPlugin(): Plugin {
   return {
@@ -339,9 +339,9 @@ export function readWorkerName(root: string): string {
 
 `chibivoidPlugin()` の中身を順に見ていきましょう。
 
-#### 1. `process.cwd()` をアプリのルートとみなす
+#### 1. `process.cwd()` をアプリケーションのルートとみなす
 
-`vite.config.ts` は、アプリのディレクトリで Vite を起動した際に読み込まれるため、その時点のカレントディレクトリをアプリのルートとして使います。Void と同じ挙動です。
+`vite.config.ts` は、アプリケーションのディレクトリで Vite を起動した際に読み込まれるため、その時点のカレントディレクトリをアプリケーションのルートとして使います。Void と同じ挙動です。
 
 #### 2. `.chibivoid/entry.ts` を即座に書き出す
 
@@ -359,7 +359,7 @@ Worker 用の環境の名前は、Void の `void_worker` にならって `chibiv
 
 ## playground を作成する
 
-プラグインの動作確認用に、chibivoid を使う `playground` アプリを作成しましょう:
+プラグインの動作確認用に、chibivoid を使う `playground` アプリケーションを作成しましょう:
 
 ```sh
 mkdir playground
@@ -391,7 +391,7 @@ mkdir playground
 ```
 <!-- /file -->
 
-ここで `"chibivoid": "*"` の `*` は、「どのバージョンでもよい」という指定です。npm は、同じ名前でその指定を満たすパッケージが workspace にあれば、ダウンロードする代わりにそちらをリンクします。`hono` は chibivoid の依存でもありますが、chibivoid が生成するコードは `hono` をパッケージ名でインポートし、そのインポートはアプリの側から解決されるため、アプリの直接の依存にも入れておきます。
+ここで `"chibivoid": "*"` の `*` は、「どのバージョンでもよい」という指定です。npm は、同じ名前でその指定を満たすパッケージが workspace にあれば、ダウンロードする代わりにそちらをリンクします。`hono` は chibivoid の依存でもありますが、chibivoid が生成するコードは `hono` をパッケージ名でインポートし、そのインポートはアプリケーションの側から解決されるため、アプリケーションの直接の依存にも入れておきます。
 
 続いて、`playground/vite.config.ts` と `playground/tsconfig.json` を追加します:
 
@@ -488,7 +488,7 @@ sequenceDiagram
   V-->>W: 変換済みの entry.ts
   W->>V: virtual:chibivoid-routes をください
   Note over V: routingPlugin() の load が<br/>compileRouteTable() を呼ぶ
-  V-->>W: 生成した Hono アプリのコード
+  V-->>W: 生成した Hono アプリケーションのコード
   W->>V: chibivoid/runtime/routing と hono をください
   V-->>W: 変換済みのコード
   W->>W: createWorkerFetch(app) で fetch ハンドラーを作る
@@ -528,11 +528,11 @@ dist/chibivoid_worker/index.js             57.58 kB │ gzip: 16.05 kB │ map: 
 ✓ built in 61ms
 ```
 
-`chibivoid_worker` 環境のビルド結果が `playground/dist/chibivoid_worker/` に出力されました。`index.js` には、生成したエントリと Hono アプリ、そして Hono 本体がバンドルされています。ビルドでも同じ `resolveId`/`load` が呼ばれるため、仮想モジュールはそのまま動きます。
+`chibivoid_worker` 環境のビルド結果が `playground/dist/chibivoid_worker/` に出力されました。`index.js` には、生成したエントリと Hono アプリケーション、そして Hono 本体がバンドルされています。ビルドでも同じ `resolveId`/`load` が呼ばれるため、仮想モジュールはそのまま動きます。
 
 ## まとめ
 
-- chibivoid は Void と同じく、`packages/chibivoid`（本体）と `playground`（アプリ）のモノレポにした
+- chibivoid は Void と同じく、`packages/chibivoid`（本体）と `playground`（アプリケーション）のモノレポにした
 - `exports` で `.ts` を直接指すことで、ビルドせずにパッケージとして使うことができる（Vite の変換と Node.js の type stripping のおかげ）
 - `chibivoidPlugin()` は、① Worker のエントリ `.chibivoid/entry.ts` を書き出し、② 仮想モジュール `virtual:chibivoid-routes` を提供し、③ Cloudflare のプラグインに `main` と設定を渡す
 - エントリは Cloudflare のプラグインが設定の段階で必要とするため、`chibivoidPlugin()` が呼ばれた時点で書き出す
@@ -540,11 +540,11 @@ dist/chibivoid_worker/index.js             57.58 kB │ gzip: 16.05 kB │ map: 
 
 ## Void の実装
 
-`voidPlugin()`（`packages/void/src/index.ts`）は 1,000 行近くある関数ですが、骨格は chibivoid と同じです。`process.cwd()` をアプリのルートにし、設定（`void.config.ts`）を読み、アプリを解析し（`analyzeApplicationSync()`）、最後にプラグインの配列を返します。Void が返すプラグインは 20 個ほどあり、その中に `routingPlugin()`（`plugin-routing.ts`）と、Cloudflare のプラグインを包んだ `cloudflare()` が入っています。
+`voidPlugin()`（`packages/void/src/index.ts`）は 1,000 行近くある関数ですが、骨格は chibivoid と同じです。`process.cwd()` をアプリケーションのルートにし、設定（`void.config.ts`）を読み、アプリケーションを解析し（`analyzeApplicationSync()`）、最後にプラグインの配列を返します。Void が返すプラグインは 20 個ほどあり、その中に `routingPlugin()`（`plugin-routing.ts`）と、Cloudflare のプラグインを包んだ `cloudflare()` が入っています。
 
-`voidPlugin()` の途中には、TanStack Start や SvelteKit などのメタフレームワークを検出して、Void のルーティングを使わずに、リソース推論、`void/db` などのランタイム、デプロイを提供するモードへの分岐もあります。本書では、`routes/` と `pages/` を Void 自身が扱う「Void アプリ」のモードを作成します。
+`voidPlugin()` の途中には、TanStack Start や SvelteKit などのメタフレームワークを検出して、Void のルーティングを使わずに、リソース推論、`void/db` などのランタイム、デプロイを提供するモードへの分岐もあります。本書では、`routes/` と `pages/` を Void 自身が扱う「Void アプリケーション」のモードを作成します。
 
-エントリの生成は、Void では `packages/void/src/router/compile.ts` の `compileWorkerEntry()` がおこないます。生成されるエントリは、`fetch` と `scheduled`（cron）のメソッドに加えて、キューを使うアプリでは `queue`、メールを受信するアプリでは `email` のメソッドも備える、`cloudflare:workers` の `WorkerEntrypoint` を継承したクラスになっており、`virtual:void-routes` から Hono アプリの他にも多くのものをインポートしています。また `plugin-routing.ts` には、まさにこの章で説明した理由が書かれたコメントがあります:
+エントリの生成は、Void では `packages/void/src/router/compile.ts` の `compileWorkerEntry()` がおこないます。生成されるエントリは、`fetch` と `scheduled`（cron）のメソッドに加えて、キューを使うアプリケーションでは `queue`、メールを受信するアプリケーションでは `email` のメソッドも備える、`cloudflare:workers` の `WorkerEntrypoint` を継承したクラスになっており、`virtual:void-routes` から Hono アプリケーションの他にも多くのものをインポートしています。また `plugin-routing.ts` には、まさにこの章で説明した理由が書かれたコメントがあります:
 
 ```ts
 // Generate the entry file and tsconfig eagerly (at plugin creation time,
@@ -552,6 +552,6 @@ dist/chibivoid_worker/index.js             57.58 kB │ gzip: 16.05 kB │ map: 
 // config resolution time, which is before any hooks like buildStart fire.
 ```
 
-`createWorkerFetch()` は、Void では `packages/void/src/runtime/routing/worker.ts` にあります。環境変数のバリデーション、Void の内部エンドポイント（`/__void/ready` など）、内部用のバインディングを隠す処理、ISR（Incremental Static Regeneration）のキャッシュなどを経てから Hono アプリを呼び出し、どのルートにもマッチしなかった `GET` または `HEAD` リクエストは、静的アセットにフォールバックしています。
+`createWorkerFetch()` は、Void では `packages/void/src/runtime/routing/worker.ts` にあります。環境変数のバリデーション、Void の内部エンドポイント（`/__void/ready` など）、内部用のバインディングを隠す処理、ISR（Incremental Static Regeneration）のキャッシュなどを経てから Hono アプリケーションを呼び出し、どのルートにもマッチしなかった `GET` または `HEAD` リクエストは、静的アセットにフォールバックしています。
 
-生成コードからのインポートについては違いがあります。chibivoid は生成コードの中で `"hono"` や `"chibivoid/runtime/routing"` とパッケージ名でインポートしています。Void は、Vite プラグインのコードの中で `import.meta.resolve()` を使ってルーティングのランタイム（`packages/void/src/runtime/routing/index.ts`）などを絶対パスに解決してから、生成コードに埋め込んでいます。ルーティングのランタイムは、Void が `exports` で公開していないモジュールであり、パッケージ名ではインポートできないためです。`Hono` も、`"hono"` からではなく、このルーティングのランタイムが再エクスポートしたものをインポートしています。アプリが `hono` に直接依存していなくても、ルーティングのランタイムと同じ Hono を使うためです。chibivoid では、読みやすさを優先して名前のまま記述し、`runtime/` を `exports` で公開し（「TypeScript をビルドせずにパッケージにする」）、アプリ側にも `hono` を依存として入れる（「playground を作成する」）ことで解決しています。
+生成コードからのインポートについては違いがあります。chibivoid は生成コードの中で `"hono"` や `"chibivoid/runtime/routing"` とパッケージ名でインポートしています。Void は、Vite プラグインのコードの中で `import.meta.resolve()` を使ってルーティングのランタイム（`packages/void/src/runtime/routing/index.ts`）などを絶対パスに解決してから、生成コードに埋め込んでいます。ルーティングのランタイムは、Void が `exports` で公開していないモジュールであり、パッケージ名ではインポートできないためです。`Hono` も、`"hono"` からではなく、このルーティングのランタイムが再エクスポートしたものをインポートしています。アプリケーションが `hono` に直接依存していなくても、ルーティングのランタイムと同じ Hono を使うためです。chibivoid では、読みやすさを優先して名前のまま記述し、`runtime/` を `exports` で公開し（「TypeScript をビルドせずにパッケージにする」）、アプリケーション側にも `hono` を依存として入れる（「playground を作成する」）ことで解決しています。

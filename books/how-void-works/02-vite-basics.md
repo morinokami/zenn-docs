@@ -12,13 +12,13 @@ title: "Vite 入門: 開発サーバー、プラグイン、仮想モジュー�
 
 ## Vite とは何か
 
-[Vite](https://vite.dev) は、Vue.js の作者でもある Evan You が公開した、ウェブアプリの開発サーバーと本番ビルドを提供するツールです。Vite と、その部品であるバンドラーの [Rolldown](https://rolldown.rs)、パーサーを含むツール群の [Oxc](https://oxc.rs) などは、のちに Evan You が創業した [VoidZero](https://voidzero.dev) という会社が中心となって開発してきました。VoidZero は 2026 年に Cloudflare に買収されましたが、その後も VoidZero のチームがこれらのツールをオープンソースのまま開発し続けています。本書のテーマである Void も、VoidZero のチームが開発している Cloudflare のプロダクトであり、Vite と深く統合されています。
+[Vite](https://vite.dev) は、Vue.js の作者でもある Evan You が公開した、ウェブアプリケーションの開発サーバーと本番ビルドを提供するツールです。Vite と、その部品であるバンドラーの [Rolldown](https://rolldown.rs)、パーサーを含むツール群の [Oxc](https://oxc.rs) などは、のちに Evan You が創業した [VoidZero](https://voidzero.dev) という会社が中心となって開発してきました。VoidZero は 2026 年に Cloudflare に買収されましたが、その後も VoidZero のチームがこれらのツールをオープンソースのまま開発し続けています。本書のテーマである Void も、VoidZero のチームが開発している Cloudflare のプロダクトであり、Vite と深く統合されています。
 
 ### なぜ Vite が生まれたのか
 
 昔のブラウザには、ファイル同士を `import` によりつなぐしくみ（ES モジュール、ESM）がありませんでした。`<script>` タグを並べれば複数のファイルを読み込むことはできましたが、ファイル同士はグローバル変数を介してやり取りするしかなく、読み込む順番も手作業で管理する必要がありました。そこで webpack のようなバンドラーが、モジュールに分けて書かれたコードの依存関係をたどり、1 つ（または少数）のファイルにまとめてからブラウザに渡すようになりました。
 
-しかしアプリが大きくなると、開発中にコードを少し変えて保存するたびに、大量のファイルをまとめ直すことになり、待ち時間が長くなります。
+しかしアプリケーションが大きくなると、開発中にコードを少し変えて保存するたびに、大量のファイルをまとめ直すことになり、待ち時間が長くなります。
 
 Vite のアイデアは単純です。モダンなブラウザは ESM をそのまま読み込むことができるため、開発中はファイルをバンドルしないようにします。その代わり、ブラウザがインポートをたどって「このファイルをください」と要求してきた際に、そのファイルだけをその場で変換して返します:
 
@@ -37,7 +37,7 @@ sequenceDiagram
 
 本番では、たくさんのファイルを 1 つずつ読み込むと遅くなるため、従来通りバンドルします。Vite 8 では、このバンドルに Rust 製の Rolldown が使われています。
 
-つまり Vite は、アプリが大きくなるほど開発中の待ち時間が長くなる、という従来のバンドラーの問題を解消するために生まれました。そのための方法が、「開発中はバンドルしない、本番ではバンドルする」という使い分けです。
+つまり Vite は、アプリケーションが大きくなるほど開発中の待ち時間が長くなる、という従来のバンドラーの問題を解消するために生まれました。そのための方法が、「開発中はバンドルしない、本番ではバンドルする」という使い分けです。
 
 ### Vite のコマンド
 
@@ -90,7 +90,7 @@ cd vite-basics
 npm install
 ```
 
-次に、アプリのエントリポイントとなる `index.html` を、プロジェクトのルートに作成します。ブラウザで開発サーバーにアクセスすると、Vite はまずこのファイルを返します:
+次に、アプリケーションのエントリポイントとなる `index.html` を、プロジェクトのルートに作成します。ブラウザで開発サーバーにアクセスすると、Vite はまずこのファイルを返します:
 
 <!-- file: code/how-void-works/ch02/index.html -->
 ```html:index.html
@@ -248,7 +248,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { normalizePath, type Plugin } from "vite";
 
-// アプリのコードがインポートする ID と、プラグインの内部で使う ID
+// アプリケーションのコードがインポートする ID と、プラグインの内部で使う ID
 const VIRTUAL_ID = "virtual:notes";
 const RESOLVED_ID = "\0" + VIRTUAL_ID;
 
@@ -313,7 +313,7 @@ export function notesPlugin(): Plugin {
 
 `resolveId` は、`import notes from "virtual:notes"` の指定子 `"virtual:notes"` を受け取った場合に、`"\0virtual:notes"` という ID を返します。これで「このモジュールは `notes` プラグインが担当する」ことが決まります。
 
-ID の先頭に `\0`（ヌル文字）を付けるのは、プラグインの間での慣習で、Rolldown のドキュメントの「[Virtual Modules Convention](https://rolldown.rs/apis/plugin-api#virtual-modules)」で説明されています。`\0` は「これは実在するファイルではない」という目印で、他のプラグインがこの ID をファイルパスだと思って処理しようとするのを防ぎます。アプリのコードに記述する名前（`virtual:notes`）と、内部の ID（`\0virtual:notes`）を分けておくのがポイントです。`virtual:` という接頭辞は、付けるだけで仮想モジュールになるような特別な指定ではなく、「仮想モジュールである」ことを示すための慣習的な目印です。
+ID の先頭に `\0`（ヌル文字）を付けるのは、プラグインの間での慣習で、Rolldown のドキュメントの「[Virtual Modules Convention](https://rolldown.rs/apis/plugin-api#virtual-modules)」で説明されています。`\0` は「これは実在するファイルではない」という目印で、他のプラグインがこの ID をファイルパスだと思って処理しようとするのを防ぎます。アプリケーションのコードに記述する名前（`virtual:notes`）と、内部の ID（`\0virtual:notes`）を分けておくのがポイントです。`virtual:` という接頭辞は、付けるだけで仮想モジュールになるような特別な指定ではなく、「仮想モジュールである」ことを示すための慣習的な目印です。
 
 `load` は、ID が `\0virtual:notes` の場合だけ、`notes/` ディレクトリを読んでモジュールのソースコードを文字列として返します:
 
@@ -489,7 +489,7 @@ HMR は、変更の影響を受けるモジュールだけを差し替えて、�
 
 `node_modules` の中のパッケージは、何百ものファイルに分かれていたり、CommonJS 形式で書かれていたりします。そのままブラウザに読ませると遅い上に動かないことがあるため、Vite は開発サーバーの起動時に、使われている依存パッケージを Rolldown により ESM の少数のファイルにまとめておきます。これを[依存の事前バンドル](https://vite.dev/guide/dep-pre-bundling)と呼び、結果は `node_modules/.vite/deps` に置かれます。事前バンドルの設定は、`optimizeDeps` というオプションにまとめられています。
 
-どの依存が使われているかについては、開発サーバーの起動時に `index.html` からインポートをたどって調べます（これを[依存スキャン](https://vite.dev/guide/dep-pre-bundling#automatic-dependency-discovery)と呼びます）。ページを表示している途中で新しい依存が見つかると、Vite はバンドルをやり直してページを再読み込みします。Void のようにサーバーが HTML を描画するアプリには `index.html` がないため、事前にどの依存を使うかを `optimizeDeps.include` により指定しておくことになります（第 8・9 章）。
+どの依存が使われているかについては、開発サーバーの起動時に `index.html` からインポートをたどって調べます（これを[依存スキャン](https://vite.dev/guide/dep-pre-bundling#automatic-dependency-discovery)と呼びます）。ページを表示している途中で新しい依存が見つかると、Vite はバンドルをやり直してページを再読み込みします。Void のようにサーバーが HTML を描画するアプリケーションには `index.html` がないため、事前にどの依存を使うかを `optimizeDeps.include` により指定しておくことになります（第 8・9 章）。
 
 ## ビルドとプレビュー
 
@@ -519,7 +519,7 @@ npm run preview
 
 最後に、Void を理解する上で欠かせない Environment API について紹介します。
 
-これまでのアプリでは、`src/main.ts` のようなアプリのコードは、ブラウザだけで動いていました。しかし Void のアプリでは、次のようになります:
+これまでのアプリケーションでは、`src/main.ts` のようなアプリケーションのコードは、ブラウザだけで動いていました。しかし Void のアプリケーションでは、次のようになります:
 
 - `routes/` や `pages/*.server.ts` のコードは Cloudflare Workers の上で動きます
 - `pages/*.tsx` のコンポーネントは Worker の上（サーバーでの描画）とブラウザの上の両方で動きます

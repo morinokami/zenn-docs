@@ -1,4 +1,4 @@
-// `import { Link } from "@chibivoid/react"` でアプリから使う API。
+// `import { Link } from "@chibivoid/react"` でアプリケーションから使う API。
 import { useContext } from "react";
 import { PageContext } from "./context.ts";
 

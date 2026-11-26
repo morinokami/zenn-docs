@@ -82,13 +82,13 @@ JavaScript が無効な場合でも、JavaScript の読み込みが終わる前�
 throw new ValidationError({ name: "名前を入力してください" });
 ```
 
-また、アプリのコードからインポートできるように、`index.ts` からも `ValidationError` を再エクスポートしておきます:
+また、アプリケーションのコードからインポートできるように、`index.ts` からも `ValidationError` を再エクスポートしておきます:
 
 <!-- diff: code/how-void-works/ch09/packages/chibivoid/src/index.ts code/how-void-works/ch10/packages/chibivoid/src/index.ts -->
 ```diff ts:packages/chibivoid/src/index.ts
 @@ -55,5 +55,5 @@
  
- // アプリのコードから `import { defineHandler } from "chibivoid"` と記述することができるように再エクスポートする。
+ // アプリケーションのコードから `import { defineHandler } from "chibivoid"` と記述することができるように再エクスポートする。
  // （Worker の中ではこの index.ts ではなく runtime/handler.ts に差し替えられる）
 -export { defineHandler, defineMiddleware } from "./runtime/handler.ts";
 +export { defineHandler, defineMiddleware, ValidationError } from "./runtime/handler.ts";
@@ -190,7 +190,7 @@ throw new ValidationError({ name: "名前を入力してください" });
 
 `handlePageMutation()` は「action の設計」の表の通りに、次の流れで変更リクエストを処理します:
 
-1. `isSameOrigin()` により、リクエストがアプリ自身と同じオリジンから送られたものかどうかを確かめ、そうでない場合は 403 を返す。このチェックについては、この節の後半で説明する
+1. `isSameOrigin()` により、リクエストがアプリケーション自身と同じオリジンから送られたものかどうかを確かめ、そうでない場合は 403 を返す。このチェックについては、この節の後半で説明する
 2. action を実行する。action が `Response` を返した場合は、その `Response` をそのまま返す。action が `ValidationError` を投げた場合は、フィールドごとのエラー（`error.errors`）を `errors` に入れて処理を続ける。それ以外の例外はそのまま投げ直す
 3. loader をもう一度実行し、`errors` を入れたページオブジェクトを第 9 章の「コア: 同じ URL から HTML と JSON を返し分ける」で作成した `respondWithPage()` により返す。loader が `Response` を返した場合は、その `Response` をそのまま返す
 
@@ -209,9 +209,9 @@ action を実行した後に loader を実行し直している点に注目し�
 </script>
 ```
 
-あなたのアプリにログインしている人がこのサイトを開くと、本人の知らないうちに、このフォームがあなたのアプリに送信されてしまいます。
+あなたのアプリケーションにログインしている人がこのサイトを開くと、本人の知らないうちに、このフォームがあなたのアプリケーションに送信されてしまいます。
 
-このような送信を見分けるために、`isSameOrigin()` はブラウザがリクエストに付けるヘッダーを確かめます。ブラウザは `POST` などのリクエストに、送信元のページのオリジンを表わす `Origin` ヘッダーを付けて送ります。オリジンとは、URL のスキーム、ホスト、ポートの組のことです。上の例では、リクエストに `Origin: https://evil.example` が付きます。`isSameOrigin()` はこの値がアプリ自身のオリジンと一致しない場合に `false` を返し、`handlePageMutation()` はリクエストを 403 で拒否します。
+このような送信を見分けるために、`isSameOrigin()` はブラウザがリクエストに付けるヘッダーを確かめます。ブラウザは `POST` などのリクエストに、送信元のページのオリジンを表わす `Origin` ヘッダーを付けて送ります。オリジンとは、URL のスキーム、ホスト、ポートの組のことです。上の例では、リクエストに `Origin: https://evil.example` が付きます。`isSameOrigin()` はこの値がアプリケーション自身のオリジンと一致しない場合に `false` を返し、`handlePageMutation()` はリクエストを 403 で拒否します。
 
 `Origin` ヘッダーがない場合は、[`Sec-Fetch-Site`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Site) ヘッダーを確かめます。このヘッダーの値は、同じオリジンのページから送られたリクエストでは `same-origin` に、アドレスバーへの入力など、ユーザー自身の操作によるリクエストでは `none` になります。そのため、この 2 つの値の場合だけリクエストを通します。また、どちらのヘッダーもないリクエストは、`curl` のようなブラウザ以外のクライアントから送られたものと考えられるため、そのまま通しています。
 
@@ -529,7 +529,7 @@ curl -s -o /dev/null -w "%{http_code}\n" -X POST -H 'Origin: https://evil.exampl
 - `handlePageMutation()` は `Origin` ヘッダー（または `Sec-Fetch-Site` ヘッダー）を確かめて、別のサイトからの送信（CSRF）を拒否する
 - `fetch()` はリダイレクトを自動でたどり、ヘッダーも引き継ぐため、action からのリダイレクトも特別な処理なしで扱うことができる
 
-これで、第 8 章から続いた Pages の 3 つの章は終わりです。ページの表示、画面遷移、そしてデータの変更という、ウェブアプリの基本的な流れがすべて chibivoid の上で動くようになりました。
+これで、第 8 章から続いた Pages の 3 つの章は終わりです。ページの表示、画面遷移、そしてデータの変更という、ウェブアプリケーションの基本的な流れがすべて chibivoid の上で動くようになりました。
 
 ## Void の実装
 

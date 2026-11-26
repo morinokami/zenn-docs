@@ -6,7 +6,7 @@ const RESOLVED_VIRTUAL_ROUTES_ID = "\0" + VIRTUAL_ROUTES_ID;
 
 /**
  * ルーティングを担当するプラグイン。
- * 今はまだ、固定の Hono アプリを仮想モジュール `virtual:chibivoid-routes` として提供するだけ。
+ * 今はまだ、固定の Hono アプリケーションを仮想モジュール `virtual:chibivoid-routes` として提供するだけ。
  */
 export function routingPlugin(): Plugin {
   return {

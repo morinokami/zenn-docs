@@ -13,7 +13,7 @@ const HANDLER_PATH = fileURLToPath(new URL("./runtime/handler.ts", import.meta.u
 /**
  * ファイルベースルーティングを担当するプラグイン。
  * - routes/ をスキャンする
- * - スキャン結果から仮想モジュール `virtual:chibivoid-routes`（Hono アプリ）を生成する
+ * - スキャン結果から仮想モジュール `virtual:chibivoid-routes`（Hono アプリケーション）を生成する
  */
 export function routingPlugin(root: string): Plugin {
   const paths: ProjectPaths = {
