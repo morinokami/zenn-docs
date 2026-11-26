@@ -438,9 +438,7 @@ export const kv: KVClient = {
 
 ## 動かしてみる
 
-この章では、`index.ts` など、chibivoid 本体のコードを変更しました。そのため、開発サーバーを起動している場合は、いったん止めてから進めてください。
-
-第 3 章の「ビルドとプレビュー」で見たように、ビルドの際には、Cloudflare のプラグインがデプロイ用の Worker の設定を `wrangler.json` として出力します。まずは、KV を使わない状態でビルドして、この設定を確かめておきましょう:
+第 3 章の「ビルドとプレビュー」で見たように、ビルドの際には、Cloudflare のプラグインがデプロイ用の Worker の設定を `wrangler.json` として出力します。まずは、KV を使わない状態でビルドして、この設定の内容を確かめておきましょう:
 
 ```sh
 npm run build
@@ -448,7 +446,7 @@ node -e 'console.log(require("./playground/dist/chibivoid_worker/wrangler.json")
 # []
 ```
 
-`kv_namespaces` は空で、KV のバインディングはありません。次に、開発サーバーを起動しておきます:
+`kv_namespaces` は空で、KV のバインディングはありません。次に、開発サーバーを起動し直しておきます:
 
 ```sh
 npm run dev
@@ -486,7 +484,7 @@ curl -i -X POST http://localhost:5173/api/counter
 Error: env: Cloudflare のバインディング 'KV' がありません
 ```
 
-推論の結果を設定に反映させるために、開発サーバーをいったん止めて（Ctrl+C）起動し直し、もう一度リクエストを送ってみましょう:
+推論の結果を設定に反映させるために、開発サーバーをいったん止めて起動し直し、もう一度リクエストを送ってみましょう:
 
 ```sh
 curl -X POST http://localhost:5173/api/counter
@@ -540,7 +538,7 @@ if (bindings.needsKV && !hasBinding(resolved.kv_namespaces, kvName)) {
 
 `env` の取り出しは、`packages/void/src/runtime/env/runtime.ts` と `env/raw.ts` が担当しています。`withRuntimeEnv()` と `requireRuntimeBinding()` という名前も、chibivoid と同じです。ただし、Void は `AsyncLocalStorage` を、`Symbol.for('void.envContext.v1')` をキーとして `globalThis` に保存しています。Vite の依存の事前バンドル（第 2 章の「HMR と依存の事前バンドル」）などにより同じモジュールが 2 回評価されても、同じ `AsyncLocalStorage` を使うためです。
 
-Void は、`AsyncLocalStorage` を使うためのフラグも自動で追加します。`voidPlugin()` は、`packages/void/src/cli/wrangler.ts` の `normalizeWranglerCompatibilityFlags()` により、`compatibility_flags` に `nodejs_compat` も `nodejs_als` もなければ `nodejs_als` を追加します。認証、PostgreSQL や MySQL、Sandbox SDK を使うアプリでは、他の Node.js の API も必要になるため、代わりに `nodejs_compat` を追加します。`void init` が `void.config.ts` に書き込む `compatibility_date` は、デフォルトでは `2026-02-24`（`LATEST_KNOWN_COMPAT_DATE`）です。この日付は `nodejs_compat` がデフォルトで有効になる `2026-08-04` より前であるため、Void では chibivoid と違って、`AsyncLocalStorage` を使うためにフラグが必要になります。
+Void は、`AsyncLocalStorage` を使うためのフラグも自動で追加します。`voidPlugin()` は、`packages/void/src/cli/wrangler.ts` の `normalizeWranglerCompatibilityFlags()` により、`compatibility_flags` に `nodejs_compat` も `nodejs_als` もなければ `nodejs_als` を追加します。認証、PostgreSQL や MySQL、Sandbox SDK を使うアプリでは、他の Node.js の API も必要になるため、代わりに `nodejs_compat` を追加します。`void init` が `void.config.ts` に書き込む `compatibility_date` は、デフォルトでは `2026-02-24`（`LATEST_KNOWN_COMPAT_DATE`）です。この日付は `nodejs_compat` がデフォルトで有効になる `2026-08-04` より前であるため、Void では chibivoid とは異なり、`AsyncLocalStorage` を使うためにフラグが必要になります。
 
 `void/kv`（`packages/void/src/runtime/kv/index.ts`）は、chibivoid と同じく値を JSON で保存し、`requireRuntimeBinding('KV')` によりネームスペースを取り出します。
 

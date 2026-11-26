@@ -489,7 +489,7 @@ export function Form({ action, onSubmit, ...rest }: FormProps) {
 
 ## 動かしてみる
 
-この章では、`router/compile.ts` など、chibivoid 本体のプラグインのコードを変更しました。古いプラグインのままでは `POST /users` のルートが登録されないため、開発サーバーを起動している場合は、いったん止めてから起動し直してください:
+開発サーバーを起動し直します:
 
 ```sh
 npm run dev

@@ -481,7 +481,7 @@ export async function fetch(
 
 `like()` は、`fetch()` により `/api/counter` に `POST` リクエストを送り、返ってきた `count` をボタンに表示します。このとき、`result.count` の型は `routes/api/counter.ts` の `POST` が返す `{ count: number }` から決まり、`number` になります。
 
-この章では、`plugin-routing.ts` など、chibivoid 本体のプラグインのコードを変更しました。そのため、開発サーバーを起動している場合は、いったん止めてから起動し直してください:
+開発サーバーを起動し直します:
 
 ```sh
 npm run dev

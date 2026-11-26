@@ -1258,7 +1258,7 @@ export default function UserPage({ user }: Props) {
 
 ## 動かしてみる
 
-この章では、chibivoid 本体のプラグインのコードと playground の `vite.config.ts` を変更しました。そのため、開発サーバーを起動している場合は、いったん止めてから起動し直してください:
+開発サーバーを起動し直します:
 
 ```sh
 npm run dev

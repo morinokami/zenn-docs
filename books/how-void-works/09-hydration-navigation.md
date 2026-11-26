@@ -725,7 +725,7 @@ export function Link({ href, onClick, ...rest }: LinkProps) {
 ```
 <!-- /diff -->
 
-この章では、`vite.config.ts` から読み込まれる chibivoid 本体と `@chibivoid/react` のプラグインのコードを変更しました。そのため、開発サーバーを起動している場合は、いったん止めてから起動し直してください:
+開発サーバーを起動し直します:
 
 ```sh
 npm run dev
