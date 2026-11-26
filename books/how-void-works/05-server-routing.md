@@ -243,7 +243,7 @@ export function detectHttpExports(absPath: string): string[] {
 
 `export const GET = ...`、`export function POST() {}`、`export { handler as PUT }` のどの書き方でも、`exportName.name` にエクスポート名が入ります。`export type { ... }` は実行時には存在しないため除いています。
 
-この「実行せずに解析する」という方針は、Void の様々な箇所で採用されています。たとえば、第 7 章のリソース推論でも、同じ `parseSync()` を使います。
+この「実行せずに解析する」という方針は、Void の様さまざまな箇所で採用されています。たとえば、第 7 章のリソース推論でも、同じ `parseSync()` を使います。
 
 ## `routes/` をスキャンする
 

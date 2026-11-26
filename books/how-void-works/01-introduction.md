@@ -4,7 +4,7 @@ title: "はじめに"
 
 この本は、[Void](https://void.cloud/guide/) というフレームワークの「中身」について理解するためのガイドブックです。そのために、Void と同じしくみをもつ小さなフレームワークである chibivoid を自分の手で作りながら、Void が内部で何をしているのかについて 1 つずつ確かめていきます。
 
-なお、chibivoid という名前は、本書と同じように Vue.js を小さく作りながら学ぶ書籍である [chibivue](http://book.chibivue.land/) にならって付けたものです。chibivue と作者の [ubugeeei](https://github.com/ubugeeei) 氏に感謝します 🙏
+なお、chibivoid という名前は、本書と同じように Vue.js を小さく作りながら学ぶ書籍である [chibivue](https://book.chibivue.land/) にならって付けたものです。chibivue と作者の [ubugeeei](https://github.com/ubugeeei) 氏に感謝します 🙏
 
 ## Void とは何か
 
