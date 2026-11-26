@@ -632,6 +632,6 @@ Void では、`packages/void/src/runtime/routing/assets.ts` の `createManifestL
 | マイグレーション | `cli/deploy-cloudflare-migrate.ts`、`cli/deploy-migrations.ts` |
 | 公開 | `cli/deploy-cloudflare-publish.ts` |
 
-公開の段階では、Void は新しいバージョンをトラフィックを流さずにアップロードし、`/__void/ready` により正しく動くことを確かめてから、トラフィックを新しいバージョンに切り替えます。ただし、Worker を初めてデプロイする場合は、バージョンのアップロードでは Worker を作成できないため、先に通常のデプロイで公開してから `/__void/ready` を確かめます。
+公開の段階では、Void は新しいバージョンをトラフィックを流さずにアップロードし、`/__void/ready` により正しく動くことを確かめてから、トラフィックを新しいバージョンに切り替えます。ただし、Worker を初めてデプロイする場合は、バージョンのアップロードでは Worker を作成できないため、先に通常のデプロイで公開してから `/__void/ready` を確かめます。これらの処理の本体は、`cli/deploy-cloudflare-publish.ts` が呼び出す、`packages/deploy-cloudflare/src/version.ts` の `activateCloudflareVersion()` にあります。
 
 なお、Void は Cloudflare の操作に Wrangler ではなく `cf` という CLI を使っています。リソースの作成などでは、`cf` が出力する JSON を読んでおり、chibivoid とは異なり、表示用の文字列から ID を探すことはしません。

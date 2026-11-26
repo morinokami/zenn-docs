@@ -1310,10 +1310,10 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:5173/users/999
 
 「Pages の設計」で触れたように、Void のコアの共通部分は `packages/void/src/pages/` に置かれています。この章で作成したコアのファイルと比べると、次のような違いがあります:
 
-- `scan.ts`: `.vue`、`.svelte`、`.md` のページにも対応しています。また、`.island.tsx` で作るアイランドのページや名前付きレイアウト（`_layouts/`）を扱い、`export const ssr = false` や `prerender` などのページ設定も読み取ります
+- `scan.ts`: `.vue`、`.svelte`、`.md` のページにも対応しています。また、`.island.tsx` で作るアイランドのページや名前付きレイアウト（`_layouts/`）を扱い、`export const ssr = false` や `prerender` などのページ設定も読み取ります。`componentId` からは末尾の `/index` を取り除くため、`pages/users/index.tsx` の ID は、chibivoid の `users/index` ではなく `users` になります
 - `manifest.ts`: コンポーネントの対応表に加えて、URL からページを探す `matchRoute()` も生成します。`matchRoute()` は、固定の URL であれば表から直接探し、動的な URL であれば正規表現により探します
 - `plugin.ts`: `createPagesPlugin(pagesDir, { name, generateRenderer, generateClient, config })` という、chibivoid とほぼ同じ API をもっています。`generateClient` は、第 9 章で chibivoid にも追加します
-- `protocol.ts`: ページオブジェクトの型（`PageObject`）には、chibivoid の 4 つのフィールドに加えて、`shared`（全ページ共通のデータ）、`head`（タイトルなど）、`deferred`（遅延 props）や、第 10 章で追加する `errors` などのフィールドが並んでいます。また、HTML をストリーミングで返します
+- `protocol.ts`: ページオブジェクトの型（`PageObject`）には、chibivoid の 4 つのフィールドに加えて、`shared`（全ページ共通のデータ）、`head`（タイトルなど）、`deferred`（遅延 props）や、第 10 章で追加する `errors` などのフィールドが並んでいます。また、アダプターの描画結果として、文字列だけでなく HTML のストリームも受け取ることができます
 - `serialize.ts`: chibivoid では `protocol.ts` に定義した `serializePageData()` が、Void ではこのファイルにあります。`JSON.stringify()` ではなく devalue というライブラリにより文字列にするため、`Date` や `Map` などの値も型を保ったまま受け渡すことができます
 
 ページへの `GET` リクエストを処理するハンドラーは、`packages/void/src/runtime/routing/pages.ts` にある、chibivoid と同じ名前の `createPageGetHandler()` が作成します。また、`defineHandler()` の戻り値の型である `TypedHandler` は、`packages/void/src/runtime/handler/index.ts` に定義されています。Void の `TypedHandler<V, R>` は、`__output` に加えて、入力のバリデーションスキーマの型をもつ `__validators` も備えています。

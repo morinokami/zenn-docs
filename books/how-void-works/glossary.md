@@ -25,9 +25,9 @@ title: "用語集"
 | Hono | ウェブ標準 API の上で動く軽量なウェブフレームワーク。Void 内部のルーターとして使われる | [第 4 章](/morinokami/books/how-void-works/viewer/04-skeleton) |
 | ルートテーブル | ルートを登録した Hono アプリのコード。chibivoid では仮想モジュール `virtual:chibivoid-routes` として生成する | [第 4 章](/morinokami/books/how-void-works/viewer/04-skeleton)・[第 5 章](/morinokami/books/how-void-works/viewer/05-server-routing)・[第 6 章](/morinokami/books/how-void-works/viewer/06-dev-server) |
 | ファイルベースルーティング | ファイルの置き場所と名前から URL を決めるしくみ。chibivoid は `routes/` や `pages/` をスキャンし、ルートを登録するコードを生成して実現する | [第 5 章](/morinokami/books/how-void-works/viewer/05-server-routing)・[第 8 章](/morinokami/books/how-void-works/viewer/08-pages-ssr) |
+| 抽象構文木（AST） | ソースコードの構造を木で表わしたデータ。第 7 章では、Vite の `parseSync()` により作成した AST をたどって `env.KV` のようなアクセスを探す | [第 5 章](/morinokami/books/how-void-works/viewer/05-server-routing)・[第 7 章](/morinokami/books/how-void-works/viewer/07-resource-inference) |
 | ミドルウェア | ルートのハンドラーの前後で動く関数。`middleware/` に置いたグローバルミドルウェアは、Worker に届くすべてのリクエストでファイル名の数字の順に動く | [第 6 章](/morinokami/books/how-void-works/viewer/06-dev-server) |
 | リソース推論（resource inference） | ソースコードを実行せずに解析して、アプリが必要とするリソース（KV など）を割り出すしくみ。結果は Worker の設定と、デプロイの際のリソースの作成に使われる | [第 7 章](/morinokami/books/how-void-works/viewer/07-resource-inference)・[第 12 章](/morinokami/books/how-void-works/viewer/12-build-deploy) |
-| 抽象構文木（AST） | ソースコードの構造を木で表わしたデータ。第 7 章では、Vite の `parseSync()` により作成した AST をたどって `env.KV` のようなアクセスを探す | [第 7 章](/morinokami/books/how-void-works/viewer/07-resource-inference) |
 | AsyncLocalStorage | 非同期の処理の流れごとに値を保存できる、Node.js 由来の API。chibivoid はリクエストごとの `env` を保存するのに使う | [第 7 章](/morinokami/books/how-void-works/viewer/07-resource-inference) |
 | Pages | `pages/` に置いた UI コンポーネントがそのままページになる、Void の機能。隣に置いた `.server.ts` の loader がページのデータを用意し、action がフォームの送信を処理する | [第 8 章](/morinokami/books/how-void-works/viewer/08-pages-ssr)・[第 9 章](/morinokami/books/how-void-works/viewer/09-hydration-navigation)・[第 10 章](/morinokami/books/how-void-works/viewer/10-actions-forms) |
 | SSR（Server-Side Rendering） | コンポーネントをサーバーで HTML にすること | [第 8 章](/morinokami/books/how-void-works/viewer/08-pages-ssr) |

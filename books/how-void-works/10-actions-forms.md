@@ -7,8 +7,8 @@ title: "Pages (3): action とフォーム"
 ```ts
 // pages/users/index.server.ts
 export const action = defineHandler(async (c) => {
-  const form = await c.req.formData();
-  await addUser(String(form.get("name")));
+  const { name } = await c.req.json<{ name: string }>();
+  await addUser(name);
   // 何も返さなければ、loader をもう一度実行して最新のページを返す
 });
 ```
@@ -541,4 +541,4 @@ Void でも `packages/void/src/pages/protocol.ts` に chibivoid と同じ名前�
 
 React のアダプターのフォーム（`packages/react/src/runtime/form.tsx`、`use-form.ts`）は、`useForm("/users", { name: "", email: "" })` のように呼び出して、入力値、エラー、送信中かどうかなどをまとめて管理する API になっています。
 
-ただし、Void の `Form` は、この章の `Form` とは異なり、JavaScript が動いていることを前提にしています。`Form` は React 19 の「フォームアクション」により、`<form>` の `action` に関数を渡して送信するため、JavaScript が無効な場合はフォームを送信することができません。また、`useForm()` は入力値にファイルが含まれない限り、入力値を JSON で送信します。
+ただし、Void の `Form` は、この章の `Form` とは異なり、JavaScript が動いていることを前提にしています。`Form` は React 19 の「フォームアクション」により、`<form>` の `action` に関数を渡して送信するため、JavaScript が無効な場合はフォームを送信することができません。また、`useForm()` は入力値にファイルが含まれない限り、入力値を JSON で送信します。この章の冒頭の action が、`c.req.formData()` ではなく `c.req.json()` により入力を受け取っているのは、そのためです。
