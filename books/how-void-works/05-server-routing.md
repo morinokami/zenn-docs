@@ -632,39 +632,31 @@ export function routingPlugin(root: string): Plugin {
 
 ### 4. `chibivoid` のインポートを差し替える
 
-ルートのファイルでは、`import { defineHandler } from "chibivoid"` と記述します。`chibivoid` の `exports` の `"."` は `src/index.ts`、つまり Vite のプラグイン本体です。`index.ts` は `@cloudflare/vite-plugin` をインポートしており、その先には Wrangler やファイルシステムを使うコードが大量につながっています。
+4 つ目は、`resolveId` でおこなっている `chibivoid` のインポートの差し替えです。ルートのファイルに記述する `import { defineHandler } from "chibivoid"` は、Worker の中では、軽量な `runtime/handler.ts` に解決されるようにしています。他の 3 つよりも込み入った話となるため、何が問題なのか、どのように解決しているのか、そしてそれを支える Vite のしくみの順に見ていきます。
 
-この後の「ルートを作成して動かす」でルートのファイルを作成した後で、試しに `resolveId` の差し替えをコメントアウトしてビルドしてみると、次のようなエラーになるはずです:
+#### 何が問題なのか
 
-```
-✓ 428 modules transformed.
-✗ Build failed in 4.57s
-error during build:
-Build failed with 1 error:
+`chibivoid` の `exports` の `"."` は `src/index.ts`、つまり Vite のプラグイン本体です。`index.ts` は `@cloudflare/vite-plugin` をインポートしており、その先には Wrangler やファイルシステムを使うコードが大量につながっています。そのため、何もしなければ、`defineHandler()` を使いたいだけにもかかわらず、Vite や Wrangler といったプラグインの依存まで Worker のバンドルに引き込まれてしまいます。これらは Node.js で動かすためのコードであり、Worker の中で動かすことはできません。
 
-[UNRESOLVED_IMPORT] Could not resolve './node.js' in ../node_modules/blake3-wasm/esm/index.js
-    ...
-    │ Help: '../node_modules/blake3-wasm/esm/index.js' is imported by the following path:
-    │         - ../node_modules/blake3-wasm/esm/index.js
-    │         - ../node_modules/@cloudflare/vite-plugin/node_modules/wrangler/wrangler-dist/cli.js
-    │         - ../node_modules/@cloudflare/vite-plugin/dist/index.mjs
-    │         - ../packages/chibivoid/src/index.ts
-    │         - routes/api/hello.ts
-    │         - \0virtual:chibivoid-routes
-    │         - .chibivoid/entry.ts
-    │         - \0virtual:cloudflare/worker-entry
-...
-```
+#### どのように解決しているのか
 
-`defineHandler()` を使いたかっただけにもかかわらず、Wrangler の CLI まで Worker にバンドルしようとして失敗しています。試した場合は、コメントアウトを外しておいてください。そのままにしておくと、開発サーバーでもルートのレスポンスが 500 Internal Server Error になります。
-
-`resolveId` の差し替えが効くのは、プラグインに `enforce: "pre"` を付けているためです。第 2 章で見たように、インポートの解決先を探す Vite の組み込みプラグイン（`builtin:vite-resolve`）は、`enforce` を付けないプラグインより先に動きます。`chibivoid` は実在するパッケージであるため、`enforce: "pre"` がないと、`routingPlugin()` の `resolveId` が呼ばれる前に Vite が `src/index.ts` に解決してしまいます。
-
-そこで、`resolveId` では、サーバー側の環境（`consumer` が `"server"`）において `chibivoid` がインポートされた場合に、軽量な `runtime/handler.ts` に差し替えています。この節の最後で追加するように、`index.ts` は `defineHandler()` を `runtime/handler.ts` から再エクスポートするだけであるため、差し替えても利用者のコードは同じように動きます。差し替えた後のビルド結果は 60 KB ほどで、Wrangler は含まれていません。
-
-ここでは、`resolveId` は `\0` 付きの ID ではなく、実在するファイルの絶対パスを返しています。Vite では、通常のファイルのモジュール ID は、そのファイルの絶対パスです。この ID に対して `load` で値を返すプラグインはないため、第 2 章の「プラグインとフック」で見たように、最後に Vite がこのパスのファイルを読み込みます。その後は普通のファイルと同じように、TypeScript から JavaScript に変換されます。つまり、`resolveId` が `\0` 付きの ID を返せば仮想モジュールを作成でき、実在するファイルのパスを返せばインポートの解決先を別のファイルに差し替えることができます。
+`resolveId` では、サーバー側の環境（`consumer` が `"server"`）において `chibivoid` がインポートされた場合に、軽量な `runtime/handler.ts` に差し替えています。この後の「`index.ts` から再エクスポートする」で追加するように、`index.ts` は `defineHandler()` を `runtime/handler.ts` から再エクスポートするだけであるため、差し替えても利用者のコードは同じように動きます。これにより、ビルド結果に Vite や Wrangler のコードが含まれることはなくなります。
 
 この差し替えは、Void の `packages/void/AGENTS.md`（AI エージェントやコントリビューター向けの設計メモ）でも、重要な設計判断（Key Design Decisions）の 1 つ「Import redirection」として説明されています。これがないと、ルートのファイルからプラグイン全体（`vite` や `@cloudflare/vite-plugin` など）が Worker のバンドルに引き込まれてしまう、という内容です。
+
+#### 差し替えを支える Vite のしくみ
+
+この差し替えは、Vite のプラグインの 2 つのしくみに支えられています。
+
+1 つ目は、プラグインに付けている `enforce: "pre"` です。第 2 章で見たように、インポートの解決先を探す Vite の組み込みプラグイン（`builtin:vite-resolve`）は、`enforce` を付けないプラグインより先に動きます。`chibivoid` は実在するパッケージであるため、`enforce: "pre"` がないと、`routingPlugin()` の `resolveId` が呼ばれる前に Vite が `src/index.ts` に解決してしまいます。
+
+2 つ目は、`resolveId` が返す値です。ここでは、`\0` 付きの ID ではなく、実在するファイルの絶対パスを返しています。Vite では、通常のファイルのモジュール ID は、そのファイルの絶対パスです。この ID に対して `load` で値を返すプラグインはないため、第 2 章の「プラグインとフック」で見たように、最後に Vite がこのパスのファイルを読み込みます。そしてその後は普通のファイルと同じように、TypeScript から JavaScript に変換されます。つまり、`resolveId` が `\0` 付きの ID を返せば仮想モジュールを作成でき、実在するファイルのパスを返せばインポートの解決先を別のファイルに差し替えることができます。
+
+:::message
+差し替えの効果を確かめたい場合は、この後の「ルートを作成して動かす」でルートのファイルを作成した後で、試しに `resolveId` の差し替えをコメントアウトしてビルドしてみてください。ビルドのログに表示される、変換されたモジュールの数（`✓ ... modules transformed.`）が、数十個から数百個以上に増えるはずです。依存パッケージのバージョンによっては、ビルドがエラーで失敗することもあります。
+:::
+
+### `index.ts` から再エクスポートする
 
 最後に、`index.ts` で `routingPlugin()` に `root` を渡すようにし、再エクスポートを追加します:
 
