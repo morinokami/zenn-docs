@@ -2,7 +2,15 @@
 title: "Pages (1): サーバーサイドレンダリングと loader"
 ---
 
-この章からは、第 5 章で作成した API ルートと並ぶ、Void のもう 1 つの主要な機能である Pages を作っていきます。Pages では、`pages/` に置いた UI コンポーネントがそのままページになり、その隣に置いた `.server.ts` ファイルが、そのページのデータを用意します。たとえば、ユーザーの一覧を表示する `/users` ページは、次の 2 つのファイルで構成されます:
+この章からは、第 5 章で作成した API ルートと並ぶ、Void のもう 1 つの主要な機能である Pages を作っていきます。Pages では、`pages/` に置いた UI コンポーネントがそのままページになり、その隣に置いた `.server.ts` ファイルが、そのページのデータを用意します。たとえば、ユーザーの一覧を表示する `/users` ページは、次の 2 つのファイルから構成されます:
+
+```ts
+// pages/users/index.server.ts → /users ページのデータ（サーバーだけで動く）
+export const loader = defineHandler(async () => {
+  return { users: await listUsers() };
+});
+export type Props = InferProps<typeof loader>;
+```
 
 ```tsx
 // pages/users/index.tsx → /users ページの UI
@@ -17,14 +25,6 @@ export default function UsersPage({ users }: Props) {
     </ul>
   );
 }
-```
-
-```ts
-// pages/users/index.server.ts → /users ページのデータ（サーバーだけで動く）
-export const loader = defineHandler(async () => {
-  return { users: await listUsers() };
-});
-export type Props = InferProps<typeof loader>;
 ```
 
 Pages は、第 8 章から第 10 章までの 3 つの章に分けて作ります。この章では、ページをサーバーで HTML に描画して返すところ、つまりサーバーサイドレンダリングの部分を実装します。ブラウザで JavaScript を動かすハイドレーションと画面遷移については第 9 章で、フォームの送信については第 10 章で、それぞれ扱います。
@@ -42,7 +42,7 @@ Void の公式ドキュメント「[Pages Routing](https://void.cloud/guide/page
 
 ### 1. コンポーネントと loader の組
 
-1 つのページは、基本的に UI を表わすコンポーネントとデータを用意する `loader` の組からなります。たとえば、`pages/about.tsx` が `/about` ページの UI になり、`pages/about.server.ts` がエクスポートする `loader` がそのページのデータを用意します。`loader` はサーバーだけで動くため、KV やデータベースに直接アクセスすることができます。`.server.ts` がないページは、データなしで描画されます。また、URL の決め方は、`[id]` や `index` の扱いも含めて `routes/` とまったく同じです（第 5 章の「ファイル名を URL パターンに変換する」）。
+1 つのページは、基本的に UI を表わすコンポーネントとデータを用意する `loader` の組からなります。たとえば、`pages/about.tsx` が `/about` ページの UI になり、`pages/about.server.ts` がエクスポートする `loader` がそのページのデータを用意します。`loader` はサーバー上でのみ動くため、KV やデータベースに直接アクセスすることができます。`.server.ts` がないページは、データなしで描画されます。また、URL の決め方は、`[id]` や `index` の扱いも含めて `routes/` とまったく同じです（第 5 章の「ファイル名を URL パターンに変換する」）。
 
 ### 2. ページオブジェクト
 
@@ -96,7 +96,7 @@ Void でも、コアの共通部分は `packages/void/src/pages/` に、各フ�
 mkdir -p packages/chibivoid/src/pages
 ```
 
-chibivoid は、`pages/` に置かれたファイルを次のように扱います:
+chibivoid は、ユーザーのアプリケーション側の `pages/` に置かれたファイルを次のように扱います:
 
 | ファイル | 扱い |
 | --- | --- |
