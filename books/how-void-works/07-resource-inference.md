@@ -6,7 +6,7 @@ Void の公式ドキュメント「[What is Void?](https://void.cloud/guide/)」
 
 > Import `db` from `void/db` to query your database. Void provides a local database during development and provisions one when you deploy.
 
-つまり Void では、設定ファイルに「データベースを使う」と記述する必要はなく、モジュールをインポートするだけでリソースを使うことができるのです。このしくみをリソース推論（resource inference）と呼びます。この章では、KV を題材にして、リソース推論を chibivoid に実装していきます。
+つまり Void では、設定ファイルに「データベースを使う」と記述する必要はなく、モジュールをインポートするだけでリソースを使うことができるのです。この魔法のようなしくみをリソース推論（resource inference）と呼びます。この章では、KV を題材にして、リソース推論を chibivoid に実装していきます。
 
 ## この章のゴール
 
@@ -17,19 +17,19 @@ Void の公式ドキュメント「[What is Void?](https://void.cloud/guide/)」
 
 ## 解決すべき 2 つの問題
 
-`import { kv } from "chibivoid/kv"` と記述するだけで KV を使うことができるようにするには、次の 2 つの問題を解決する必要があります。
+`import { kv } from "chibivoid/kv"` と記述するだけで KV を使えるようにするためには、次の 2 つの問題を解決する必要があります。
 
-### 問題 1: どのバインディングが必要かを、起動前に知る（Node.js 側）
+### 問題 1: どのバインディングが必要か、起動前にはわからない（Node.js 側）
 
 第 3 章の「Cloudflare Workers とは何か」で見たように、Worker のバインディングは設定で宣言するものであり、実行中に増やすことはできません。開発中も、Miniflare は起動時の設定に従って KV を用意します。つまり、アプリのコードを動かす前に、「このアプリは KV を使う」ということを知っておく必要があります。
 
-### 問題 2: どこからでも `env` を取り出す（Worker 側）
+### 問題 2: `kv` は、今のリクエストの `env` を見つけられない（Worker 側）
 
 KV のバインディングは、Worker の `fetch(request, env, ctx)` が呼ばれる際に、`env.KV` として渡されます。一方、`import { kv } from "chibivoid/kv"` の `kv` は、モジュールのトップレベルで作成された 1 つのオブジェクトです。では、`kv.get("key")` が呼ばれた際に、`kv` はどのようにして今のリクエストの `env.KV` を見つければよいのでしょうか。
 
 それでは、この 2 つの問題を順に解決していきましょう。
 
-## 問題 1: ソースコードからバインディングを推論する
+## ソースコードからバインディングを推論する
 
 1 つ目の問題は、第 5 章の「エクスポートを『実行せずに』調べる」と同じ方法により解決できます。つまり、ソースコードを実行せずに解析し、`chibivoid/kv` をインポートしているファイルがあるかどうかを調べればよいのです。
 
@@ -167,8 +167,8 @@ export function inferProjectBindings(root: string): InferredBindings {
 `c.env.KV.get(...)` のように、`chibivoid/kv` を使わずに直接バインディングにアクセスするコードもあります。このようなアクセスを見つけるために、抽象構文木（AST）をたどります。AST は、ソースコードの構造を木で表わしたデータです。たとえば、`c.env.KV` の AST は次のようになります:
 
 ```
-MemberExpression            ← c.env.KV
-├── object: MemberExpression  ← c.env
+MemberExpression                    ← c.env.KV
+├── object: MemberExpression        ← c.env
 │   ├── object: Identifier "c"
 │   └── property: Identifier "env"
 └── property: Identifier "KV"
@@ -220,7 +220,7 @@ MemberExpression            ← c.env.KV
 
 推論は、`chibivoidPlugin()` が呼ばれた時点、つまり Vite が `vite.config.ts` を読み込む際におこなわれます。Cloudflare のプラグインは、ここで組み立てた設定により Miniflare を起動するため、推論はそれより前に済ませておく必要があります。開発サーバーであれば、`chibivoidPlugin()` が呼ばれるのは起動時の 1 回だけであるため、推論の結果は起動し直すまで変わりません。そのため、開発サーバーを起動した後で初めて `chibivoid/kv` を使い始めた場合は、開発サーバーを起動し直す必要があります（「動かしてみる」で確かめます）。
 
-## 問題 2: どこからでも `env` を取り出す
+## どこからでも `env` を取り出す
 
 続いては、Worker 側の問題です。chibivoid が何もしなければ、利用者は、ハンドラーが受け取った `env` を使う場所まで引数で渡していくことになります:
 
