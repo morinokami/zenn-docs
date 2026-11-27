@@ -17,4 +17,4 @@ chibivoid を作り終えた今、次は本物の Void に触れる番です。�
 
 使っているうちに「この機能はどう実現されているのだろう」と気になることが出てきたら、[Void のリポジトリ](https://github.com/voidzero-dev/void)を開いて、本家のコードを読んでみましょう。どこから読めばよいか迷ったら、各章末の「Void の実装」で紹介したファイルが入り口になります。
 
-さらに一歩踏み込んでみたくなったら、ぜひ Void への貢献にも挑戦してみてください。Void を使ったりコードを読んだりするなかで気づいたバグや改善点は、そのまま Issue や Pull Request のタネになります。手元で開発を始めるための手順は、README の「[Contributing](https://github.com/voidzero-dev/void#contributing)」にまとめられています。Void のリポジトリでお会いしましょう！
+さらに一歩踏み込んでみたくなったら、ぜひ Void への貢献にも挑戦してみてください。Void を使ったりコードを読んだりするなかで気づいたバグや改善点は、そのまま Issue や Pull Request のタネになります。手元で開発を始めるための手順は、README の「[Contributing](https://github.com/voidzero-dev/void#contributing)」にまとめられています。ぜひ Void のリポジトリでお会いしましょう！
