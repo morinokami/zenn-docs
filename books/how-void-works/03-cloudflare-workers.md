@@ -102,12 +102,12 @@ cd workers-basics
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.67.0",
-    "@cloudflare/workers-types": "^5.20261106.1",
-    "@types/node": "^26.6.6",
+    "@cloudflare/vite-plugin": "^1.70.2",
+    "@cloudflare/workers-types": "^5.20261127.1",
+    "@types/node": "^26.6.11",
     "typescript": "^7.0.2",
-    "vite": "^8.3.6",
-    "wrangler": "^4.158.0"
+    "vite": "^8.4.0",
+    "wrangler": "^4.168.0"
   }
 }
 ```
@@ -303,11 +303,10 @@ KV のデータは `.wrangler/state/v3/kv` に保存されているため、開�
 
 ```
 $ npm run build
-vite v8.3.6 building worker environment for production...
+vite v8.4.0 building worker environment for production...
 ✓ 5 modules transformed.
-dist/worker/.vite/manifest.json  0.15 kB │ gzip: 0.11 kB
-dist/worker/wrangler.json        1.23 kB │ gzip: 0.64 kB
-dist/worker/index.js             0.86 kB │ gzip: 0.59 kB │ map: 1.69 kB
+dist/worker/wrangler.json  1.23 kB │ gzip: 0.64 kB
+dist/worker/index.js       0.86 kB │ gzip: 0.59 kB │ map: 1.71 kB
 ✓ built in 93ms
 ```
 

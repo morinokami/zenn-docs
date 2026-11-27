@@ -197,12 +197,12 @@ flowchart LR
 
 | パッケージ | バージョン |
 | --- | --- |
-| vite | 8.3 |
-| @cloudflare/vite-plugin | 1.67 |
-| wrangler | 4.158 |
+| vite | 8.4 |
+| @cloudflare/vite-plugin | 1.70 |
+| wrangler | 4.168 |
 | hono | 4.13 |
 | react / react-dom | 19.3 |
-| @vitejs/plugin-react | 6.2 |
+| @vitejs/plugin-react | 6.3 |
 | typescript | 7.0 |
 
 ### 前提知識

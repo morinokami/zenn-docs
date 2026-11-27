@@ -114,8 +114,8 @@ mkdir -p packages/chibivoid/src/router packages/chibivoid/src/runtime
     "./runtime/*": "./src/runtime/*.ts"
   },
   "dependencies": {
-    "@cloudflare/vite-plugin": "^1.67.0",
-    "hono": "^4.13.16"
+    "@cloudflare/vite-plugin": "^1.70.2",
+    "hono": "^4.13.23"
   },
   "peerDependencies": {
     "vite": "^8.0.0"
@@ -381,13 +381,13 @@ mkdir playground
   },
   "dependencies": {
     "chibivoid": "*",
-    "hono": "^4.13.16"
+    "hono": "^4.13.23"
   },
   "devDependencies": {
-    "@types/node": "^26.6.6",
+    "@types/node": "^26.6.11",
     "typescript": "^7.0.2",
-    "vite": "^8.3.6",
-    "wrangler": "^4.158.0"
+    "vite": "^8.4.0",
+    "wrangler": "^4.168.0"
   }
 }
 ```
@@ -523,11 +523,10 @@ export default app;
 
 ```
 $ npm run build
-vite v8.3.6 building chibivoid_worker environment for production...
-✓ 31 modules transformed.
-dist/chibivoid_worker/.vite/manifest.json   0.15 kB │ gzip:  0.11 kB
-dist/chibivoid_worker/wrangler.json         1.20 kB │ gzip:  0.63 kB
-dist/chibivoid_worker/index.js             57.60 kB │ gzip: 16.08 kB │ map: 105.65 kB
+vite v8.4.0 building chibivoid_worker environment for production...
+✓ 32 modules transformed.
+dist/chibivoid_worker/wrangler.json   1.20 kB │ gzip:  0.63 kB
+dist/chibivoid_worker/index.js       62.15 kB │ gzip: 17.19 kB │ map: 115.42 kB
 ✓ built in 61ms
 ```
 

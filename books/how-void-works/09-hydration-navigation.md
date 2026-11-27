@@ -503,7 +503,7 @@ startReactPages({ components, layoutTree });
 +    "./pages-client": "./src/runtime/pages-client.tsx"
    },
    "dependencies": {
-     "@vitejs/plugin-react": "^6.2.1"
+     "@vitejs/plugin-react": "^6.3.0"
 ```
 <!-- /diff -->
 

@@ -35,14 +35,14 @@ HTML には、JavaScript を読み込む `<script>` タグが 1 つもありま�
 また、そもそもブラウザ用の JavaScript がビルドされていません。第 2 章の「ビルドとプレビュー」のビルドログに `building client environment for production...` と表示されていたように、ブラウザで動くコードは `client` 環境でビルドされます。しかし、先ほどの `npm run build` のログには、Worker 用の `chibivoid_worker` 環境の行しかありません:
 
 ```
-vite v8.3.6 building chibivoid_worker environment for production...
+vite v8.4.0 building chibivoid_worker environment for production...
 ✓ built in 531ms
 ```
 
 上の出力では、ファイルの一覧を省略しています。一覧には `about-<ハッシュ>.js` のようにページの名前が付いたファイルも並びますが、いずれも `dist/chibivoid_worker/` に出力された Worker 用のコードです。`playground/dist/` を見ても、`chibivoid_worker/` しか見当たらないはずです。そこで、この章の前半では、次の 2 つの対応をおこないます:
 
 1. ブラウザ用のエントリ（`virtual:chibivoid-pages-client`）を、`client` 環境でビルドする
-2. ビルドの際にハッシュが付けられたファイル名（`pages-client-CxI8fAKa.js` など）を、Worker が描画する HTML に埋め込む
+2. ビルドの際にハッシュが付けられたファイル名（`pages-client-CPbe9WZg.js` など）を、Worker が描画する HTML に埋め込む
 
 ## ブラウザ用の JavaScript をビルドする
 
@@ -97,7 +97,7 @@ vite v8.3.6 building chibivoid_worker environment for production...
 ```json
 {
   "virtual:chibivoid-pages-client": {
-    "file": "assets/pages-client-CxI8fAKa.js",
+    "file": "assets/pages-client-CPbe9WZg.js",
     "name": "pages-client",
     "src": "virtual:chibivoid-pages-client",
     "isEntry": true,
@@ -110,7 +110,7 @@ vite v8.3.6 building chibivoid_worker environment for production...
     ]
   },
   "pages/users/index.tsx": {
-    "file": "assets/users-B1XRoXDe.js",
+    "file": "assets/users-sNv0VolW.js",
     "name": "users",
     "src": "pages/users/index.tsx",
     "isDynamicEntry": true
@@ -218,7 +218,7 @@ assets: { binding: "ASSETS" },
 ```
 <!-- /diff -->
 
-開発中に返すタグは第 9 章の「コア: ブラウザ用のエントリ」と同じです。一方、本番では最初にページが描画される際に、`loadManifest()` が `env.ASSETS.fetch()` により `/.vite/manifest.json` を読みます。以後は、読み込みに失敗した場合も含めて、その結果を使い回します。`ASSETS` バインディングの `fetch()` には絶対 URL を渡す必要があるため、`request.url` を基準にして URL を組み立てています。そして、マニフェストから `virtual:chibivoid-pages-client` のファイル名を引いて、`<script type="module" src="/assets/pages-client-CxI8fAKa.js"></script>` のようなタグを作成します。
+開発中に返すタグは第 9 章の「コア: ブラウザ用のエントリ」と同じです。一方、本番では最初にページが描画される際に、`loadManifest()` が `env.ASSETS.fetch()` により `/.vite/manifest.json` を読みます。以後は、読み込みに失敗した場合も含めて、その結果を使い回します。`ASSETS` バインディングの `fetch()` には絶対 URL を渡す必要があるため、`request.url` を基準にして URL を組み立てています。そして、マニフェストから `virtual:chibivoid-pages-client` のファイル名を引いて、`<script type="module" src="/assets/pages-client-CPbe9WZg.js"></script>` のようなタグを作成します。
 
 ### 静的アセットはどう配信されるのか
 
@@ -242,19 +242,19 @@ flowchart LR
 
 ```
 $ npm run build
-vite v8.3.6 building chibivoid_worker environment for production...
-dist/chibivoid_worker/index.js                             538.10 kB │ gzip: 110.83 kB │ map: 944.85 kB
+vite v8.4.0 building chibivoid_worker environment for production...
+dist/chibivoid_worker/index.js                             542.77 kB │ gzip: 111.97 kB │ map: 954.80 kB
 ✓ built in 567ms
-vite v8.3.6 building client environment for production...
+vite v8.4.0 building client environment for production...
 dist/client/.assetsignore                      0.02 kB
-dist/client/.vite/manifest.json                1.63 kB │ gzip:  0.36 kB
-dist/client/assets/about-CKxjvIxb.js           0.24 kB │ gzip:  0.22 kB
-dist/client/assets/_id_-DlIvQ2uU.js            0.30 kB │ gzip:  0.24 kB
-dist/client/assets/layout-C2U090-n.js          0.40 kB │ gzip:  0.23 kB
-dist/client/assets/users-B1XRoXDe.js           0.54 kB │ gzip:  0.33 kB
-dist/client/assets/runtime-BlFBezGH.js         0.86 kB │ gzip:  0.46 kB
-dist/client/assets/pages-B2PWhuZk.js           0.89 kB │ gzip:  0.60 kB
-dist/client/assets/pages-client-CxI8fAKa.js  222.91 kB │ gzip: 70.01 kB
+dist/client/.vite/manifest.json                1.67 kB │ gzip:  0.36 kB
+dist/client/assets/about-B0k_k64Y.js           0.24 kB │ gzip:  0.22 kB
+dist/client/assets/_id_-CC4f9SYS.js            0.30 kB │ gzip:  0.24 kB
+dist/client/assets/layout-kKE9kFhs.js          0.40 kB │ gzip:  0.23 kB
+dist/client/assets/users-sNv0VolW.js           0.54 kB │ gzip:  0.34 kB
+dist/client/assets/runtime-DyrFW3mq.js         0.89 kB │ gzip:  0.46 kB
+dist/client/assets/pages-oTRyNeN9.js           0.89 kB │ gzip:  0.60 kB
+dist/client/assets/pages-client-CPbe9WZg.js  222.44 kB │ gzip: 69.90 kB
 ✓ built in 363ms
 ```
 
@@ -282,7 +282,7 @@ npm run preview
 
 ```sh
 curl -s http://localhost:4173/ | grep -o '<script type="module" src="[^"]*"></script>'
-# <script type="module" src="/assets/pages-client-CxI8fAKa.js"></script>
+# <script type="module" src="/assets/pages-client-CPbe9WZg.js"></script>
 ```
 
 ハッシュ付きのファイルを読み込む `<script>` タグが表示されるはずです。ブラウザで `http://localhost:4173/` を開くと、ハイドレーション、`Link` による遷移、フォームの送信、「いいね」ボタンが、すべて本番のビルドで動くはずです。第 3 章の「ビルドとプレビュー」で見たように、`vite preview` はビルドした `index.js` をローカルの workerd で動かしています。そのため、デプロイした場合とほぼ同じ状態をローカルで確認することができます。
@@ -550,18 +550,18 @@ npm run deploy --workspace playground -- --dry-run
 > chibivoid deploy --dry-run
 
 [dry-run] wrangler kv namespace create chibivoid-app-kv
-vite v8.3.6 building chibivoid_worker environment for production...
+vite v8.4.0 building chibivoid_worker environment for production...
 ✓ built in 596ms
-vite v8.3.6 building client environment for production...
+vite v8.4.0 building client environment for production...
 ✓ built in 298ms
 
- ⛅️ wrangler 4.158.0
+ ⛅️ wrangler 4.168.0
 Using redirected Wrangler configuration.
  - Configuration being used: "dist/chibivoid_worker/wrangler.json"
  - Original user's configuration: "<no user config found>"
  - Deploy configuration file: ".wrangler/deploy/config.json"
 ✨ Read 11 files from the assets directory .../playground/dist/client
-Total Upload: 556.46 KiB / gzip: 116.04 KiB
+Total Upload: 560.87 KiB / gzip: 117.10 KiB
 Your Worker has access to the following bindings:
 Binding                 Resource
 env.KV (local)          KV Namespace

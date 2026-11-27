@@ -17,8 +17,8 @@
     "./runtime/*": "./src/runtime/*.ts"
   },
   "dependencies": {
-    "@cloudflare/vite-plugin": "^1.67.0",
-    "hono": "^4.13.16"
+    "@cloudflare/vite-plugin": "^1.70.2",
+    "hono": "^4.13.23"
   },
   "peerDependencies": {
     "vite": "^8.0.0"

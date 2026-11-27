@@ -74,9 +74,9 @@ cd vite-basics
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/node": "^26.6.6",
+    "@types/node": "^26.6.11",
     "typescript": "^7.0.2",
-    "vite": "^8.3.6"
+    "vite": "^8.4.0"
   }
 }
 ```
@@ -127,7 +127,7 @@ list.innerHTML = "<li>まだメモはありません</li>";
 ```
 $ npm run dev
 
-  VITE v8.3.6  ready in 281 ms
+  VITE v8.4.0  ready in 281 ms
 
   ➜  Local:   http://localhost:5173/
 ```
@@ -497,7 +497,7 @@ HMR は、変更の影響を受けるモジュールだけを差し替えて、�
 
 ```
 $ npm run build
-vite v8.3.6 building client environment for production...
+vite v8.4.0 building client environment for production...
 [notes] "client" 環境でモジュールを生成します
 ✓ 5 modules transformed.
 dist/index.html                0.27 kB │ gzip: 0.22 kB

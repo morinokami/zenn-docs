@@ -768,7 +768,7 @@ mkdir -p packages/react/src/runtime
     "./pages-server": "./src/runtime/pages-server.tsx"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^6.2.1"
+    "@vitejs/plugin-react": "^6.3.0"
   },
   "peerDependencies": {
     "chibivoid": "*",
@@ -1026,18 +1026,18 @@ export function useParams(): Record<string, string> {
    "dependencies": {
 +    "@chibivoid/react": "*",
      "chibivoid": "*",
--    "hono": "^4.13.16"
-+    "hono": "^4.13.16",
+-    "hono": "^4.13.23"
++    "hono": "^4.13.23",
 +    "react": "^19.3.1",
 +    "react-dom": "^19.3.1"
    },
    "devDependencies": {
-     "@types/node": "^26.6.6",
-+    "@types/react": "^19.3.0",
+     "@types/node": "^26.6.11",
++    "@types/react": "^19.3.3",
 +    "@types/react-dom": "^19.3.0",
      "typescript": "^7.0.2",
-     "vite": "^8.3.6",
-     "wrangler": "^4.158.0"
+     "vite": "^8.4.0",
+     "wrangler": "^4.168.0"
 ```
 <!-- /diff -->
 
