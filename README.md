@@ -16,11 +16,16 @@ $ npx zenn new:article --slug my-awesome-article
 $ npx zenn preview
 ```
 
-## 本のコードの埋め込み
-
-`books/how-void-works` では、本文中のコードブロックの多くを、`<!-- file: ... -->` / `<!-- diff: ... -->` というマーカーで `code/how-void-works/` の実ファイルから埋め込んでいます。コードを直したら、次のコマンドで本文を更新してください（`--check` を付けると、本文が最新かどうかだけを確認します）。
+## how-void-works のコードの埋め込み
 
 ```sh
 $ node scripts/sync-code.mjs
 $ node scripts/sync-code.mjs --check
+```
+
+## how-void-works のコードの動作確認
+
+```sh
+$ node scripts/check-code.mjs
+$ node scripts/check-code.mjs ch05 ch08
 ```

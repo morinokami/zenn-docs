@@ -1,0 +1,49 @@
+name: how-void-works
+
+on:
+  push:
+    paths:
+      - books/how-void-works/**
+      - code/how-void-works/**
+      - scripts/**
+      - .github/workflows/how-void-works.yml
+  schedule:
+    - cron: "0 0 * * 1" # 毎週月曜日 9:00（JST）
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: 本文に埋め込んだコードが最新か
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - run: node scripts/sync-code.mjs --check
+
+  check:
+    name: 各章のコードが動くか
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          # 本で前提にしている、最も古いバージョン
+          node-version: 24
+      - run: node scripts/check-code.mjs
+        env:
+          WRANGLER_SEND_METRICS: "false"
