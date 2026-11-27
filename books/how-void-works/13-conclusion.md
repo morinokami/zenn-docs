@@ -13,8 +13,8 @@ title: "おわりに"
 
 Void の 10 万行を超えるコードも、この骨格の上に、さまざまな機能と、実用に耐えるための細かな工夫を肉付けしたものです。ここを押さえておけば、どの機能も「骨格のどの部分に差し込まれているのか」という目で読むことができるはずです。
 
-chibivoid を作り終えた今、次は本物の Void に触れる番です。まずは公式ドキュメントの「[Quickstart](https://void.cloud/guide/quickstart)」に沿って、Void でアプリケーションを作ってみてください。`void/kv` をインポートするだけで KV が使えるようになるといった便利さの裏側に、本書で作ってきたしくみが見えてくるでしょう。
+chibivoid を作り終えた今、もしまだであれば、次は本物の Void に触れる番です。まずは公式ドキュメントの「[Quickstart](https://void.cloud/guide/quickstart)」に沿って、Void でアプリケーションを作ってみてください。`void/kv` をインポートするだけで KV が使えるようになるといった便利さの裏側に、本書で作ってきたしくみが見えてくるでしょう。
 
 使っているうちに「この機能はどう実現されているのだろう」と気になることが出てきたら、[Void のリポジトリ](https://github.com/voidzero-dev/void)を開いて、本家のコードを読んでみましょう。どこから読めばよいか迷ったら、各章末の「Void の実装」で紹介したファイルが入り口になります。
 
-さらに一歩踏み込んでみたくなったら、ぜひ Void への貢献にも挑戦してみてください。Void を使ったりコードを読んだりするなかで気づいたバグや改善点は、そのまま Issue や Pull Request のタネになります。手元で開発を始めるための手順は、README の「[Contributing](https://github.com/voidzero-dev/void#contributing)」にまとめられています。ぜひ Void のリポジトリでお会いしましょう！
+さらに一歩踏み込んでみたくなったら、ぜひ Void への貢献にも挑戦してみてください。Void を使ったりコードを読んだりするなかで気づいたバグや改善点は、そのまま Issue や Pull Request のタネになります。手元で開発を始めるための手順は、README の「[Contributing](https://github.com/voidzero-dev/void#contributing)」にまとめられています。ぜひ Void のリポジトリで再会しましょう！
