@@ -22,11 +22,11 @@ import { fetch } from "void/client";
 const { message } = await fetch("/api/hello"); // message は string 型
 ```
 
-そのため、API の戻り値を変更した際に、クライアントのコードがその変更に追従していなければ型エラーになります。この章では、このしくみを chibivoid に実装していきます。
+そのため、API の戻り値を変更した際に、クライアントのコードがその変更に追従していなければ型エラーとなり、実行する前に更新漏れに気づけます。この章では、このしくみを chibivoid に実装していきます。
 
 ## この章のゴール
 
-- ファイル構成から、ルートのファイルの型を参照するだけの型定義を生成し、型の計算そのものは TypeScript に任せるという方針を理解する
+- ファイル構成から、ルートのファイルの型を参照するだけの型定義を生成し、型の計算そのものは TypeScript に任せるという方針について理解する
 - `declare module` によるモジュール拡張（module augmentation）を使用して、生成した型をライブラリの型にマージする
 - パスとメソッドから戻り値の型が決まり、パラメータの渡し忘れも型エラーになる `fetch()` を作成する
 
@@ -121,7 +121,7 @@ export interface RouteMap {
 
 これにより、`fetch()` は、`.chibivoid/routes.d.ts` をインポートすることなく、`RouteMap` を参照するだけで利用者のルートの型を知ることができます。
 
-ただし、TypeScript が `.chibivoid/routes.d.ts` を読み込まなければ、宣言のマージはおこなわれません。TypeScript は、`tsconfig.json` の [`include`](https://www.typescriptlang.org/tsconfig/#include) に指定したファイルと、そこからインポートされるファイルを型チェックの対象として読み込みます。`.chibivoid/routes.d.ts` はどこからもインポートされないため、`include` に追加しておく必要があります。この設定は「型付き `fetch()` を使ってみる」でおこないます。
+ただし、TypeScript が `.chibivoid/routes.d.ts` を読み込まなければ、宣言のマージはおこなわれません。TypeScript は、`tsconfig.json` の [`include`](https://www.typescriptlang.org/tsconfig/#include) に指定したファイルと、そこからインポートされるファイルを型チェックの対象として読み込みます。`.chibivoid/routes.d.ts` はどこからもインポートされないため、`include` に追加しておく必要があります。この設定は後で「型付き `fetch()` を使ってみる」でおこないます。
 
 なお、生成するファイルの先頭にある `export {};` は省略することができません。トップレベルに `import` や `export` が 1 つもないファイルは、TypeScript から[モジュールではなくスクリプトとして扱われます](https://www.typescriptlang.org/docs/handbook/2/modules.html#how-javascript-modules-are-defined)。その場合、ファイルの中の `declare module "chibivoid/routes"` は、既存のモジュールの拡張ではなく、新しいモジュールの宣言になってしまいます。その結果、本物の `chibivoid/routes` の `RouteMap` は空のままになり、`fetch()` の呼び出しはすべて型エラーになります。
 
@@ -253,7 +253,7 @@ declare module "chibivoid/routes" {
 
 ### `codegen/write-if-changed.ts`: 内容が変わった場合にだけ書き込む関数
 
-続いて、ファイルの内容が変わった場合にだけ書き込む `writeFileIfChanged()` を `codegen/write-if-changed.ts` に作成します:
+続いて、ファイルの内容が変わった場合にだけ書き込みをおこなう `writeFileIfChanged()` を `codegen/write-if-changed.ts` に作成します:
 
 <!-- file: code/how-void-works/ch11/packages/chibivoid/src/codegen/write-if-changed.ts -->
 ```ts:packages/chibivoid/src/codegen/write-if-changed.ts
@@ -515,7 +515,7 @@ npm run typecheck --workspace playground
 
 型エラーが出力されなければ成功です。また、エディターで `pages/index.tsx` を開き、`fetch("` まで入力してみてください。ルートのパターンが補完の候補として表示されるはずです。
 
-さらに、「型付き `fetch()` でできること」で見たような誤ったコードを記述して、もう一度 `typecheck` スクリプトを実行し、エラーになることも確かめてみましょう。また、`routes/api/counter.ts` の `POST` が返す `{ count }` を `{ total: count }` に変更すると、`pages/index.tsx` の `result.count` がエラーになるはずです。このように、サーバー側のコードの変更が、クライアント側のコードの型エラーとして現れます。
+さらに、「型付き `fetch()` でできること」で見たような誤ったコードを記述して、もう一度 `typecheck` スクリプトを実行し、エラーになることも確かめてみましょう。また、`routes/api/counter.ts` の `POST` が返す `{ count }` を `{ total: count }` に変更すると、ブラウザで動かすまでもなく、`pages/index.tsx` の `result.count` がエラーになるはずです。
 
 :::message
 型定義を生成するためだけに、型チェックのたびにビルドをおこなうと、型チェックに時間がかかってしまいます。Void には、Vite を起動せずに `routes/` などのスキャンだけをおこなって型定義を生成する [`void prepare`](https://void.cloud/guide/type-safety#setup) というコマンドがあります。
