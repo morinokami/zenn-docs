@@ -83,7 +83,7 @@ vite v8.3.6 building chibivoid_worker environment for production...
 ```
 <!-- /diff -->
 
-ここでは、`client` 環境の `build` オプションに、次の 2 つを指定しています:
+ここでは `client` 環境の `build` オプションに、次の 2 つを指定しています:
 
 - [`manifest: true`](https://vite.dev/config/build-options#build-manifest): ビルドの最後に、マニフェスト（`.vite/manifest.json`）を出力します
 - `rolldownOptions.input`: ビルドの入力として、`pages-client` という名前で `CLIENT_ENTRY_ID`（`virtual:chibivoid-pages-client`）を指定します。このように、仮想モジュールもビルドの入力にすることができます
@@ -238,7 +238,7 @@ flowchart LR
 
 ## ビルドしてプレビューする
 
-それでは、「ビルドしたページに JavaScript が読み込まれない」で起動したプレビューサーバーを止めて（Ctrl+C）、もう一度ビルドしてみましょう:
+それでは、「ビルドしたページに JavaScript が読み込まれない」で起動したプレビューサーバーを止めて、もう一度ビルドしてみましょう:
 
 ```
 $ npm run build
@@ -611,7 +611,7 @@ npm run deploy
 ## まとめ
 
 - `vite build` は、環境ごとにビルドをおこなう。ブラウザ用のエントリを `client` 環境の入力に加えると、その出力が `dist/client/` に置かれ、静的アセットとして配信される
-- ハッシュ付きのファイル名はマニフェストからわかる。Worker は `ASSETS` バインディングによりマニフェストを読み、`<script>` タグを作成する
+- ハッシュ付きのファイル名はマニフェストから知ることができる。Worker は `ASSETS` バインディングによりマニフェストを読み、`<script>` タグを作成する
 - `vite preview` により、ビルドした Worker をローカルの workerd で動かして確かめることができる
 - デプロイは「推論 → プロビジョニング → ビルド → 公開」の流れで進む。作成したリソースの ID は `chibivoid.lock.json` に記録し、ビルドの際に Worker の設定に埋め込む。開発中と同じ推論が、デプロイの際のリソースの作成にも使われる
 
