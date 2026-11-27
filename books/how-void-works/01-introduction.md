@@ -245,6 +245,6 @@ Vite、Cloudflare Workers、Hono、サーバーサイドレンダリング（SSR
 git clone https://github.com/voidzero-dev/void.git
 ```
 
-本書の Void の説明は、2026 年 11 月時点の `main`（`void@1.11.0` のリリースより後のコミット [`a7b1b0c`](https://github.com/voidzero-dev/void/tree/a7b1b0cd5de3ff8fa9f4ee343ab1601cd2d4bdf4)）をもとにしています。Void は活発に開発されているため、ファイルの中身や行数は変わっていることがあります。
+本書の Void の説明は、2026 年 11 月時点の `main`（`void@1.12.2` のリリースより後のコミット [`eaeb02e`](https://github.com/voidzero-dev/void/tree/eaeb02e78dc5cdf9d6d8f0469521fa9184f29dad)）をもとにしています。Void は活発に開発されているため、ファイルの中身や行数は変わっていることがあります。
 
 それでは、以上の準備のもと、さっそく Vite のしくみの学習から始めていきましょう。

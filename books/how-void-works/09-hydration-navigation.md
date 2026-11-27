@@ -800,7 +800,9 @@ HTML ではなく、`/users` のページオブジェクトが JSON で返され
 
 `X-VoidPages` ヘッダーの判定は `packages/void/src/pages/protocol.ts` の `isPagesRequest()` が、`Vary` ヘッダーの付与は同じファイルの `varyPagesResponse()` が、それぞれおこないます。
 
-ナビゲーションエンジンは、`packages/void/src/pages/navigation-engine.ts` に実装されており、1,300 行あまりあります。chibivoid の `createRouter()` と同じ役割に加えて、リンクにマウスカーソルを重ねた際などに遷移先のページを先読みするプリフェッチ（prefetch）、スクロール位置の復元、事前レンダリングしたページのデータの利用なども扱っています。また、`Link` の振る舞いのうち、フレームワークに依存しない判定は `packages/void/src/pages/link.ts` にまとめられており、各アダプターの `Link` から使われています。
+ナビゲーションエンジンは、`packages/void/src/pages/navigation-engine.ts` に実装されており、1,500 行近くあります。chibivoid の `createRouter()` と同じ役割に加えて、リンクにマウスカーソルを重ねた際などに遷移先のページを先読みするプリフェッチ（prefetch）、スクロール位置の復元、事前レンダリングしたページのデータの利用なども扱っています。また、`Link` の振る舞いのうち、フレームワークに依存しない判定は `packages/void/src/pages/link.ts` にまとめられており、各アダプターの `Link` から使われています。
+
+さらに、ナビゲーションエンジンは、デプロイの前から開いていたタブで画面遷移する場合にも対応しています。アプリケーションをデプロイし直すとファイル名のハッシュが変わり、古いタブが読み込もうとするコンポーネントのファイルは、すでに存在しなくなっていることがあるためです。そこで Void は、ソースコードなどのハッシュから求めたビルドの ID を、ブラウザ用とサーバー用の両方のコードに埋め込みます。ナビゲーションエンジンは、この ID を `X-VoidPages-Build` ヘッダーに入れてリクエストを送ります。サーバーは、送られてきた ID が自身の ID と異なる `GET` リクエストに対しては、ページオブジェクトの代わりに、`X-VoidPages` ヘッダーの付かない空のレスポンスを返します（`protocol.ts` の `needsPageReload()`）。これを受け取ったナビゲーションエンジンは、遷移先のページを通常の画面遷移で読み込み直します。ヘッダーの付かないレスポンスを通常の画面遷移の合図にする点は、chibivoid の `visit()` と同じです。なお、フォームの送信（第 10 章）に対するレスポンスは、action がすでに実行されているため、読み込み直さずにそのまま使います。
 
 React のアダプターのブラウザ側の処理は、`packages/react/src/runtime/pages-client.ts` の `startReactPages()` に実装されています。`hydrateRoot()` によりハイドレーションを始める点は chibivoid と同じですが、`export const ssr = false` を指定したページでは、サーバーで描画しないため `createRoot()` を使います。また、chibivoid の `flushSync()` の代わりに、React の `startTransition()` と Suspense を組み合わせて遷移中も前の画面を表示し続けるようにしています。
 

@@ -619,7 +619,7 @@ npm run deploy
 
 ## Void の実装
 
-Void では、`packages/void/src/runtime/routing/assets.ts` の `createManifestLoader()` がマニフェストを読み込みます。chibivoid と同じく、`env.ASSETS.fetch()` により `/.vite/manifest.json` を取得していますが、読み込みに失敗した結果はキャッシュせず、次のリクエストで読み込みをやり直します。そして、同じファイルの `createClientAssetTags()` が、エントリの `<script>` タグだけでなく、そのページで必要な CSS の `<link rel="stylesheet">` タグや、先読みするファイルの `<link rel="modulepreload">` タグも作成します。
+Void では、`packages/void/src/runtime/routing/assets.ts` の `createManifestLoader()` がマニフェストを読み込みます。chibivoid と同じく、`env.ASSETS.fetch()` により `/.vite/manifest.json` を取得していますが、読み込みに失敗した結果はキャッシュせず、次のリクエストで読み込みをやり直します。また、chibivoid のように読み込み中の `Promise` を複数のリクエストで共有することはせず、キャッシュするのは読み込み終えたマニフェストだけにしています。コメントには、Workers の I/O はそれを始めたリクエストに結び付いているため、`Promise` を共有すると、読み込みを始めたリクエストがキャンセルされた場合に `Promise` が解決されないまま残り、後続のリクエストがすべてそれをもち続けてしまうことがある、と理由が書かれています。そして、同じファイルの `createClientAssetTags()` が、エントリの `<script>` タグだけでなく、そのページで必要な CSS の `<link rel="stylesheet">` タグや、先読みするファイルの `<link rel="modulepreload">` タグも作成します。
 
 静的アセットをどのように配信するかは、`packages/void/src/asset-routing.ts` が決めています。Pages のアプリケーションでは 404 のページも含めてページの HTML を Worker が返すため、すべてのリクエストをまず Worker に通す設定（`run_worker_first: ['/**']`）にしています。そのため、「マニフェストを Worker から読む」で見た chibivoid とは異なり、静的アセットへのリクエストでもまず Worker が呼ばれます（条件を満たす場合に、ハッシュ付きのファイルを Worker を経由せずに配信する最適化も、`asset-worker-bypass.ts` に入っています）。
 
