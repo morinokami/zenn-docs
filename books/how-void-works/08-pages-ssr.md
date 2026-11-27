@@ -96,7 +96,7 @@ Void でも、コアの共通部分は `packages/void/src/pages/` に、各フ�
 mkdir -p packages/chibivoid/src/pages
 ```
 
-chibivoid は、ユーザーのアプリケーション内の `pages/` に置かれたファイルを次のように扱います:
+chibivoid は、アプリケーション内の `pages/` に置かれたファイルを次のように扱います:
 
 | ファイル | 扱い |
 | --- | --- |

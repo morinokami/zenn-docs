@@ -335,7 +335,7 @@ export function readWorkerName(root: string): string {
 ```
 <!-- /file -->
 
-`chibivoidPlugin()` は、Vite のプラグインの配列を返します。`plugins: [chibivoidPlugin()]` のように配列が入れ子になっていても、Vite はそれを上手く展開して 1 つの配列として扱ってくれます。
+`chibivoidPlugin()` は、Vite のプラグインの配列を返します。`plugins: [chibivoidPlugin()]` のように配列が入れ子になっていても、Vite はそれをうまく展開して 1 つの配列として扱ってくれます。
 
 `chibivoidPlugin()` の中身を順に見ていきましょう。
 

@@ -243,7 +243,7 @@ export function detectHttpExports(absPath: string): string[] {
 
 `export const GET = ...`、`export function POST() {}`、`export { handler as PUT }` のどの書き方でも、`exportName.name` にエクスポート名が入ります。`export type { ... }` は実行時には存在しないため除いています。
 
-この「実行せずに解析する」という方針は、Void の様さまざまな箇所で採用されています。たとえば、第 7 章のリソース推論でも、同じ `parseSync()` を使います。
+この「実行せずに解析する」という方針は、Void のさまざまな箇所で採用されています。たとえば、第 7 章のリソース推論でも、同じ `parseSync()` を使います。
 
 ## `routes/` をスキャンする
 
@@ -520,7 +520,7 @@ export function compileRouteTable(scan: ScanResult, options: CompileOptions): st
 
 ファイルのパスや URL パターンは、`JSON.stringify()` により文字列リテラルにしています。`"` や `\` のように、文字列リテラルの中でエスケープが必要な文字を含むパスでも、クォートとエスケープが正しくおこなわれるためです。
 
-playground に、あとで「ルートを作成して動かす」で作る 3 つのルート（`api/hello.ts`、`api/users/[id].ts`、`api/users/me.ts`）がある場合、開発サーバーで生成されるコードは次のようになります（パスは環境によって変わります）:
+playground に、後で「ルートを作成して動かす」で作る 3 つのルート（`api/hello.ts`、`api/users/[id].ts`、`api/users/me.ts`）がある場合、開発サーバーで生成されるコードは次のようになります（パスは環境によって変わります）:
 
 ```js
 import { Hono } from "hono";

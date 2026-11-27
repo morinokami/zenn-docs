@@ -291,7 +291,7 @@ curl -s http://localhost:4173/ | grep -o '<script type="module" src="[^"]*"></sc
 
 ビルドしたものをデプロイするだけであれば、第 3 章の「ビルドとプレビュー」で見たように、`npx wrangler deploy` コマンドを実行するだけで済みます。しかし、playground のように KV を使うアプリケーションでは、それだけではデプロイすることができません。`wrangler.json` の KV の ID がまだ仮の値（`local`）のままであるためです。そのため、本物の KV ネームスペースを作成し、その ID を設定に入れる必要があります。第 3 章の「ビルドとプレビュー」で触れた Wrangler の自動プロビジョニングを使う方法もありますが、chibivoid は Void の `void deploy` と同じく、リソースを自分で作成します。
 
-Void の `void deploy` コマンドは、Cloudflare に直接デプロイする場合（`void deploy --platform cloudflare`）、概ね次の流れで処理を進めます:
+Void の `void deploy` コマンドは、Cloudflare に直接デプロイする場合（`void deploy --platform cloudflare`）、おおむね次の流れで処理を進めます:
 
 ```mermaid
 flowchart LR

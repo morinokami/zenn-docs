@@ -215,7 +215,7 @@ Vite、Cloudflare Workers、Hono、サーバーサイドレンダリング（SSR
 
 ## 本書の進め方
 
-各章は、概ね次の流れで進みます:
+各章は、おおむね次の流れで進みます:
 
 1. この章のゴール: 何を作り、何がわかるようになるか
 2. しくみの説明: なぜそのしくみが必要か
@@ -237,7 +237,7 @@ Vite、Cloudflare Workers、Hono、サーバーサイドレンダリング（SSR
 
 コードブロックの上に表示しているのは、変更するファイルの名前です。`@@ -10,3 +10,4 @@` は変更箇所の位置で、変更前の 10 行目から 3 行分が、変更後は 10 行目から 4 行分になることを表わします。変更のない部分は、変更箇所の前後の数行だけを残して省略しています。
 
-各章の完成形は、本書のリポジトリ内の [`code/how-void-works/chNN/`](https://github.com/morinokami/zenn-docs/tree/master/code/how-void-works) に置いてあります。上手く動かない場合は、手元のコードと見比べてください。第 2 章と第 3 章ではそれぞれ独立した小さなプロジェクトを作り、第 4 章から chibivoid を作り始めます。第 5 章から第 12 章までは、どの章も前の章のコードに手を加えるかたちで進みます。そのため、これらの章から読み始める場合は、前の章の完成形を出発点にしてください。
+各章の完成形は、本書のリポジトリ内の [`code/how-void-works/chNN/`](https://github.com/morinokami/zenn-docs/tree/master/code/how-void-works) に置いてあります。うまく動かない場合は、手元のコードと見比べてください。第 2 章と第 3 章ではそれぞれ独立した小さなプロジェクトを作り、第 4 章から chibivoid を作り始めます。第 5 章から第 12 章までは、どの章も前の章のコードに手を加えるかたちで進みます。そのため、これらの章から読み始める場合は、前の章の完成形を出発点にしてください。
 
 本文中に出てくる Void のファイルは、原則として `packages/void/src/plugin-routing.ts` のように、リポジトリのルートからのパスで示します。同じパッケージのファイルが続くところや表の中では、前後と共通する部分（`packages/void/src/` など）を省いて、`cli/deploy-cloudflare.ts` や `codegen/route-types.ts` のように示すこともあります。Void のソースを読みながら進めると理解が深まるため、可能であればクローンしておきましょう:
 
@@ -245,6 +245,6 @@ Vite、Cloudflare Workers、Hono、サーバーサイドレンダリング（SSR
 git clone https://github.com/voidzero-dev/void.git
 ```
 
-本書の Void の説明は、2026 年 11 月時点の `main`（`void@1.11.0` のリリースより後のコミット [`a7b1b0c`](https://github.com/voidzero-dev/void/tree/a7b1b0cd5de3ff8fa9f4ee343ab1601cd2d4bdf4)）を元にしています。Void は活発に開発されているため、ファイルの中身や行数は変わっていることがあります。
+本書の Void の説明は、2026 年 11 月時点の `main`（`void@1.11.0` のリリースより後のコミット [`a7b1b0c`](https://github.com/voidzero-dev/void/tree/a7b1b0cd5de3ff8fa9f4ee343ab1601cd2d4bdf4)）をもとにしています。Void は活発に開発されているため、ファイルの中身や行数は変わっていることがあります。
 
 それでは、以上の準備のもと、さっそく Vite のしくみの学習から始めていきましょう。
