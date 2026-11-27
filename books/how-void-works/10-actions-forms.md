@@ -2,7 +2,7 @@
 title: "Pages (3): action とフォーム"
 ---
 
-第 8 章と第 9 章で、ページをサーバーで描画して表示し、ページ全体を読み込み直さずに画面を切り替えることができるようになりました。Pages の最後となるこの章では、ユーザーの入力を受け取ってデータを変更するしくみを作っていきます。Void では、ページの `.server.ts` ファイルが [`action`](https://void.cloud/guide/pages-routing/actions-and-forms) をエクスポートすると、そのページへのフォームの送信を処理することができます。たとえば、`/users` ページへのフォームの送信を受け取ってユーザーを追加する action は次のようになります:
+第 8 章と第 9 章で、ページをサーバーで描画して表示し、ページ全体を読み込み直さずに画面を切り替えられるようになりました。Pages の最後となるこの章では、ユーザーの入力を受け取ってデータを変更するしくみを作っていきます。Void では、ページの `.server.ts` ファイルが [`action`](https://void.cloud/guide/pages-routing/actions-and-forms) をエクスポートすると、そのページへのフォームの送信を処理することができます。たとえば、`/users` ページへのフォームの送信を受け取ってユーザーを追加する action は次のようになります:
 
 ```ts
 // pages/users/index.server.ts
@@ -45,7 +45,7 @@ JavaScript が無効な場合でも、JavaScript の読み込みが終わる前�
 
 ## コア: `ValidationError`
 
-まずは、コア側から作っていきましょう。action から投げることで、フィールドごとのエラーをページに返すことができる例外クラス `ValidationError` を `runtime/handler.ts` に追加します:
+まずはコア側から作っていきましょう。action から投げることで、フィールドごとのエラーをページに返すことができる例外クラス `ValidationError` を `runtime/handler.ts` に追加します:
 
 <!-- diff: code/how-void-works/ch09/packages/chibivoid/src/runtime/handler.ts code/how-void-works/ch10/packages/chibivoid/src/runtime/handler.ts -->
 ```diff ts:packages/chibivoid/src/runtime/handler.ts
