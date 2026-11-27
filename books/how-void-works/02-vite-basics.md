@@ -554,7 +554,7 @@ flowchart TB
 
 ## Void の実装
 
-`packages/void/src/plugin-routing.ts` を開くと、この章で学んだ `enforce: 'pre'` と、`config`、`buildStart`、`resolveId`、`load`、`configureServer` の各フックがそのまま並んでいます（他に、この章では扱っていない `configResolved`、`generateBundle`、`watchChange`、`hotUpdate` も使われています）。仮想モジュールとしては、ルートテーブルの `virtual:void-routes` や、型付き `fetch()` のための `virtual:void-client-browser`/`virtual:void-client-worker` などが定義されています。
+`packages/void/src/plugin-routing.ts` を開くと、この章で学んだ `enforce: 'pre'` と、`config`、`buildStart`、`resolveId`、`load`、`configureServer` の各フックがそのまま並んでいます（他に、この章では扱っていない `configResolved`、`generateBundle`、`watchChange`、`hotUpdate` も使われています）。仮想モジュールとしては、ルートを登録するコードの `virtual:void-routes` や、型付き `fetch()` のための `virtual:void-client-browser`/`virtual:void-client-worker` などが定義されています。
 
 細かい違いとして、Void では次のような書き方も使われています:
 

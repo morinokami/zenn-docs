@@ -41,6 +41,8 @@ chibivoid/
 2. Hono アプリケーションを、仮想モジュール `virtual:chibivoid-routes` として提供する
 3. Cloudflare の Vite プラグインに、1. のファイルをエントリ（`main`）として渡す
 
+本書では、2. の仮想モジュールとして提供する、ルートを登録した Hono アプリケーションのコードを、ルートテーブルと呼びます。
+
 リクエストは workerd の中で `.chibivoid/entry.ts` に届き、そこからインポートされた Hono アプリケーションが応答します。実際にどの順番で何が起きるのかは、「動かしてみる」にてアプリケーションを動かした後に、図を使って確かめます。
 
 ## Void をまねたモノレポを作成する
@@ -450,7 +452,7 @@ ls -l node_modules/chibivoid
 npm run dev
 ```
 
-開発サーバーを起動したまま、別のターミナルから `curl` でリクエストを送ってみましょう:
+開発サーバーを起動したまま、別のターミナルから `curl` でリクエストを送ってみましょう（次の出力では、`content-length` や `Date` などのヘッダーを省略しています）:
 
 ```
 $ curl -i http://localhost:5173/
@@ -522,9 +524,10 @@ export default app;
 ```
 $ npm run build
 vite v8.3.6 building chibivoid_worker environment for production...
+✓ 31 modules transformed.
 dist/chibivoid_worker/.vite/manifest.json   0.15 kB │ gzip:  0.11 kB
 dist/chibivoid_worker/wrangler.json         1.20 kB │ gzip:  0.63 kB
-dist/chibivoid_worker/index.js             57.58 kB │ gzip: 16.05 kB │ map: 105.62 kB
+dist/chibivoid_worker/index.js             57.60 kB │ gzip: 16.08 kB │ map: 105.65 kB
 ✓ built in 61ms
 ```
 

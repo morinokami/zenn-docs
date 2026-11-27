@@ -730,7 +730,7 @@ export type Props = InferProps<typeof loader>; // { users: User[] }
 
 `Exclude<Awaited<R>, Response>` は、「`loader` の戻り値を `await` した結果の型から、`c.notFound()` などで返した `Response` を除いた型」を表わします。`loader` が `Response` を返した場合、`handlePageGet()` はその `Response` をそのまま返すため、props には `Response` 以外の値だけが渡されます。
 
-この「型の上だけに存在するプロパティに型をもたせる」技法は、第 11 章で API ルートの型を生成する際にも使います。
+この「型の上だけに存在するプロパティに型をもたせる」テクニックは、第 11 章で API ルートの型を生成する際にも使います。
 
 最後に、アプリケーションのコードからインポートできるように、`index.ts` からもこれらの型を再エクスポートしておきます:
 

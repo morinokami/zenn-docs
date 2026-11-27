@@ -737,6 +737,8 @@ npm run dev
 
 ```html
 $ curl http://localhost:5173/
+<!doctype html>
+<html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -751,6 +753,7 @@ RefreshRuntime.injectIntoGlobalHook(window);
 <div id="app">...</div>
 <script type="module" src="/@id/__x00__virtual:chibivoid-pages-client"></script>
 </body>
+</html>
 ```
 
 `<head>` には React Refresh の準備コードと Vite のクライアントが、`<body>` の最後にはブラウザ用のエントリが、それぞれ入っていることがわかります。
@@ -765,13 +768,13 @@ RefreshRuntime.injectIntoGlobalHook(window);
 - `/users` へのリクエストには `X-ChibivoidPages: true` ヘッダーが付いており、レスポンスは JSON です
 - アドレスバーの URL は `/users` に変わり、ブラウザの「戻る」ボタンで `/` に戻ることができます
 
-このリクエストを、`curl` で再現してみましょう:
+このリクエストを、`curl` で再現してみましょう（次の出力では、`content-length` や `Date` などのヘッダーを省略しています）:
 
 ```
 $ curl -i -H 'X-ChibivoidPages: true' http://localhost:5173/users
 HTTP/1.1 200 OK
-content-type: application/json
 vary: X-ChibivoidPages
+content-type: application/json
 x-chibivoidpages: true
 
 {"component":"users/index","props":{"users":[{"id":1,"name":"Ada"},{"id":2,"name":"Linus"}]},"params":{},"url":"/users"}
