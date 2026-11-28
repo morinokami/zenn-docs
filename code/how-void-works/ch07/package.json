@@ -1,0 +1,14 @@
+{
+  "name": "chibivoid-root",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "playground"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "npm run dev --workspace playground",
+    "build": "npm run build --workspace playground",
+    "preview": "npm run preview --workspace playground"
+  }
+}

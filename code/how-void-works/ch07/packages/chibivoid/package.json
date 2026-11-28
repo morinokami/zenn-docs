@@ -1,0 +1,18 @@
+{
+  "name": "chibivoid",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./kv": "./src/runtime/kv.ts",
+    "./runtime/*": "./src/runtime/*.ts"
+  },
+  "dependencies": {
+    "@cloudflare/vite-plugin": "^1.70.2",
+    "hono": "^4.13.23"
+  },
+  "peerDependencies": {
+    "vite": "^8.0.0"
+  }
+}
